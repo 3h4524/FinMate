@@ -6,13 +6,15 @@ import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "LoginHistory")
 public class LoginHistory {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "history_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -20,11 +22,11 @@ public class LoginHistory {
     private User user;
 
     @Nationalized
-    @Column(name = "action_type", nullable = false, length = 20)
+    @Column(name = "action_type", nullable = false)
     private String actionType;
 
     @Nationalized
-    @Column(name = "ip_address", length = 50)
+    @Column(name = "ip_address")
     private String ipAddress;
 
     @Nationalized
@@ -33,13 +35,13 @@ public class LoginHistory {
 
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -75,12 +77,11 @@ public class LoginHistory {
         this.deviceInfo = deviceInfo;
     }
 
-    public Instant getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-
 }

@@ -1,123 +1,50 @@
 package org.codewith3h.finmateapplication.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
-
-import java.time.Instant;
+import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "Users", schema = "dbo")
+@Data
 public class User {
     @Id
-    @Column(name = "user_id", nullable = false)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long id;
 
-    @Nationalized
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Nationalized
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Nationalized
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
 
-    @ColumnDefault("0")
-    @Column(name = "is_premium")
-    private Boolean isPremium;
+    @Column(name = "is_premium", nullable = false)
+    private boolean premium = false;
 
-    @Nationalized
-    @ColumnDefault("'USER'")
-    @Column(name = "role", length = 20)
-    private String role;
+    @Column(name = "role", nullable = false, length = 20)
+    private String role = "USER";
 
     @Column(name = "last_login_at")
-    private Instant lastLoginAt;
+    private LocalDateTime lastLoginAt;
 
-    @ColumnDefault("getdate()")
-    @Column(name = "created_at")
-    private Instant createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @ColumnDefault("getdate()")
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-    public Integer getId() {
-        return id;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public Boolean getIsPremium() {
-        return isPremium;
-    }
-
-    public void setIsPremium(Boolean isPremium) {
-        this.isPremium = isPremium;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Instant getLastLoginAt() {
-        return lastLoginAt;
-    }
-
-    public void setLastLoginAt(Instant lastLoginAt) {
-        this.lastLoginAt = lastLoginAt;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
 }
