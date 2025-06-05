@@ -1,6 +1,8 @@
 package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
@@ -10,10 +12,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "GoalContributions")
 public class GoalContribution {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contribution_id", nullable = false)
     private Integer id;
 
@@ -35,53 +40,5 @@ public class GoalContribution {
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
     private Instant createdAt;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Goal getGoal() {
-        return goal;
-    }
-
-    public void setGoal(Goal goal) {
-        this.goal = goal;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public LocalDate getContributionDate() {
-        return contributionDate;
-    }
-
-    public void setContributionDate(LocalDate contributionDate) {
-        this.contributionDate = contributionDate;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
 
 }
