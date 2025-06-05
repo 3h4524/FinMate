@@ -1,21 +1,26 @@
 package org.codewith3h.finmateapplication.controller;
 
-import org.codewith3h.finmateapplication.entity.Goal;
+import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
+import org.codewith3h.finmateapplication.dto.response.ApiResponse;
+import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/financial")
+@RequestMapping("/goal")
 public class SetFinancialGoalController {
     @Autowired
     private GoalService goalService;
-    @GetMapping()
-    public List<Goal> getListGoals() {
-        return goalService.getAllGoals();
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<GoalResponse>> createGoal(@RequestBody CreateGoalRequest request, @RequestHeader(name = "userId") Integer userId) {
+        request.setUserId(userId);
+        GoalResponse goal = goalService.createFinancialGoal(request);
+        ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Goal created successfully.");
+        apiResponse.setResult(goal);
+        return ResponseEntity.ok(apiResponse);
     }
 }

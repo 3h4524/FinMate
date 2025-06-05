@@ -1,7 +1,8 @@
 package org.codewith3h.finmateapplication.exception;
 
 public enum ErrorCode {
-    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error")
+    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error"),
+    USER_NOT_FOUND(1001, "User not found")
     ;
 
 
