@@ -2,16 +2,13 @@ package org.codewith3h.finmateapplication.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
-import org.codewith3h.finmateapplication.dto.response.GoalContributionResponse;
 import org.codewith3h.finmateapplication.dto.response.GoalProgressResponse;
-import org.codewith3h.finmateapplication.entity.GoalContribution;
 import org.codewith3h.finmateapplication.service.GoalProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/goal_tracking")

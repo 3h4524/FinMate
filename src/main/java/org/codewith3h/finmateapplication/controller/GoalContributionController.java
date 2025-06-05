@@ -3,12 +3,10 @@ package org.codewith3h.finmateapplication.controller;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
+import org.codewith3h.finmateapplication.dto.request.CreateGoalContributionRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.GoalContributionResponse;
-import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.service.GoalContributionService;
-import org.codewith3h.finmateapplication.service.GoalProgressService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +30,7 @@ public class GoalContributionController {
     }
 
     @PostMapping("/{goalId}")
-    public ResponseEntity<ApiResponse<GoalContributionResponse>> createGoalContribution(@RequestBody GoalContributionResponse request, @PathVariable int goalId) {
+    public ResponseEntity<ApiResponse<GoalContributionResponse>> createGoalContribution(@RequestBody CreateGoalContributionRequest request, @PathVariable int goalId) {
         request.setGoalId(goalId);
         GoalContributionResponse goalContributionResponse = goalContributionService.createGoalContribution(request);
         ApiResponse<GoalContributionResponse> apiResponse = new ApiResponse<>();

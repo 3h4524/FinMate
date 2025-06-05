@@ -2,13 +2,11 @@ package org.codewith3h.finmateapplication.service;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.request.CreateUserRequest;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.mapper.UserMapper;
 import org.codewith3h.finmateapplication.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

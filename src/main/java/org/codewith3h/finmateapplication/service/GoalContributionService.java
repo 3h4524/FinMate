@@ -3,10 +3,8 @@ package org.codewith3h.finmateapplication.service;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
+import org.codewith3h.finmateapplication.dto.request.CreateGoalContributionRequest;
 import org.codewith3h.finmateapplication.dto.response.GoalContributionResponse;
-import org.codewith3h.finmateapplication.dto.response.GoalResponse;
-import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalContribution;
 import org.codewith3h.finmateapplication.mapper.GoalContributionMapper;
 import org.codewith3h.finmateapplication.repository.GoalContributionRepository;
@@ -26,7 +24,7 @@ public class GoalContributionService {
         return goalContributionRepository.findGoalContributionsByGoal_Id(goalId).stream().map(goalContributionMapper::toGoalContributionResponse).collect(Collectors.toList());
     }
 
-    public GoalContributionResponse createGoalContribution(GoalContributionResponse request) {
+    public GoalContributionResponse createGoalContribution(CreateGoalContributionRequest request) {
         GoalContribution goalContribution = goalContributionMapper.toGoalContribution(request);
         goalContributionRepository.save(goalContribution);
         return goalContributionMapper.toGoalContributionResponse(goalContribution);
