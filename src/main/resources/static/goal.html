@@ -333,15 +333,16 @@
     const goalListView = document.getElementById('goalListView');
     const goalsList = document.getElementById('goalsList');
     const createFirstGoalButton = document.getElementById('createFirstGoalButton');
-
-    // Modal functionality
     const newGoalModal = document.getElementById('newGoalModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelButton = document.getElementById('cancelButton');
     const newGoalForm = document.getElementById('newGoalForm');
     const errorDisplay = document.getElementById('errorDisplay');
     const errorMessageModal = document.getElementById('errorMessageModal');
+    const targetAmountInput = document.getElementById('targetAmountModal');
+    const currentAmountInput = document.getElementById('currentAmountModal');
 
+    // API configuration
     const API_BASE_URL = 'http://localhost:8080/FinMateApplication';
     const userId = localStorage.getItem('userId') || 6;
 
@@ -383,10 +384,9 @@
         errorText.textContent = error;
     }
 
-    // Fetch goals
+    // API interactions
     async function fetchGoals() {
         try {
-
             const response = await fetch(`${API_BASE_URL}/goal_tracking/list`, {
                 headers: {'userId': userId.toString()}
             });
@@ -409,15 +409,12 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({goalId})
             });
-
             window.location.href = 'goal_detail.html';
-
         } catch (error) {
             console.error('Error:', error);
             alert('Không thể lưu goalId');
         }
     }
-
 
     // Render goals list
     function renderGoals() {
@@ -471,33 +468,13 @@
         }
     }
 
-    // Show modal
-    newGoalButton.addEventListener('click', () => {
-        newGoalModal.classList.remove('hidden');
-    });
-
-    createFirstGoalButton.addEventListener('click', () => {
-        newGoalModal.classList.remove('hidden');
-    });
-
-    // Close modal
+    // Modal functionality
     function closeModal() {
         newGoalModal.classList.add('hidden');
         newGoalForm.reset();
         hideError();
     }
 
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelButton.addEventListener('click', closeModal);
-
-    // Close modal when clicking outside
-    newGoalModal.addEventListener('click', (e) => {
-        if (e.target === newGoalModal) {
-            closeModal();
-        }
-    });
-
-    // Error handling
     function showError(message) {
         errorMessageModal.textContent = message;
         errorDisplay.classList.remove('hidden');
@@ -507,15 +484,43 @@
         errorDisplay.classList.add('hidden');
     }
 
-    // Set default dates
     function setDefaultDates() {
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-
         document.getElementById('startDateModal').valueAsDate = today;
         document.getElementById('deadlineModal').valueAsDate = tomorrow;
     }
+
+    function showSuccess() {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Congratulations you have successfully created a new goal!',
+            showConfirmButton: true,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    }
+
+    // Event listeners for modal
+    newGoalButton.addEventListener('click', () => {
+        newGoalModal.classList.remove('hidden');
+    });
+
+    createFirstGoalButton.addEventListener('click', () => {
+        newGoalModal.classList.remove('hidden');
+    });
+
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelButton.addEventListener('click', closeModal);
+
+    newGoalModal.addEventListener('click', (e) => {
+        if (e.target === newGoalModal) {
+            closeModal();
+        }
+    });
 
     newGoalButton.addEventListener('click', setDefaultDates);
     createFirstGoalButton.addEventListener('click', setDefaultDates);
@@ -581,22 +586,7 @@
         }
     });
 
-    function showSuccess() {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Congratulations you have successfully created a new goal!',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true
-        });
-    }
-
     // Real-time validation for amounts
-    const targetAmountInput = document.getElementById('targetAmountModal');
-    const currentAmountInput = document.getElementById('currentAmountModal');
-
     function validateAmounts() {
         const target = parseFloat(targetAmountInput.value) || 0;
         const current = parseFloat(currentAmountInput.value) || 0;

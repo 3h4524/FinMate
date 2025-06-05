@@ -288,9 +288,11 @@
 </div>
 
 <script>
+    // State management
     let goalProgressResponse = null;
     let chartType = 'line';
     let error = '';
+    let progressChart;
 
     // DOM elements
     const pageTitle = document.getElementById('pageTitle');
@@ -299,7 +301,6 @@
     const progressChartCanvas = document.getElementById('progressChart');
     const lineChartButton = document.getElementById('lineChartButton');
     const barChartButton = document.getElementById('barChartButton');
-
     const addContributionButton = document.getElementById('addContributionButton');
     const addContributionModal = document.getElementById('addContributionModal');
     const closeModalButton = document.getElementById('closeModalButton');
@@ -307,9 +308,7 @@
     const contributionForm = document.getElementById('contributionForm');
     const formError = document.getElementById('formError');
 
-
-    let progressChart;
-
+    // API configuration
     const API_BASE_URL = 'http://localhost:8080/FinMateApplication';
 
     // Helper functions
@@ -323,22 +322,6 @@
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
         return day + '/' + month + '/' + year;
-    }
-
-    // Fetch goal details and contributions
-    async function fetchGoalDetails(goalId) {
-        console.log("fetchGoalDetails: " + goalId);
-        try {
-            const response = await fetch(`${API_BASE_URL}/goal_tracking/${goalId}`);
-            if (!response.ok) throw new Error('Failed to fetch goal details');
-            const data = await response.json();
-            goalProgressResponse = data.result;
-
-            renderGoalDetails();
-        } catch (err) {
-            error = 'Failed to fetch goal details or contributions';
-            renderError();
-        }
     }
 
     function getStatusColor(status) {
@@ -364,6 +347,45 @@
     function renderError() {
         errorMessage.classList.remove('hidden');
         errorText.textContent = error;
+    }
+
+    // API interactions
+    async function fetchGoalDetails(goalId) {
+        console.log("fetchGoalDetails: " + goalId);
+        try {
+            const response = await fetch(`${API_BASE_URL}/goal_tracking/${goalId}`);
+            if (!response.ok) throw new Error('Failed to fetch goal details');
+            const data = await response.json();
+            goalProgressResponse = data.result;
+            renderGoalDetails();
+        } catch (err) {
+            error = 'Failed to fetch goal details or contributions';
+            renderError();
+        }
+    }
+
+    async function fetchGoalProgressData(goalId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/goal_tracking/list_progress/${goalId}`);
+            if (!response.ok) throw new Error('Failed to fetch goal progress data');
+            const data = await response.json();
+            return data.result;
+        } catch (error) {
+            console.error('Error fetching goal progress data:', error);
+            return null;
+        }
+    }
+
+    async function fetchGoalContributionData(goalId) {
+        try {
+            const contributionsResponse = await fetch(`${API_BASE_URL}/contributions/${goalId}`);
+            if (!contributionsResponse.ok) throw new Error('Failed to fetch goal contributions');
+            const contributionsData = await contributionsResponse.json();
+            return contributionsData.result;
+        } catch (error) {
+            console.error('Error fetching goal contribution data:', error);
+            return null;
+        }
     }
 
     // Render goal details
@@ -435,19 +457,6 @@
         });
     }
 
-    async function fetchGoalContributionData(goalId) {
-        try {
-            const contributionsResponse = await fetch(`${API_BASE_URL}/contributions/${goalId}`);
-            if (!contributionsResponse.ok) throw new Error('Failed to fetch goal contributions');
-            const contributionsData = await contributionsResponse.json();
-            return contributionsData.result;
-        } catch (error) {
-            console.error('Error fetching goal contribution data:', error);
-            return null;
-        }
-    }
-
-
     // Render contributions
     async function renderContributions() {
         if (!goalProgressResponse) return;
@@ -506,15 +515,36 @@
     `;
     }
 
-    // Event listeners for date inputs and buttons
-    document.getElementById('startDate').addEventListener('change', renderContributions);
-    document.getElementById('endDate').addEventListener('change', renderContributions);
-    document.getElementById('refreshGoalContributionsButton').addEventListener('click', renderContributions);
-    document.getElementById('clearFiltersButton').addEventListener('click', () => {
-        document.getElementById('startDate').value = '';
-        document.getElementById('endDate').value = '';
-        renderContributions();
-    });
+    // Modal handling
+    function openModal() {
+        addContributionModal.classList.remove('hidden');
+        document.getElementById('contributionDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('contributionAmount').value = '';
+        document.getElementById('contributionNote').value = '';
+        formError.classList.add('hidden');
+    }
+
+    function closeModal() {
+        addContributionModal.classList.add('hidden');
+        formError.classList.add('hidden');
+    }
+
+    function showSuccess() {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Congratulations you have successfully created a new goal contribution!',
+            showConfirmButton: true,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    }
+
+    // Event listeners for modal and buttons
+    addContributionButton.addEventListener('click', openModal);
+    closeModalButton.addEventListener('click', closeModal);
+    cancelModalButton.addEventListener('click', closeModal);
 
     lineChartButton.addEventListener('click', () => {
         chartType = 'line';
@@ -530,53 +560,14 @@
         renderChart();
     });
 
-    async function fetchGoalProgressData(goalId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/goal_tracking/list_progress/${goalId}`);
-            if (!response.ok) throw new Error('Failed to fetch goal progress data');
-            const data = await response.json();
-            return data.result; //
-        } catch (error) {
-            console.error('Error fetching goal progress data:', error);
-            return null;
-        }
-    }
-
-    //initPage
-    async function loadGoalIdFromSession() {
-        try {
-            const res = await fetch(`${API_BASE_URL}/goal_tracking/get-goal-id-from-session`);
-            const data = await res.json();
-            console.log("data", data);
-            if (data.error) {
-                console.log(data.error);
-            } else {
-                console.log(data.goalId);
-                await fetchGoalDetails(data.goalId);
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    // Event listeners
-    addContributionButton.addEventListener('click', openModal);
-    closeModalButton.addEventListener('click', closeModal);
-    cancelModalButton.addEventListener('click', closeModal);
-
-    // Modal handling
-    function openModal() {
-        addContributionModal.classList.remove('hidden');
-        document.getElementById('contributionDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('contributionAmount').value = '';
-        document.getElementById('contributionNote').value = '';
-        formError.classList.add('hidden');
-    }
-
-    function closeModal() {
-        addContributionModal.classList.add('hidden');
-        formError.classList.add('hidden');
-    }
+    document.getElementById('startDate').addEventListener('change', renderContributions);
+    document.getElementById('endDate').addEventListener('change', renderContributions);
+    document.getElementById('refreshGoalContributionsButton').addEventListener('click', renderContributions);
+    document.getElementById('clearFiltersButton').addEventListener('click', () => {
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        renderContributions();
+    });
 
     // Form submission
     contributionForm.addEventListener('submit', async (e) => {
@@ -623,16 +614,21 @@
         }
     });
 
-    function showSuccess() {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Congratulations you have successfully created a new goal contribution!',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true
-        });
+    // Initialization
+    async function loadGoalIdFromSession() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/goal_tracking/get-goal-id-from-session`);
+            const data = await res.json();
+            console.log("data", data);
+            if (data.error) {
+                console.log(data.error);
+            } else {
+                console.log(data.goalId);
+                await fetchGoalDetails(data.goalId);
+            }
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     loadGoalIdFromSession();
