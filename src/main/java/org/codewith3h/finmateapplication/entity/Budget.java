@@ -1,10 +1,8 @@
 package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -12,8 +10,11 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "Budgets")
+@DynamicInsert
+@DynamicUpdate
 public class Budget {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "budget_id", nullable = false)
     private Integer id;
 
@@ -46,11 +47,11 @@ public class Budget {
     @Column(name = "notification_threshold")
     private Integer notificationThreshold;
 
-    @ColumnDefault("getdate()")
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private Instant createdAt;
 
-    @ColumnDefault("getdate()")
+    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
     private Instant updatedAt;
 

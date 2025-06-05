@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.exception;
 
+import ch.qos.logback.core.spi.ErrorCodes;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException() {
+    ResponseEntity<ApiResponse> handlingException() {
         ApiResponse apiResponse = new ApiResponse();
         ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         apiResponse.setCode(errorCode.getCode());
@@ -18,14 +19,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
-    @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse> handlingAppException(AppException ex) {
-        ApiResponse apiResponse = new ApiResponse();
-        ErrorCode errorCode = ex.getErrorCode();
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
-        return ResponseEntity.badRequest().body(apiResponse);
-    }
+//    @ExceptionHandler(value = RuntimeException.class)
+//    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException e) {
+//        ApiResponse apiResponse = new ApiResponse();
+//        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
+//        apiResponse.setCode(errorCode.getCode());
+//        apiResponse.setMessage(e.getMessage());
+//        return ResponseEntity.badRequest().body(apiResponse);
+//    }
+
+//    @ExceptionHandler(value = AppException.class)
+//    ResponseEntity<ApiResponse> handlingAppException(AppException ex) {
+//        ApiResponse apiResponse = new ApiResponse();
+//        ErrorCode errorCode = ex.getErrorCode();
+//        apiResponse.setCode(errorCode.getCode());
+//        apiResponse.setMessage(errorCode.getMessage());
+//        return ResponseEntity.badRequest().body(apiResponse);
+//    }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
