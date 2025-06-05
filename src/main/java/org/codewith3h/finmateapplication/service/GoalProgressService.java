@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.response.GoalProgressResponse;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalProgress;
+import org.codewith3h.finmateapplication.exception.AppException;
+import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
 import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
@@ -27,7 +29,7 @@ public class GoalProgressService {
 
     public GoalProgressResponse getGoalProgressesByGoalId(int goalId) {
         Goal goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new RuntimeException("No goals found. Create a goal to start tracking your progress."));
+                .orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
 
         LocalDate today = LocalDate.now();
 
