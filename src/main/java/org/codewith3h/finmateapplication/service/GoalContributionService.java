@@ -3,6 +3,7 @@ package org.codewith3h.finmateapplication.service;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.CreateGoalContributionRequest;
 import org.codewith3h.finmateapplication.dto.response.GoalContributionResponse;
 import org.codewith3h.finmateapplication.entity.GoalContribution;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Data
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoalContributionService {
     GoalContributionRepository goalContributionRepository;
@@ -25,6 +27,7 @@ public class GoalContributionService {
     }
 
     public GoalContributionResponse createGoalContribution(CreateGoalContributionRequest request) {
+        log.info("Creating goal contribution for goal id {}, amount: {}", request.getGoalId(), request.getAmount());
         GoalContribution goalContribution = goalContributionMapper.toGoalContribution(request);
         goalContributionRepository.save(goalContribution);
         return goalContributionMapper.toGoalContributionResponse(goalContribution);

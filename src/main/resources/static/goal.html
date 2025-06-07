@@ -533,6 +533,7 @@
         const formData = new FormData(newGoalForm);
         const goalData = {
             name: formData.get('nameModal'),
+            userId: userId,
             description: formData.get('descriptionModal'),
             targetAmount: parseFloat(formData.get('targetAmountModal')),
             currentAmount: parseFloat(formData.get('currentAmountModal')),
@@ -570,7 +571,6 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'userId': userId.toString()
                 },
                 body: JSON.stringify(goalData)
             });

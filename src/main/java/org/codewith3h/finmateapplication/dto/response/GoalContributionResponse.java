@@ -1,17 +1,22 @@
 package org.codewith3h.finmateapplication.dto.response;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class GoalContributionResponse {
-    private Integer goalId;
-    private BigDecimal amount;
-    private String note;
-    private LocalDate contributionDate;
-    private Instant createdAt;
+    Integer goalId;
+    BigDecimal amount;
+    String note;
+    LocalDate contributionDate;
+    Instant createdAt;
 }
 

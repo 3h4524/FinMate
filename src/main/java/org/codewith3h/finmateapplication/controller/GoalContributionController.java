@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -30,11 +31,10 @@ public class GoalContributionController {
     }
 
     @PostMapping("/{goalId}")
-    public ResponseEntity<ApiResponse<GoalContributionResponse>> createGoalContribution(@RequestBody CreateGoalContributionRequest request, @PathVariable int goalId) {
-        request.setGoalId(goalId);
+    public ResponseEntity<ApiResponse<GoalContributionResponse>> createGoalContribution(@RequestBody @Valid CreateGoalContributionRequest request) {
         GoalContributionResponse goalContributionResponse = goalContributionService.createGoalContribution(request);
         ApiResponse<GoalContributionResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("Goal created successfully.");
+        apiResponse.setMessage("Goal Contribution created successfully.");
         apiResponse.setResult(goalContributionResponse);
         return ResponseEntity.ok(apiResponse);
     }

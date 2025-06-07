@@ -1,19 +1,22 @@
 package org.codewith3h.finmateapplication.controller;
 
 import jakarta.servlet.http.HttpSession;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.GoalProgressResponse;
 import org.codewith3h.finmateapplication.service.GoalProgressService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/goal_tracking")
 public class GoalTrackingController {
-    @Autowired
     GoalProgressService goalProgressService;
 
     @GetMapping("/{goalId}")
@@ -24,6 +27,7 @@ public class GoalTrackingController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    // This function is for testing purposes only and is not part of the final implementation. Hehe
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<GoalProgressResponse>>> getGoalProgresses(
             @RequestHeader(name = "userId") Integer userId,
