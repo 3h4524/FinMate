@@ -2,7 +2,7 @@ package org.codewith3h.finmateapplication.exception;
 
 public class AppException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private ErrorCode errorCode;
     public AppException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
@@ -11,4 +11,7 @@ public class AppException extends RuntimeException {
     public ErrorCode getErrorCode() {
         return errorCode;
     }
+     public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
+     }
 }

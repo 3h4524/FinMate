@@ -1,20 +1,17 @@
 package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import jakarta.persistence.Table;
+import lombok.Data;
+import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @Entity
+@DynamicInsert
+@Data
 @Table(name = "GoalContributions")
 public class GoalContribution {
     @Id
@@ -34,11 +31,11 @@ public class GoalContribution {
     @Column(name = "note")
     private String note;
 
+    @ColumnDefault("getdate()")
     @Column(name = "contribution_date", nullable = false)
     private LocalDate contributionDate;
 
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
     private Instant createdAt;
-
 }

@@ -1,25 +1,22 @@
 package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import jakarta.persistence.Table;
+import lombok.Data;
+import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
-@Getter
-@Setter
 @Entity
+@DynamicInsert
+@Data
 @Table(name = "Goals")
 public class Goal {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "goal_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -49,9 +46,8 @@ public class Goal {
     @Column(name = "deadline", nullable = false)
     private LocalDate deadline;
 
-    @ColumnDefault("3")
-    @Column(name = "priority")
-    private Integer priority;
+    @Column(name = "is_long_term", nullable = false)
+    private Boolean isLongTerm = false;
 
     @Nationalized
     @ColumnDefault("'IN_PROGRESS'")
@@ -70,9 +66,6 @@ public class Goal {
     @Column(name = "notification_enabled")
     private Boolean notificationEnabled;
 
-    @Column(name = "allocation_percentage", precision = 5, scale = 2)
-    private BigDecimal allocationPercentage;
-
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
     private Instant createdAt;
@@ -80,5 +73,4 @@ public class Goal {
     @ColumnDefault("getdate()")
     @Column(name = "updated_at")
     private Instant updatedAt;
-
 }
