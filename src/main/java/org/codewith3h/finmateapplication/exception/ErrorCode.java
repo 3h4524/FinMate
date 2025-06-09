@@ -1,14 +1,12 @@
 package org.codewith3h.finmateapplication.exception;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 public enum ErrorCode {
-    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error")
-    ;
+    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error"),
+    INVALID_INPUT(1001, "Invalid input data"),
+    BUDGET_EXISTS(1002, "Budget already exists");
 
-    private int code;
-    private String message;
+    private final int code;
+    private final String message;
 
     ErrorCode(int code, String message) {
         this.code = code;
@@ -22,5 +20,4 @@ public enum ErrorCode {
     public String getMessage() {
         return message;
     }
-
 }

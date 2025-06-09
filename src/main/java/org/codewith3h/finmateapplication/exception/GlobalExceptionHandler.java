@@ -1,6 +1,5 @@
 package org.codewith3h.finmateapplication.exception;
 
-import ch.qos.logback.core.spi.ErrorCodes;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,41 +9,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingException() {
-        ApiResponse apiResponse = new ApiResponse();
-        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ApiResponse<Object>> handlingException(Exception ex) {
+        ApiResponse<Object> apiResponse = new ApiResponse<>(null, ex.getMessage() != null ? ex.getMessage() : ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
-//    @ExceptionHandler(value = RuntimeException.class)
-//    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException e) {
-//        ApiResponse apiResponse = new ApiResponse();
-//        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
-//        apiResponse.setCode(errorCode.getCode());
-//        apiResponse.setMessage(e.getMessage());
-//        return ResponseEntity.badRequest().body(apiResponse);
-//    }
-
-//    @ExceptionHandler(value = AppException.class)
-//    ResponseEntity<ApiResponse> handlingAppException(AppException ex) {
-//        ApiResponse apiResponse = new ApiResponse();
-//        ErrorCode errorCode = ex.getErrorCode();
-//        apiResponse.setCode(errorCode.getCode());
-//        apiResponse.setMessage(errorCode.getMessage());
-//        return ResponseEntity.badRequest().body(apiResponse);
-//    }
-
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ApiResponse<Object>> handlingMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         String enumKey = ex.getFieldError().getDefaultMessage();
-        ErrorCode errorcode =  ErrorCode.valueOf(enumKey);
-
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(errorcode.getCode());
-        apiResponse.setMessage(errorcode.getMessage());
+        ErrorCode errorCode;
+        try {
+            errorCode = ErrorCode.valueOf(enumKey);
+        } catch (IllegalArgumentException e) {
+            errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
+        }
+        ApiResponse<Object> apiResponse = new ApiResponse<>(null, errorCode.getMessage());
+        apiResponse.setCode(errorCode.getCode());
         return ResponseEntity.badRequest().body(apiResponse);
     }
 }

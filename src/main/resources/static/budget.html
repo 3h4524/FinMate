@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinMate - Budget Management</title>
+    <title>FinMate - Quản lý Ngân sách</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="font-sans text-gray-900 bg-green-50 overflow-x-hidden">
+<body class="font-sans text-gray-900 bg-green-50">
 <div class="flex min-h-screen">
     <!-- Sidebar -->
     <aside id="sidebar" class="w-64 bg-teal-900 text-white p-5 fixed h-full overflow-y-auto transition-transform transform md:translate-x-0 -translate-x-full z-50">
@@ -17,24 +17,24 @@
         </div>
         <nav>
             <ul class="space-y-2 flex-1">
-                <li><a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-tachometer-alt mr-3"></i> Dashboard</a></li>
-                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-bullseye mr-3"></i> Goals</a></li>
-                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-exchange-alt mr-3"></i> Transactions</a></li>
-                <li><a href="#" class="flex items-center p-3 rounded-lg bg-green-700 text-lime-300 border-l-4 border-lime-300"><i class="fas fa-calculator mr-3"></i> Budget</a></li>
-                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-chart-pie mr-3"></i> Reports</a></li>
-                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-user mr-3"></i> Profile</a></li>
-                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-cog mr-3"></i> Settings</a></li>
+                <li><a href="index.html" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-tachometer-alt mr-3"></i> Bảng điều khiển</a></li>
+                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-bullseye mr-3"></i> Mục tiêu</a></li>
+                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-exchange-alt mr-3"></i> Giao dịch</a></li>
+                <li><a href="#" class="flex items-center p-3 rounded-lg bg-green-700 text-lime-300 border-l-4 border-lime-300"><i class="fas fa-calculator mr-3"></i> Ngân sách</a></li>
+                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-chart-pie mr-3"></i> Báo cáo</a></li>
+                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-user mr-3"></i> Hồ sơ</a></li>
+                <li><a href="#" class="flex items-center p-3 rounded-lg hover:bg-teal-700 hover:text-lime-300 transition"><i class="fas fa-cog mr-3"></i> Cài đặt</a></li>
             </ul>
         </nav>
         <div class="mt-auto pt-5 border-t border-white/10 flex items-center cursor-pointer" onclick="showProfile()">
             <img id="userAvatar" src="https://via.placeholder.com/40" alt="User avatar" class="w-10 h-10 rounded-full">
             <div class="ml-3">
-                <span id="userName" class="block font-medium">Guest User</span>
+                <span id="userName" class="block font-medium">Khách</span>
                 <span class="text-sm text-gray-300">guest@finmate.com</span>
             </div>
         </div>
         <button class="flex items-center w-full p-3 mt-2 rounded-lg bg-transparent text-white hover:bg-teal-700 transition" onclick="logout()">
-            <i class="fas fa-sign-out-alt mr-3"></i> Logout
+            <i class="fas fa-sign-out-alt mr-3"></i> Đăng xuất
         </button>
     </aside>
 
@@ -42,18 +42,17 @@
     <main class="flex-1 md:ml-64 p-5 transition-all">
         <header class="bg-white rounded-lg p-4 shadow-md flex justify-between items-center mb-5">
             <div>
-                <h1 class="text-xl font-semibold">Budget Management</h1>
-                <div class="text-sm text-gray-600" id="current-date-time">Wednesday, June 04, 2025, 05:07 PM +07</div>
+                <h1 class="text-xl font-semibold">Quản lý Ngân sách</h1>
+                <div class="text-sm text-gray-600" id="current-date-time">Chủ nhật, 08 Tháng 6, 2025, 06:17 CH +07</div>
             </div>
             <div class="relative flex-1 max-w-md mx-4">
-                <input type="text" id="searchInput" placeholder="Search budgets..." aria-label="Search budgets" class="w-full p-2 pl-4 pr-10 border border-gray-300 rounded-full bg-gray-100 focus:border-green-600 focus:ring-2 focus:ring-green-300">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm ngân sách..." aria-label="Tìm kiếm ngân sách" class="w-full p-2 pl-4 pr-10 border border-gray-300 rounded-full bg-gray-100 focus:border-green-600 focus:ring-2 focus:ring-green-300">
                 <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
             </div>
             <div class="flex items-center gap-2">
                 <button class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition flex items-center gap-2" onclick="openModal('createBudgetModal')">
-                    <i class="fas fa-plus"></i> Create Budget Plan
+                    <i class="fas fa-plus"></i> Tạo Kế hoạch Ngân sách
                 </button>
-                <button id="themeToggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300"><i class="fas fa-moon"></i></button>
                 <button id="menuToggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 md:hidden"><i class="fas fa-bars"></i></button>
             </div>
         </header>
@@ -62,9 +61,9 @@
             <!-- Budget Monitoring -->
             <div class="bg-white rounded-lg p-5 shadow-md w-full">
                 <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold flex items-center gap-2"><i class="fas fa-chart-line"></i> Budget Monitoring</h2>
-                    <button class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition flex items-center gap-2" onclick="monitorBudgets()">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                    <h2 class="text-lg font-semibold flex items-center gap-2"><i class="fas fa-chart-line"></i> Theo dõi Ngân sách</h2>
+                    <button class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition flex items-center gap-2" onclick="monitorBudgets(0)">
+                        <i class="fas fa-sync-alt"></i> Làm mới
                     </button>
                 </div>
                 <div id="alerts"></div>
@@ -72,34 +71,35 @@
                     <table class="w-full text-center">
                         <thead>
                         <tr class="bg-gray-100">
-                            <th class="p-3 font-semibold">Category</th>
-                            <th class="p-3 font-semibold">Usage</th>
-                            <th class="p-3 font-semibold">Progress</th>
-                            <th class="p-3 font-semibold">Remaining</th>
-                            <th class="p-3 font-semibold">Actions</th>
+                            <th class="p-3 font-semibold">Danh mục</th>
+                            <th class="p-3 font-semibold">Sử dụng</th>
+                            <th class="p-3 font-semibold">Tiến độ</th>
+                            <th class="p-3 font-semibold">Còn lại</th>
+                            <th class="p-3 font-semibold">Hành động</th>
                         </tr>
                         </thead>
                         <tbody id="monitor-table-body"></tbody>
                     </table>
                 </div>
+                <div id="monitor-pagination" class="flex justify-center mt-4 gap-2"></div>
             </div>
 
             <!-- Budget vs Actual Analysis -->
             <div class="bg-white rounded-lg p-5 shadow-md w-full">
                 <div class="flex justify-between items-center mb-5 pb-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold flex items-center gap-2"><i class="fas fa-chart-bar"></i> Budget vs Actual Analysis</h2>
+                    <h2 class="text-lg font-semibold flex items-center gap-2"><i class="fas fa-chart-bar"></i> Phân tích Ngân sách vs Thực tế</h2>
                     <div class="flex gap-2">
                         <select id="analysisPeriod" class="border border-gray-300 rounded-lg px-4 py-2">
-                            <option value="current_day">Day</option>
-                            <option value="current_week">Week</option>
-                            <option value="current_month" selected>Month</option>
-                            <option value="current_year">Year</option>
+                            <option value="current_day">Ngày</option>
+                            <option value="current_week">Tuần</option>
+                            <option value="current_month" selected>Tháng</option>
+                            <option value="current_year">Năm</option>
                         </select>
                         <button class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition flex items-center gap-2" onclick="toggleChartType()">
-                            <i id="chartIcon" class="fas fa-chart-bar"></i> <span id="chartTypeLabel">Bar Chart</span>
+                            <i id="chartIcon" class="fas fa-chart-bar"></i> <span id="chartTypeLabel">Biểu đồ Cột</span>
                         </button>
                         <button class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition flex items-center gap-2" onclick="exportToCSV()">
-                            <i class="fas fa-download"></i> Export CSV
+                            <i class="fas fa-download"></i> Xuất CSV
                         </button>
                     </div>
                 </div>
@@ -108,19 +108,19 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <p class="text-gray-600 text-xs">Total Budgeted</p>
+                        <p class="text-gray-600 text-xs">Tổng Ngân sách</p>
                         <p id="totalBudgeted" class="font-bold text-lg">$0</p>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <p class="text-gray-600 text-xs">Total Spent</p>
+                        <p class="text-gray-600 text-xs">Tổng Chi tiêu</p>
                         <p id="totalSpent" class="font-bold text-lg">$0</p>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <p class="text-gray-600 text-xs">Variance</p>
+                        <p class="text-gray-600 text-xs">Chênh lệch</p>
                         <p id="varianceAmount" class="font-bold text-lg">$0</p>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <p class="text-gray-600 text-xs">Spending Rate</p>
+                        <p class="text-gray-600 text-xs">Tỷ lệ Chi tiêu</p>
                         <p id="spendingRate" class="font-bold text-lg">0%</p>
                     </div>
                 </div>
@@ -128,16 +128,17 @@
                     <table class="w-full text-center">
                         <thead>
                         <tr class="bg-gray-100">
-                            <th class="p-3 font-semibold">Category</th>
-                            <th class="p-3 font-semibold">Planned Amount</th>
-                            <th class="p-3 font-semibold">Actual Spending</th>
-                            <th class="p-3 font-semibold">Variance</th>
-                            <th class="p-3 font-semibold">Status</th>
+                            <th class="p-3 font-semibold">Danh mục</th>
+                            <th class="p-3 font-semibold">Số tiền Kế hoạch</th>
+                            <th class="p-3 font-semibold">Chi tiêu Thực tế</th>
+                            <th class="p-3 font-semibold">Chênh lệch</th>
+                            <th class="p-3 font-semibold">Trạng thái</th>
                         </tr>
                         </thead>
                         <tbody id="analysis-table"></tbody>
                     </table>
                 </div>
+                <div id="analysis-pagination" class="flex justify-center mt-4 gap-2"></div>
             </div>
         </div>
     </main>
@@ -146,41 +147,41 @@
     <div id="createBudgetModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[1000]">
         <div class="bg-white rounded-lg p-6 w-11/12 max-w-lg shadow-lg relative">
             <span class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-green-600 cursor-pointer" onclick="closeModal('createBudgetModal')">×</span>
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle"></i> Create Budget Plan</h3>
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle"></i> Tạo Kế hoạch Ngân sách</h3>
             <form id="create-budget-form">
                 <div class="mb-4">
-                    <label for="periodType" class="block text-sm font-medium mb-1">Budget Period</label>
+                    <label for="periodType" class="block text-sm font-medium mb-1">Kỳ hạn</label>
                     <select name="periodType" id="periodType" class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
-                        <option value="">Select Period</option>
-                        <option value="DAILY">Daily</option>
-                        <option value="WEEKLY">Weekly</option>
-                        <option value="MONTHLY">Monthly</option>
-                        <option value="YEARLY">Yearly</option>
+                        <option value="">Chọn Kỳ</option>
+                        <option value="DAILY">Hàng ngày</option>
+                        <option value="WEEKLY">Hàng tuần</option>
+                        <option value="MONTHLY">Hàng tháng</option>
+                        <option value="YEARLY">Hàng năm</option>
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Categories and Spending Limits</label>
+                    <label class="block text-sm font-medium mb-1">Danh mục và Hạn mức</label>
                     <div id="category-list"></div>
-                    <button type="button" class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition mt-2 flex items-center gap-2" onclick="addBudgetCategory()">
-                        <i class="fas fa-plus"></i> Add Category
+                    <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 hover:shadow-lg hover:-translate-y-1 transition mt-2 flex items-center gap-2" onclick="addBudgetCategory()">
+                        <i class="fas fa-list"></i> Thêm Danh mục
                     </button>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="mb-4">
-                        <label for="startDate" class="block text-sm font-medium mb-1">Start Date</label>
+                        <label for="startDate" class="block text-sm font-medium mb-1">Ngày Bắt đầu</label>
                         <input type="date" name="startDate" id="startDate" class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
                     </div>
                     <div class="mb-4">
-                        <label for="endDate" class="block text-sm font-medium mb-1">End Date</label>
+                        <label for="endDate" class="block text-sm font-medium mb-1">Ngày Kết thúc</label>
                         <input type="date" name="endDate" id="endDate" class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label for="threshold" class="block text-sm font-medium mb-1">Alert Threshold (%)</label>
+                    <label for="threshold" class="block text-sm font-medium mb-1">Ngưỡng Cảnh báo (%)</label>
                     <input type="number" name="threshold" id="threshold" min="1" max="100" value="80" class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
                 </div>
                 <button type="submit" class="bg-gradient-to-r from-green-700 to-lime-300 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:-translate-y-1 transition flex items-center gap-2">
-                    <i class="fas fa-save"></i> Save Budget Plan
+                    <i class="fas fa-save"></i> Lưu Kế hoạch
                 </button>
             </form>
         </div>
@@ -190,18 +191,18 @@
     <div id="budgetHistoryModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[1000]">
         <div class="bg-white rounded-lg p-6 w-11/12 max-w-4xl shadow-lg relative">
             <span class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-green-600 cursor-pointer" onclick="closeModal('budgetHistoryModal')">×</span>
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-history"></i> Budget History</h3>
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-history"></i> Lịch sử Ngân sách</h3>
             <div class="mb-4">
-                <input type="text" id="historySearch" placeholder="Search budget history..." aria-label="Search budget history" class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300">
+                <input type="text" id="historySearch" placeholder="Tìm kiếm lịch sử ngân sách..." aria-label="Search budget history" class="w-full p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300">
             </div>
             <div class="overflow-y-auto max-h-96">
                 <table class="w-full text-center">
                     <thead>
                     <tr class="bg-gray-100">
-                        <th class="p-3 font-semibold">Period</th>
-                        <th class="p-3 font-semibold">Category</th>
-                        <th class="p-3 font-semibold">Amount</th>
-                        <th class="p-3 font-semibold">Dates</th>
+                        <th class="p-3 font-semibold">Kỳ</th>
+                        <th class="p-3 font-semibold">Danh mục</th>
+                        <th class="p-3 font-semibold">Số tiền</th>
+                        <th class="p-3 font-semibold">Ngày</th>
                     </tr>
                     </thead>
                     <tbody id="budget-history-table"></tbody>
@@ -209,236 +210,229 @@
             </div>
         </div>
     </div>
+
+    <!-- Budget Details Modal -->
+    <div id="budgetDetailsModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[1000]">
+        <div class="bg-white rounded-lg p-6 w-11/12 max-w-lg shadow-lg relative">
+            <span class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-green-600 cursor-pointer" onclick="closeModal('budgetDetailsModal')">×</span>
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2"><i class="fas fa-info-circle"></i> Chi tiết Ngân sách</h3>
+            <div id="budgetDetailsContent" class="text-gray-900"></div>
+        </div>
+    </div>
 </div>
 
-<script src="script.js"></script>
 <script>
-let budgetChart = null;
-let chartType = 'bar';
-let isDarkMode = localStorage.getItem('darkMode') === 'true';
-let budgetHistory = [];
-const token = localStorage.getItem('token');
-const userId = token ? parseJwt(token).userId : 1;
+    let budgetChart = null;
+    let chartType = 'bar';
+    let budgetHistory = [];
+    const token = localStorage.getItem('token');
+    const userId = token ? parseJwt(token).userId : 1;
+    let monitorPage = 0;
+    let analysisPage = 0;
+    const pageSize = 10;
 
-function parseJwt(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    console.error('Error parsing JWT:', e);
-    return { userId: 1 };
-  }
-}
-
-function initializeUI() {
-  updateDateTime();
-  applyTheme();
-  fetchUserData();
-  monitorBudgets();
-  loadAnalysis();
-  setDefaultModalDates();
-  addBudgetCategory();
-  setupEventListeners();
-}
-
-function updateDateTime() {
-  const now = new Date();
-  document.getElementById('current-date-time').textContent = now.toLocaleString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'Asia/Ho_Chi_Minh'
-  });
-  setTimeout(updateDateTime, 60000);
-}
-
-function applyTheme() {
-  if (isDarkMode) {
-    document.body.classList.add('dark', 'bg-gray-800', 'text-gray-100');
-    document.querySelectorAll('.bg-white').forEach(card => card.classList.add('bg-gray-700', 'text-gray-100'));
-    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
-  } else {
-    document.body.classList.remove('dark', 'bg-gray-800', 'text-gray-100');
-    document.querySelectorAll('.bg-white').forEach(card => card.classList.remove('bg-gray-700', 'text-gray-100'));
-    document.getElementById('themeToggle').innerHTML = '<i class="fas fa-moon"></i>';
-  }
-}
-
-function toggleTheme() {
-  isDarkMode = !isDarkMode;
-  localStorage.setItem('darkMode', isDarkMode);
-  applyTheme();
-  loadAnalysis();
-}
-
-function fetchUserData() {
-  document.getElementById('userName').textContent = 'Guest User';
-  document.getElementById('userAvatar').src = 'https://via.placeholder.com/40';
-}
-
-function logout() {
-  localStorage.removeItem('token');
-  alert('Logged out successfully.');
-  window.location.href = 'login.html';
-}
-
-function showProfile() {
-  alert('Profile view is not yet implemented.');
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('-translate-x-full');
-  document.getElementById('sidebar').classList.toggle('translate-x-0');
-}
-
-function openModal(modalId) {
-  document.getElementById(modalId).classList.remove('hidden');
-  document.getElementById(modalId).classList.add('flex');
-}
-
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-  if (modalId === 'createBudgetModal') {
-    document.getElementById('create-budget-form').reset();
-    document.getElementById('category-list').innerHTML = '';
-    addBudgetCategory();
-    setDefaultModalDates();
-  }
-}
-
-function addBudgetCategory() {
-  const categoryList = document.getElementById('category-list');
-  const row = document.createElement('div');
-  row.className = 'flex items-center gap-2 mb-2';
-  row.innerHTML = `
-    <select name="categories[]" class="flex-1 p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
-    <option value="">Select Category</option>
-    <option value="Luong">Lương</option>
-    <option value="Thuong">Thưởng</option>
-    <option value="DauTu">Đầu tư</option>
-    <option value="QuaTang">Quà tặng</option>
-    <option value="AnUong">Ăn uống</option>
-    <option value="MuaSam">Mua sắm</option>
-    <option value="DiChuyen">Di chuyển</option>
-    <option value="NhaCua">Nhà cửa</option>
-    <option value="GiaiTri">Giải trí</option>
-    <option value="SucKhoe">Sức khỏe</option>
-    <option value="GiaoDuc">Giáo dục</option>
-    <option value="HoaDon">Hóa đơn</option>
-    <option value="Khac">Khác</option>
-    </select>
-    <input type="number" name="amounts[]" step="0.01" min="0" placeholder="Amount ($)" class="flex-1 p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
-        <button type="button" class="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700" onclick="removeBudgetCategory(this)">×</button>
-        `;
-        categoryList.appendChild(row);
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Error parsing JWT:', e);
+            return { userId: 1 };
         }
+    }
 
-        function removeBudgetCategory(button) {
+    function initializeUI() {
+        updateDateTime();
+        fetchUserData();
+        monitorBudgets(0);
+        loadAnalysis(0);
+        setDefaultModalDates();
+        addBudgetCategory();
+        setupEventListeners();
+    }
+
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('current-date-time').textContent = now.toLocaleString('vi-VN', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', timeZoneName: 'short', timeZone: 'Asia/Ho_Chi_Minh'
+        });
+        setTimeout(updateDateTime, 60000);
+    }
+
+    function fetchUserData() {
+        document.getElementById('userName').textContent = 'Khách';
+        document.getElementById('userAvatar').src = 'https://via.placeholder.com/40';
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        alert('Đăng xuất thành công.');
+        window.location.href = 'login.html';
+    }
+
+    function showProfile() {
+        alert('Chức năng xem hồ sơ chưa được triển khai.');
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        document.getElementById('sidebar').classList.toggle('translate-x-0');
+    }
+
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        document.getElementById(modalId).classList.add('flex');
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (modalId === 'createBudgetModal') {
+            document.getElementById('create-budget-form').reset();
+            document.getElementById('category-list').innerHTML = '';
+            addBudgetCategory();
+            setDefaultModalDates();
+        }
+    }
+
+    function addBudgetCategory() {
+        const categoryList = document.getElementById('category-list');
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 mb-2';
+        row.innerHTML = `
+    <select name="categories[]" class="flex-1 p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
+      <option value="">Chọn Danh mục</option>
+      <option value="Luong">Lương</option>
+      <option value="Thuong">Thưởng</option>
+      <option value="DauTu">Đầu tư</option>
+      <option value="QuaTang">Quà tặng</option>
+      <option value="AnUong">Ăn uống</option>
+      <option value="MuaSam">Mua sắm</option>
+      <option value="DiChuyen">Di chuyển</option>
+      <option value="NhaCua">Nhà cửa</option>
+      <option value="GiaiTri">Giải trí</option>
+      <option value="SucKhoe">Sức khỏe</option>
+      <option value="GiaoDuc">Giáo dục</option>
+      <option value="HoaDon">Hóa đơn</option>
+      <option value="Khac">Khác</option>
+    </select>
+    <input type="number" name="amounts[]" step="0.01" min="0" placeholder="Số tiền ($)" class="flex-1 p-3 border border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-300" required>
+    <button type="button" class="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700" onclick="removeBudgetCategory(this)">×</button>
+  `;
+        categoryList.appendChild(row);
+    }
+
+    function removeBudgetCategory(button) {
         const categoryList = document.getElementById('category-list');
         if (categoryList.children.length > 1) {
-        button.parentElement.remove();
-    } else {
-        alert('At least one category is required.');
-    }
+            button.parentElement.remove();
+        } else {
+            alert('Phải có ít nhất một danh mục.');
+        }
     }
 
-        document.getElementById("create-budget-form").addEventListener("submit", async function(e) {
+    document.getElementById("create-budget-form").addEventListener("submit", async function(e) {
         e.preventDefault();
         const formData = new FormData(this);
         const data = {
-        periodType: formData.get('periodType'),
-        startDate: formData.get('startDate'),
-        endDate: formData.get('endDate'),
-        threshold: parseInt(formData.get('threshold')),
-        categories: formData.getAll('categories[]').map((category, index) => ({
-        category, amount: parseFloat(formData.getAll('amounts[]')[index])
-    }))
-    };
+            periodType: formData.get('periodType'),
+            startDate: formData.get('startDate'),
+            endDate: formData.get('endDate'),
+            threshold: parseInt(formData.get('threshold')),
+            categories: formData.getAll('categories[]').map((category, index) => ({
+                category, amount: parseFloat(formData.getAll('amounts[]')[index])
+            }))
+        };
 
         const startDate = new Date(data.startDate);
         const endDate = new Date(data.endDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        if (endDate <= startDate) { alert("End date must be after start date."); return; }
-        if (startDate < today) { alert("Start date must be today or in the future."); return; }
-        if (!data.periodType) { alert("Please select a budget period."); return; }
-        if (data.categories.some(cat => !cat.category || cat.amount <= 0)) { alert("Please fill in all category fields with valid amounts."); return; }
+        if (endDate <= startDate) { alert("Ngày kết thúc phải sau ngày bắt đầu."); return; }
+        if (startDate < today) { alert("Ngày bắt đầu phải là hôm nay hoặc trong tương lai."); return; }
+        if (!data.periodType) { alert("Vui lòng chọn kỳ ngân sách."); return; }
+        if (data.categories.some(cat => !cat.category || cat.amount <= 0)) { alert("Vui lòng điền đầy đủ các trường danh mục với số tiền hợp lệ."); return; }
 
         const categoryMap = {
-        "Luong": 1, "Thuong": 2, "DauTu": 3, "QuaTang": 4, "AnUong": 5,
-        "MuaSam": 6, "DiChuyen": 7, "NhaCua": 8, "GiaiTri": 9, "SucKhoe": 10,
-        "GiaoDuc": 11, "HoaDon": 12, "Khac": 13
-    };
+            "Luong": 1, "Thuong": 2, "DauTu": 3, "QuaTang": 4, "AnUong": 5,
+            "MuaSam": 6, "DiChuyen": 7, "NhaCua": 8, "GiaiTri": 9, "SucKhoe": 10,
+            "GiaoDuc": 11, "HoaDon": 12, "Khac": 13
+        };
         for (const cat of data.categories) {
-        const categoryId = categoryMap[cat.category];
-        if (!categoryId) { alert(`Invalid category: ${cat.category}`); return; }
+            const categoryId = categoryMap[cat.category];
+            if (!categoryId) { alert(`Danh mục không hợp lệ: ${cat.category}`); return; }
 
-        const budgetData = {
-        userId, categoryId, userCategoryId: null, amount: cat.amount,
-        periodType: data.periodType, startDate: data.startDate, endDate: data.endDate,
-        notificationThreshold: data.threshold
-    };
-        try {
-        const response = await fetch('http://localhost:8080/budget', {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "userId": userId.toString() },
-        body: JSON.stringify(budgetData)
-    });
-        const responseData = await response.json();
-        if (!response.ok || responseData.code !== 1000) {
-        alert(`Error creating budget for ${cat.category}: ${responseData.message || "Unknown error"}`);
-        return;
-    }
-        budgetHistory.push({ ...budgetData, categoryName: cat.category });
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Network error. Please check your connection.");
-        return;
-    }
-    }
+            const budgetData = {
+                userId, categoryId, userCategoryId: null, amount: cat.amount,
+                periodType: data.periodType, startDate: data.startDate, endDate: data.endDate,
+                notificationThreshold: data.threshold
+            };
+            try {
+                const response = await fetch('http://localhost:8080/budget', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "userId": userId.toString() },
+                    body: JSON.stringify(budgetData)
+                });
+                const responseData = await response.json();
+                if (!response.ok || responseData.code !== 1000) {
+                    alert(`Lỗi khi tạo ngân sách cho ${cat.category}: ${responseData.message || "Lỗi không xác định"}`);
+                    return;
+                }
+                budgetHistory.push({ ...budgetData, categoryName: cat.category });
+            } catch (error) {
+                console.error("Lỗi:", error);
+                alert("Lỗi mạng. Vui lòng kiểm tra kết nối.");
+                return;
+            }
+        }
 
-        alert("Budget plan created successfully!");
+        alert("Kế hoạch ngân sách đã được tạo thành công!");
         this.reset();
         closeModal('createBudgetModal');
-        monitorBudgets();
-        loadAnalysis();
+        monitorBudgets(0);
+        loadAnalysis(0);
     });
 
-        async function monitorBudgets() {
+    async function monitorBudgets(page) {
+        monitorPage = page;
         const monitorTableBody = document.getElementById("monitor-table-body");
         const alertsContainer = document.getElementById("alerts");
-        monitorTableBody.innerHTML = '<tr><td colspan="5" class="p-3"><i class="fas fa-spinner fa-spin"></i> Loading budgets...</td></tr>';
+        const paginationContainer = document.getElementById("monitor-pagination");
+        monitorTableBody.innerHTML = '<tr><td colspan="5" class="p-3"><i class="fas fa-spinner fa-spin"></i> Đang tải ngân sách...</td></tr>';
         alertsContainer.innerHTML = '';
+        paginationContainer.innerHTML = '';
 
         try {
-        const response = await fetch('http://localhost:8080/budget/list', { headers: { "userId": userId.toString() } });
-        const data = await response.json();
-        if (response.ok && data.result.length > 0) {
-        monitorTableBody.innerHTML = '';
-        const alerts = [];
-        data.result.forEach(budget => {
-        const usagePercent = budget.percentageUsed.toFixed(2);
-        const remaining = budget.amount - (budget.currentSpending || 0);
-        let progressClass = 'bg-green-500';
-        let statusText = 'On Track';
-        let alertType = '';
+            const response = await fetch(`http://localhost:8080/budget/list?page=${page}&size=${pageSize}`, { headers: { "userId": userId.toString() } });
+            const data = await response.json();
+            if (response.ok && data.result.content.length > 0) {
+                monitorTableBody.innerHTML = '';
+                const alerts = [];
+                data.result.content.forEach(budget => {
+                    const usagePercent = budget.percentageUsed.toFixed(2);
+                    const remaining = budget.amount - (budget.currentSpending || 0);
+                    let progressClass = 'bg-green-500';
+                    let statusText = 'Đúng kế hoạch';
+                    let alertType = '';
 
-        if (usagePercent >= 100) {
-        progressClass = 'bg-red-500';
-        statusText = 'Over Budget';
-        alertType = 'danger';
-        alerts.push({ category: budget.categoryName, message: `Over Budget: ${budget.categoryName} has exceeded the budget limit (${formatCurrency(budget.currentSpending)} / ${formatCurrency(budget.amount)}).`, type: 'danger' });
-    } else if (usagePercent >= budget.notificationThreshold) {
-        progressClass = 'bg-yellow-500';
-        statusText = 'Approaching Limit';
-        alertType = 'warning';
-        alerts.push({ category: budget.categoryName, message: `Warning: ${budget.categoryName} is approaching the budget limit (${usagePercent}% used).`, type: 'warning' });
-    }
+                    if (usagePercent >= 100) {
+                        progressClass = 'bg-red-500';
+                        statusText = 'Vượt Ngân sách';
+                        alertType = 'danger';
+                        alerts.push({ category: budget.categoryName, message: `Vượt Ngân sách: ${budget.categoryName} đã vượt quá giới hạn ngân sách (${formatCurrency(budget.currentSpending)} / ${formatCurrency(budget.amount)}).`, type: 'danger' });
+                    } else if (usagePercent >= budget.notificationThreshold) {
+                        progressClass = 'bg-yellow-500';
+                        statusText = 'Gần Giới hạn';
+                        alertType = 'warning';
+                        alerts.push({ category: budget.categoryName, message: `Cảnh báo: ${budget.categoryName} đang gần giới hạn ngân sách (${usagePercent}% đã sử dụng).`, type: 'warning' });
+                    }
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
           <td class="p-3">${budget.categoryName}</td>
           <td class="p-3">${usagePercent}%</td>
           <td class="p-3">
@@ -448,253 +442,299 @@ function addBudgetCategory() {
           </td>
           <td class="p-3">${formatCurrency(remaining)}</td>
           <td class="p-3">
-            <button onclick="viewBudgetDetails(${budget.categoryId}, '${budget.categoryName}')" class="text-teal-600 hover:text-teal-800"><i class="fas fa-eye"></i></button>
+            <button onclick="viewBudgetDetails(${budget.categoryId}, '${budget.categoryName}', ${budget.amount}, ${budget.currentSpending}, ${budget.notificationThreshold}, '${budget.startDate}', '${budget.endDate}', '${budget.periodType}')" class="text-teal-600 hover:text-teal-800"><i class="fas fa-eye"></i></button>
           </td>
         `;
-        monitorTableBody.appendChild(row);
-    });
+                    monitorTableBody.appendChild(row);
+                });
 
-        alerts.forEach(alert => {
-        alertsContainer.innerHTML += `
+                alerts.forEach(alert => {
+                    alertsContainer.innerHTML += `
           <div class="p-2 rounded-lg bg-${alert.type === 'warning' ? 'yellow' : 'red'}-100 text-${alert.type === 'warning' ? 'yellow' : 'red'}-600 flex items-center gap-2">
             <i class="fas fa-${alert.type === 'warning' ? 'exclamation-triangle' : 'times-circle'}"></i> ${alert.message}
           </div>
         `;
-    });
-    } else {
-        monitorTableBody.innerHTML = '<tr><td colspan="5" class="p-3">No active budgets found.</td></tr>';
-    }
-    } catch (error) {
-        console.error("Error:", error);
-        monitorTableBody.innerHTML = '<tr><td colspan="5" class="p-3 text-red-600">Error loading budgets. Please try again.</td></tr>';
-    }
+                });
+
+                // Thêm phân trang
+                renderPagination(paginationContainer, data.result, monitorBudgets);
+            } else {
+                monitorTableBody.innerHTML = '<tr><td colspan="5" class="p-3">Không tìm thấy ngân sách hoạt động.</td></tr>';
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            monitorTableBody.innerHTML = '<tr><td colspan="5" class="p-3 text-red-600">Lỗi tải ngân sách. Vui lòng thử lại.</td></tr>';
+        }
     }
 
-        function viewBudgetDetails(categoryId, categoryName) {
-        alert(`Viewing details for ${categoryName} (Category ID: ${categoryId}). This feature is not fully implemented yet.`);
+    function viewBudgetDetails(categoryId, categoryName, amount, currentSpending, threshold, startDate, endDate, periodType) {
+        const detailsContent = `
+    <p><strong>Danh mục:</strong> ${categoryName}</p>
+    <p><strong>Số tiền Ngân sách:</strong> ${formatCurrency(amount)}</p>
+    <p><strong>Chi tiêu Hiện tại:</strong> ${formatCurrency(currentSpending || 0)}</p>
+    <p><strong>Phần trăm Sử dụng:</strong> ${((currentSpending / amount) * 100).toFixed(2)}%</p>
+    <p><strong>Ngưỡng Cảnh báo:</strong> ${threshold}%</p>
+    <p><strong>Ngày Bắt đầu:</strong> ${startDate}</p>
+    <p><strong>Ngày Kết thúc:</strong> ${endDate}</p>
+    <p><strong>Kỳ:</strong> ${periodType === 'DAILY' ? 'Hàng ngày' : periodType === 'WEEKLY' ? 'Hàng tuần' : periodType === 'MONTHLY' ? 'Hàng tháng' : 'Hàng năm'}</p>
+  `;
+        document.getElementById('budgetDetailsContent').innerHTML = detailsContent;
+        openModal('budgetDetailsModal');
     }
 
-        async function loadAnalysis() {
+    async function loadAnalysis(page) {
+        analysisPage = page;
         const table = document.getElementById("analysis-table");
         const period = document.getElementById("analysisPeriod").value;
-        table.innerHTML = '<tr><td colspan="5" class="p-3"><i class="fas fa-spinner fa-spin"></i> Loading analysis...</td></tr>';
+        const paginationContainer = document.getElementById("analysis-pagination");
+        table.innerHTML = '<tr><td colspan="5" class="p-3"><i class="fas fa-spinner fa-spin"></i> Đang tải phân tích...</td></tr>';
+        paginationContainer.innerHTML = '';
         document.getElementById('totalBudgeted').textContent = '$0';
         document.getElementById('totalSpent').textContent = '$0';
         document.getElementById('varianceAmount').textContent = '$0';
         document.getElementById('spendingRate').textContent = '0%';
 
         try {
-        const response = await fetch(`http://localhost:8080/budget/analysis?period=${period}`, { headers: { "userId": userId.toString() } });
-        const data = await response.json();
-        if (response.ok && data.result && data.result.length > 0) {
-        table.innerHTML = '';
-        const chartLabels = [];
-        const plannedData = [];
-        const actualData = [];
-        let totalBudgeted = 0;
-        let totalSpent = 0;
+            const response = await fetch(`http://localhost:8080/budget/analysis?period=${period}&page=${page}&size=${pageSize}`, { headers: { "userId": userId.toString() } });
+            const data = await response.json();
+            if (response.ok && data.result.content.length > 0) {
+                table.innerHTML = '';
+                const chartLabels = [];
+                const plannedData = [];
+                const actualData = [];
+                let totalBudgeted = 0;
+                let totalSpent = 0;
 
-        data.result.forEach(budget => {
-        const usagePercent = (budget.actualSpending / budget.plannedAmount * 100).toFixed(2) || 0;
-        const variance = budget.plannedAmount - (budget.actualSpending || 0);
-        totalBudgeted += budget.plannedAmount;
-        totalSpent += budget.actualSpending || 0;
-        const statusText = usagePercent >= 100 ? 'Over Budget' : usagePercent >= budget.notificationThreshold ? 'Approaching Limit' : 'On Track';
-        const statusClass = usagePercent >= 100 ? 'bg-red-100 text-red-600' : usagePercent >= budget.notificationThreshold ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600';
+                data.result.content.forEach(budget => {
+                    const usagePercent = (budget.actualSpending / budget.plannedAmount * 100).toFixed(2) || 0;
+                    const variance = budget.plannedAmount - (budget.actualSpending || 0);
+                    totalBudgeted += budget.plannedAmount;
+                    totalSpent += budget.actualSpending || 0;
+                    const statusText = usagePercent >= 100 ? 'Vượt Ngân sách' : usagePercent >= budget.notificationThreshold ? 'Gần Giới hạn' : 'Đúng Kế hoạch';
+                    const statusClass = usagePercent >= 100 ? 'bg-red-100 text-red-600' : usagePercent >= budget.notificationThreshold ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600';
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
           <td class="p-3">${budget.categoryName || budget.userCategoryName}</td>
           <td class="p-3">${formatCurrency(budget.plannedAmount)}</td>
           <td class="p-3">${formatCurrency(budget.actualSpending || 0)}</td>
           <td class="p-3 ${variance < 0 ? 'text-red-600' : 'text-green-600'}">${formatCurrency(variance)}</td>
           <td class="p-3"><span class="px-3 py-1 rounded-full ${statusClass}">${statusText}</span></td>
         `;
-        table.appendChild(row);
+                    table.appendChild(row);
 
-        chartLabels.push(budget.categoryName || budget.userCategoryName);
-        plannedData.push(budget.plannedAmount);
-        actualData.push(budget.actualSpending || 0);
-    });
+                    chartLabels.push(budget.categoryName || budget.userCategoryName);
+                    plannedData.push(budget.plannedAmount);
+                    actualData.push(budget.actualSpending || 0);
+                });
 
-        const variance = totalBudgeted - totalSpent;
-        const spendingRate = ((totalSpent / totalBudgeted) * 100).toFixed(1);
-        document.getElementById('totalBudgeted').textContent = formatCurrency(totalBudgeted);
-        document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
-        document.getElementById('varianceAmount').textContent = formatCurrency(variance);
-        document.getElementById('varianceAmount').className = `font-bold text-lg ${variance < 0 ? 'text-red-600' : 'text-green-600'}`;
-        document.getElementById('spendingRate').textContent = `${spendingRate}%`;
-        document.getElementById('spendingRate').className = `font-bold text-lg ${spendingRate >= 100 ? 'text-red-600' : spendingRate >= 80 ? 'text-yellow-600' : 'text-green-600'}`;
+                const variance = totalBudgeted - totalSpent;
+                const spendingRate = ((totalSpent / totalBudgeted) * 100).toFixed(1);
+                document.getElementById('totalBudgeted').textContent = formatCurrency(totalBudgeted);
+                document.getElementById('totalSpent').textContent = formatCurrency(totalSpent);
+                document.getElementById('varianceAmount').textContent = formatCurrency(variance);
+                document.getElementById('varianceAmount').className = `font-bold text-lg ${variance < 0 ? 'text-red-600' : 'text-green-600'}`;
+                document.getElementById('spendingRate').textContent = `${spendingRate}%`;
+                document.getElementById('spendingRate').className = `font-bold text-lg ${spendingRate >= 100 ? 'text-red-600' : spendingRate >= 80 ? 'text-yellow-600' : 'text-green-600'}`;
 
-        if (budgetChart) budgetChart.destroy();
-        const ctx = document.getElementById('budgetChart').getContext('2d');
-        const chartConfig = {
-        data: {
-        labels: chartLabels,
-        datasets: [
-    { label: 'Budgeted', data: plannedData, backgroundColor: 'rgba(46, 125, 50, 0.6)', borderColor: 'rgba(46, 125, 50, 1)', borderWidth: 1 },
-    { label: 'Actual', data: actualData, backgroundColor: 'rgba(211, 47, 47, 0.6)', borderColor: 'rgba(211, 47, 47, 1)', borderWidth: 1 }
-        ]
-    },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'Amount ($)' } },
-        x: { title: { display: true, text: period.includes('day') ? 'Hour' : period.includes('week') ? 'Day' : period.includes('month') ? 'Week' : 'Month' } }
-    },
-        plugins: {
-        legend: { position: 'top' },
-        title: { display: true, text: `Budget vs Actual - ${period.charAt(0).toUpperCase() + period.slice(1).replace('_', ' ')}` }
-    }
-    }
-    };
+                if (budgetChart) budgetChart.destroy();
+                const ctx = document.getElementById('budgetChart').getContext('2d');
+                const chartConfig = {
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            { label: 'Ngân sách', data: plannedData, backgroundColor: 'rgba(46, 125, 50, 0.6)', borderColor: 'rgba(46, 125, 50, 1)', borderWidth: 1 },
+                            { label: 'Thực tế', data: actualData, backgroundColor: 'rgba(211, 47, 47, 0.6)', borderColor: 'rgba(211, 47, 47, 1)', borderWidth: 1 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Số tiền ($)' } },
+                            x: { title: { display: true, text: period.includes('day') ? 'Giờ' : period.includes('week') ? 'Ngày' : period.includes('month') ? 'Tuần' : 'Tháng' } }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: `Ngân sách vs Thực tế - ${period === 'current_day' ? 'Ngày' : period === 'current_week' ? 'Tuần' : period === 'current_month' ? 'Tháng' : 'Năm'}` }
+                        }
+                    }
+                };
 
-        if (chartType === 'bar') {
-        chartConfig.type = 'bar';
-    } else if (chartType === 'line') {
-        chartConfig.type = 'line';
-        chartConfig.data.datasets.forEach(dataset => {
-        dataset.fill = false;
-        dataset.tension = 0.1;
-    });
-    } else if (chartType === 'pie') {
-        chartConfig.type = 'pie';
-        chartConfig.data.datasets = [
-    { label: 'Budgeted vs Actual', data: [totalBudgeted, totalSpent], backgroundColor: ['rgba(46, 125, 50, 0.6)', 'rgba(211, 47, 47, 0.6)'], borderColor: ['rgba(46, 125, 50, 1)', 'rgba(211, 47, 47, 1)'], borderWidth: 1 }
-        ];
-        chartConfig.data.labels = ['Budgeted', 'Actual'];
-        chartConfig.options.scales = {};
+                if (chartType === 'bar') {
+                    chartConfig.type = 'bar';
+                } else if (chartType === 'line') {
+                    chartConfig.type = 'line';
+                    chartConfig.data.datasets.forEach(dataset => {
+                        dataset.fill = false;
+                        dataset.tension = 0.1;
+                    });
+                } else if (chartType === 'pie') {
+                    chartConfig.type = 'pie';
+                    chartConfig.data.datasets = [
+                        { label: 'Ngân sách vs Thực tế', data: [totalBudgeted, totalSpent], backgroundColor: ['rgba(46, 125, 50, 0.6)', 'rgba(211, 47, 47, 0.6)'], borderColor: ['rgba(46, 125, 50, 1)', 'rgba(211, 47, 47, 1)'], borderWidth: 1 }
+                    ];
+                    chartConfig.data.labels = ['Ngân sách', 'Thực tế'];
+                    chartConfig.options.scales = {};
+                }
+
+                budgetChart = new Chart(ctx, chartConfig);
+
+                // Thêm phân trang
+                renderPagination(paginationContainer, data.result, loadAnalysis);
+            } else {
+                table.innerHTML = '<tr><td colspan="5" class="p-3">Không có dữ liệu ngân sách cho kỳ đã chọn.</td></tr>';
+                if (budgetChart) { budgetChart.destroy(); budgetChart = null; }
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            table.innerHTML = '<tr><td colspan="5" class="p-3 text-red-600">Lỗi tải phân tích. Vui lòng thử lại.</td></tr>';
+            if (budgetChart) { budgetChart.destroy(); budgetChart = null; }
+        }
     }
 
-        budgetChart = new Chart(ctx, chartConfig);
-    } else {
-        table.innerHTML = '<tr><td colspan="5" class="p-3">No budget data available for the selected period.</td></tr>';
-        if (budgetChart) { budgetChart.destroy(); budgetChart = null; }
-    }
-    } catch (error) {
-        console.error("Error:", error);
-        table.innerHTML = '<tr><td colspan="5" class="p-3 text-red-600">Error loading analysis. Please try again.</td></tr>';
-        if (budgetChart) { budgetChart.destroy(); budgetChart = null; }
-    }
+    function renderPagination(container, pageData, fetchFunction) {
+        container.innerHTML = '';
+        const { number, totalPages } = pageData;
+        if (totalPages <= 1) return;
+
+        const prevButton = document.createElement('button');
+        prevButton.className = `px-4 py-2 rounded-lg ${number === 0 ? 'bg-gray-300' : 'bg-green-600 hover:bg-green-700'} text-white`;
+        prevButton.disabled = number === 0;
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i> Trước';
+        prevButton.onclick = () => fetchFunction(number - 1);
+        container.appendChild(prevButton);
+
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = `px-4 py-2 rounded-lg ${i === number ? 'bg-green-700' : 'bg-green-600 hover:bg-green-700'} text-white`;
+            pageButton.textContent = i + 1;
+            pageButton.onclick = () => fetchFunction(i);
+            container.appendChild(pageButton);
+        }
+
+        const nextButton = document.createElement('button');
+        nextButton.className = `px-4 py-2 rounded-lg ${number === totalPages - 1 ? 'bg-gray-300' : 'bg-green-600 hover:bg-green-700'} text-white`;
+        nextButton.disabled = number === totalPages - 1;
+        nextButton.innerHTML = 'Sau <i class="fas fa-chevron-right"></i>';
+        nextButton.onclick = () => fetchFunction(number + 1);
+        container.appendChild(nextButton);
     }
 
-        function toggleChartType() {
+    function toggleChartType() {
         const chartIcon = document.getElementById('chartIcon');
         const chartTypeLabel = document.getElementById('chartTypeLabel');
         if (chartType === 'bar') {
-        chartType = 'line';
-        chartIcon.className = 'fas fa-chart-line';
-        chartTypeLabel.textContent = 'Line Chart';
-    } else if (chartType === 'line') {
-        chartType = 'pie';
-        chartIcon.className = 'fas fa-chart-pie';
-        chartTypeLabel.textContent = 'Pie Chart';
-    } else {
-        chartType = 'bar';
-        chartIcon.className = 'fas fa-chart-bar';
-        chartTypeLabel.textContent = 'Bar Chart';
-    }
-        loadAnalysis();
+            chartType = 'line';
+            chartIcon.className = 'fas fa-chart-line';
+            chartTypeLabel.textContent = 'Biểu đồ Đường';
+        } else if (chartType === 'line') {
+            chartType = 'pie';
+            chartIcon.className = 'fas fa-chart-pie';
+            chartTypeLabel.textContent = 'Biểu đồ Tròn';
+        } else {
+            chartType = 'bar';
+            chartIcon.className = 'fas fa-chart-bar';
+            chartTypeLabel.textContent = 'Biểu đồ Cột';
+        }
+        loadAnalysis(analysisPage);
     }
 
-        function exportToCSV() {
+    function exportToCSV() {
         const period = document.getElementById("analysisPeriod").value;
-        fetch(`http://localhost:8080/budget/analysis?period=${period}`, { headers: { "userId": userId.toString() } })
-        .then(response => response.json())
-        .then(data => {
-        if (data.result && data.result.length > 0) {
-        const headers = ['Category', 'Planned Amount', 'Actual Spending', 'Variance', 'Status'];
-        const rows = data.result.map(budget => {
-        const usagePercent = (budget.actualSpending / budget.plannedAmount * 100).toFixed(2) || 0;
-        const variance = budget.plannedAmount - (budget.actualSpending || 0);
-        const status = usagePercent >= 100 ? 'Over Budget' : usagePercent >= budget.notificationThreshold ? 'Approaching Limit' : 'On Track';
-        return [budget.categoryName || budget.userCategoryName, budget.plannedAmount.toFixed(2), (budget.actualSpending || 0).toFixed(2), variance.toFixed(2), status];
-    });
+        fetch(`http://localhost:8080/budget/analysis?period=${period}&page=${analysisPage}&size=${pageSize}`, { headers: { "userId": userId.toString() } })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result.content && data.result.content.length > 0) {
+                    const headers = ['Danh mục', 'Số tiền Kế hoạch', 'Chi tiêu Thực tế', 'Chênh lệch', 'Trạng thái'];
+                    const rows = data.result.content.map(budget => {
+                        const usagePercent = (budget.actualSpending / budget.plannedAmount * 100).toFixed(2) || 0;
+                        const variance = budget.plannedAmount - (budget.actualSpending || 0);
+                        const status = usagePercent >= 100 ? 'Vượt Ngân sách' : usagePercent >= budget.notificationThreshold ? 'Gần Giới hạn' : 'Đúng Kế hoạch';
+                        return [budget.categoryName || budget.userCategoryName, budget.plannedAmount.toFixed(2), (budget.actualSpending || 0).toFixed(2), variance.toFixed(2), status];
+                    });
 
-        const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `budget_analysis_${period}_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-        URL.revokeObjectURL(link.href);
-    } else {
-        alert('No data available to export.');
-    }
-    })
-        .catch(error => {
-        console.error('Error exporting CSV:', error);
-        alert('Error exporting data. Please try again.');
-    });
+                    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `phan_tich_ngan_sach_${period}_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                } else {
+                    alert('Không có dữ liệu để xuất.');
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi xuất CSV:', error);
+                alert('Lỗi xuất dữ liệu. Vui lòng thử lại.');
+            });
     }
 
-        function viewBudgetHistory() {
+    function viewBudgetHistory() {
         loadBudgetHistory();
         openModal('budgetHistoryModal');
     }
 
-        function loadBudgetHistory() {
+    function loadBudgetHistory() {
         const tableBody = document.getElementById('budget-history-table');
-        tableBody.innerHTML = budgetHistory.length ? '' : '<tr><td colspan="4" class="p-3">No budget history available.</td></tr>';
+        tableBody.innerHTML = budgetHistory.length ? '' : '<tr><td colspan="4" class="p-3">Không có lịch sử ngân sách.</td></tr>';
         budgetHistory.forEach(budget => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-      <td class="p-3">${budget.periodType.charAt(0) + budget.periodType.slice(1).toLowerCase()}</td>
+            const row = document.createElement('tr');
+            row.innerHTML = `
+      <td class="p-3">${budget.periodType === 'DAILY' ? 'Hàng ngày' : budget.periodType === 'WEEKLY' ? 'Hàng tuần' : budget.periodType === 'MONTHLY' ? 'Hàng tháng' : 'Hàng năm'}</td>
       <td class="p-3">${budget.categoryName}</td>
       <td class="p-3">${formatCurrency(budget.amount)}</td>
-      <td class="p-3">${budget.startDate} to ${budget.endDate}</td>
+      <td class="p-3">${budget.startDate} đến ${budget.endDate}</td>
     `;
-        tableBody.appendChild(row);
-    });
+            tableBody.appendChild(row);
+        });
     }
 
-        function searchBudgets() {
+    function searchBudgets() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         document.querySelectorAll('#monitor-table-body tr').forEach(row => {
-        const category = row.cells[0]?.textContent.toLowerCase();
-        row.style.display = category && category.includes(searchTerm) ? '' : 'none';
-    });
+            const category = row.cells[0]?.textContent.toLowerCase();
+            row.style.display = category && category.includes(searchTerm) ? '' : 'none';
+        });
         document.querySelectorAll('#analysis-table tr').forEach(row => {
-        const category = row.cells[0]?.textContent.toLowerCase();
-        row.style.display = category && category.includes(searchTerm) ? '' : 'none';
-    });
+            const category = row.cells[0]?.textContent.toLowerCase();
+            row.style.display = category && category.includes(searchTerm) ? '' : 'none';
+        });
     }
 
-        function searchBudgetHistory() {
+    function searchBudgetHistory() {
         const searchTerm = document.getElementById('historySearch').value.toLowerCase();
         document.querySelectorAll('#budget-history-table tr').forEach(row => {
-        const category = row.cells[1]?.textContent.toLowerCase();
-        row.style.display = category && category.includes(searchTerm) ? '' : 'none';
-    });
+            const category = row.cells[1]?.textContent.toLowerCase();
+            row.style.display = category && category.includes(searchTerm) ? '' : 'none';
+        });
     }
 
-        function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'USD' }).format(amount);
     }
 
-        function setDefaultModalDates() {
+    function setDefaultModalDates() {
         document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
         const endDate = new Date();
         endDate.setMonth(endDate.getMonth() + 1);
         document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
     }
 
-        function setupEventListeners() {
+    function setupEventListeners() {
         document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
-        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
         document.getElementById('searchInput').addEventListener('input', searchBudgets);
         document.getElementById('historySearch').addEventListener('input', searchBudgetHistory);
-        document.getElementById('analysisPeriod').addEventListener('change', loadAnalysis);
+        document.getElementById('analysisPeriod').addEventListener('change', () => loadAnalysis(0));
         document.querySelectorAll('.fixed').forEach(modal => {
-        modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal(modal.id);
-    });
-    });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal.id);
+            });
+        });
     }
 
-        window.onload = initializeUI;
+    window.onload = initializeUI;
 </script>
 </body>
 </html>
-```

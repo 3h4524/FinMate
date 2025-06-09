@@ -3,7 +3,6 @@ package org.codewith3h.finmateapplication.service;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
-import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetAnalysisResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetResponse;
 import org.codewith3h.finmateapplication.entity.*;
@@ -12,6 +11,9 @@ import org.codewith3h.finmateapplication.repository.BudgetRepository;
 import org.codewith3h.finmateapplication.repository.CategoryRepository;
 import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.codewith3h.finmateapplication.repository.UserCategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -42,7 +44,6 @@ public class BudgetService {
 
     public BudgetResponse createBudget(CreateBudgetRequest request) {
         System.out.println("Vao createBudgetService: userId " + request.getUserId());
-        // Validate required fields (BR-07)
         if (request.getUserId() == null || request.getAmount() == null || request.getPeriodType() == null ||
                 request.getStartDate() == null || (request.getCategoryId() == null)) {
             throw new RuntimeException("Tất cả các trường đều bắt buộc");
@@ -52,7 +53,6 @@ public class BudgetService {
             throw new RuntimeException("Số tiền ngân sách phải lớn hơn 0.");
         }
 
-        // Validate period type
         if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) &&
                 !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) &&
                 !"MONTHLY".equalsIgnoreCase(request.getPeriodType()) &&
@@ -60,24 +60,20 @@ public class BudgetService {
             throw new RuntimeException("Chu kỳ phải là DAILY, WEEKLY, MONTHLY hoặc YEARLY.");
         }
 
-        // Validate notification threshold
         Integer notificationThreshold = request.getNotificationThreshold() != null ? request.getNotificationThreshold() : 80;
         if (notificationThreshold < 0 || notificationThreshold > 100) {
             throw new RuntimeException("Ngưỡng cảnh báo phải nằm trong khoảng 0-100.");
         }
 
-        // Validate start date (must be today or future)
         LocalDate today = LocalDate.now();
         if (request.getStartDate().isBefore(today)) {
             throw new RuntimeException("Ngày bắt đầu phải từ hôm nay trở đi.");
         }
 
-        // Validate end date (if provided, must be after start date)
         if (request.getEndDate() != null && !request.getEndDate().isAfter(request.getStartDate())) {
             throw new RuntimeException("Ngày kết thúc phải sau ngày bắt đầu.");
         }
 
-        // Auto-calculate end date if not provided
         LocalDate endDate = request.getEndDate();
         if (endDate == null) {
             if ("DAILY".equalsIgnoreCase(request.getPeriodType())) {
@@ -91,18 +87,13 @@ public class BudgetService {
             }
         }
 
-        // Validate category existence
         Category category = null;
         UserCategory userCategory = null;
         if (request.getCategoryId() != null) {
-            Optional<Category> categoryOpt = categoryRepository.findById(request.getCategoryId());
-            if (categoryOpt.isEmpty()) {
-                throw new RuntimeException("Danh mục không tồn tại.");
-            }
-            category = categoryOpt.get();
+            category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại."));
         }
 
-        // Check for existing budget
         Optional<Budget> existingBudget = budgetRepository.findByUserIdAndPeriodTypeAndStartDate(
                 request.getUserId(), request.getPeriodType(), request.getStartDate());
         if (existingBudget.isPresent()) {
@@ -119,7 +110,6 @@ public class BudgetService {
         try {
             budgetRepository.save(budget);
             BudgetResponse response = budgetMapper.toBudgetResponse(budget);
-            // Calculate additional fields
             BigDecimal currentSpending = calculateCurrentSpending(budget);
             response.setCurrentSpending(currentSpending);
             response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), currentSpending));
@@ -130,71 +120,57 @@ public class BudgetService {
         }
     }
 
-    public List<BudgetResponse> getBudgets(Integer userId, String periodType, LocalDate startDate) {
-        List<Budget> budgets = budgetRepository.findByUser_Id(userId);
-        budgets.forEach(budget -> {
-            System.out.println(budget.toString());
-        });
+    public Page<BudgetResponse> getBudgets(Integer userId, String periodType, LocalDate startDate, Pageable pageable) {
+        Page<Budget> budgets = budgetRepository.findByUser_Id(userId, pageable);
+        budgets.forEach(budget -> System.out.println(budget.toString()));
         if (budgets.isEmpty()) {
             throw new RuntimeException("Không tìm thấy ngân sách. Vui lòng tạo kế hoạch ngân sách.");
         }
 
-        List<BudgetResponse> responses = budgets.stream()
+        List<Budget> filteredBudgets = budgets.getContent().stream()
                 .filter(budget -> periodType == null || budget.getPeriodType().equalsIgnoreCase(periodType))
                 .filter(budget -> startDate == null || budget.getStartDate().equals(startDate))
-                .map(budget -> {
-                    BudgetResponse response = budgetMapper.toBudgetResponse(budget);
-                    BigDecimal currentSpending = calculateCurrentSpending(budget);
-                    response.setCurrentSpending(currentSpending);
-                    response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), currentSpending));
-                    response.setStatus(determineStatus(response.getPercentageUsed(), budget.getNotificationThreshold()));
-                    return response;
-                })
                 .collect(Collectors.toList());
 
-        if (responses.isEmpty()) {
-            throw new RuntimeException("Không thể tải dữ liệu sử dụng.");
-        }
-        responses.forEach(response -> {
-            System.out.println(response.toString());
+        Page<Budget> filteredPage = new PageImpl<>(filteredBudgets, pageable, filteredBudgets.size());
+
+        return filteredPage.map(budget -> {
+            BudgetResponse response = budgetMapper.toBudgetResponse(budget);
+            BigDecimal currentSpending = calculateCurrentSpending(budget);
+            response.setCurrentSpending(currentSpending);
+            response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), currentSpending));
+            response.setStatus(determineStatus(response.getPercentageUsed(), budget.getNotificationThreshold()));
+            return response;
         });
-        return responses;
     }
 
-    public List<BudgetAnalysisResponse> getBudgetAnalysis(Integer userId, String periodType, LocalDate startDate) {
-        List<Budget> budgets = budgetRepository.findByUser_Id(userId);
+    public Page<BudgetAnalysisResponse> getBudgetAnalysis(Integer userId, String periodType, LocalDate startDate, Pageable pageable) {
+        Page<Budget> budgets = budgetRepository.findByUser_Id(userId, pageable);
         System.out.println("list budgetS: ");
-        budgets.forEach(budget -> {
-            System.out.println(budget.toString());
-        });
+        budgets.forEach(budget -> System.out.println(budget.toString()));
         if (budgets.isEmpty()) {
             throw new RuntimeException("Không tìm thấy ngân sách. Vui lòng tạo kế hoạch ngân sách.");
         }
 
-        List<BudgetAnalysisResponse> responses = budgets.stream()
+        List<Budget> filteredBudgets = budgets.getContent().stream()
                 .filter(budget -> periodType == null || budget.getPeriodType().equalsIgnoreCase(periodType))
                 .filter(budget -> startDate == null || budget.getStartDate().equals(startDate))
-                .map(budget -> {
-                    BudgetAnalysisResponse response = new BudgetAnalysisResponse();
-                    response.setBudgetId(budget.getId());
-                    response.setCategoryName(budget.getCategory() != null ? budget.getCategory().getName() : budget.getUserCategory() != null ? budget.getUserCategory().getName() : "Khác");
-                    response.setPlannedAmount(budget.getAmount());
-                    BigDecimal actualSpending = calculateCurrentSpending(budget);
-                    response.setActualSpending(actualSpending);
-                    response.setVariance(budget.getAmount().subtract(actualSpending));
-                    response.setPeriodType(budget.getPeriodType());
-                    response.setStatus(determineStatus(calculatePercentageUsed(budget.getAmount(), actualSpending), budget.getNotificationThreshold()));
-                    return response;
-                })
                 .collect(Collectors.toList());
 
-        if (responses.isEmpty()) {
-            throw new RuntimeException("Không thể tải dữ liệu sử dụng.");
-        }
-        responses.forEach(response -> {
-            System.out.println(response.toString());
+        Page<Budget> filteredPage = new PageImpl<>(filteredBudgets, pageable, filteredBudgets.size());
+
+        return filteredPage.map(budget -> {
+            BudgetAnalysisResponse response = new BudgetAnalysisResponse();
+            response.setBudgetId(budget.getId());
+            response.setCategoryName(budget.getCategory() != null ? budget.getCategory().getName() : budget.getUserCategory() != null ? budget.getUserCategory().getName() : "Khác");
+            response.setPlannedAmount(budget.getAmount());
+            BigDecimal actualSpending = calculateCurrentSpending(budget);
+            response.setActualSpending(actualSpending);
+            response.setVariance(budget.getAmount().subtract(actualSpending));
+            response.setPeriodType(budget.getPeriodType());
+            response.setStatus(determineStatus(calculatePercentageUsed(budget.getAmount(), actualSpending), budget.getNotificationThreshold()));
+            return response;
         });
-        return responses;
     }
 
     private BigDecimal calculateCurrentSpending(Budget budget) {
