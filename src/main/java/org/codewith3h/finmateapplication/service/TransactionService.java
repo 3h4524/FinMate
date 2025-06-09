@@ -54,7 +54,7 @@ public class TransactionService {
 
         Transaction transaction = transactionMapper.toEntity(transactionCreationRequest);
         User user = userRepository.findById(transactionCreationRequest.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND_EXCEPTION));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         log.info("User: {}", user.toString());
         log.info("User: {}", user);
         transaction.setUser(user);
