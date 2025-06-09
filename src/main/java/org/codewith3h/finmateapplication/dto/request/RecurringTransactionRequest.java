@@ -20,15 +20,15 @@ import java.time.LocalDateTime;
 @Builder
 public class RecurringTransactionRequest {
     @NotNull(message = "User ID is required")
-    private Long userId;
-    private Long categoryId;
-    private Long userCategoryId;
+    private Integer userId;
+    private Integer categoryId;
+    private Integer userCategoryId;
     @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
     private BigDecimal amount;
     @Size(max = 255, message = "Note cannot exceed 255 characters")
     private String note;
     @NotNull(message = "Frequency is required")
-    private Frequency frequency;
+    private String frequency;
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
     @NotNull(message = "End date is required")

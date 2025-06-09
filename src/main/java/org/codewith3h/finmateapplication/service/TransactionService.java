@@ -18,12 +18,18 @@ import org.codewith3h.finmateapplication.repository.CategoryRepository;
 import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.codewith3h.finmateapplication.repository.UserCategoryRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
+import org.codewith3h.finmateapplication.specification.TransactionSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -36,6 +42,7 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final UserCategoryRepository  userCategoryRepository;
+
 
     //create transaction
     public TransactionResponse createTransaction(TransactionCreationRequest transactionCreationRequest) {
@@ -112,8 +119,65 @@ public class TransactionService {
         return transactions.map(transactionMapper::toResponseDto);
     }
 
-//    @Transactional(readOnly = true)
-//    public Page<TransactionResponse> searchTransaction(TransactionSearchRequest transactionSearchRequest){
-//
-//    }
+    @Transactional(readOnly = true)
+    public Page<TransactionResponse> searchTransaction(TransactionSearchRequest transactionSearchRequest){
+
+        log.info("Searching transactions with criteria for user: {}", transactionSearchRequest.getUserId());
+
+        Specification<Transaction> spec = (root, query, cb) -> cb.conjunction();
+
+        if (transactionSearchRequest.getUserId() != null) {
+            spec = spec.and(TransactionSpecification.hasUserId(transactionSearchRequest.getUserId()));
+        }
+
+        if (transactionSearchRequest.getCategoryId() != null) {
+            spec = spec.and(TransactionSpecification.hasCategoryId(transactionSearchRequest.getCategoryId()));
+        }
+
+        if (transactionSearchRequest.getUserCategoryId() != null) {
+            spec = spec.and(TransactionSpecification.hasUserCategoryId(transactionSearchRequest.getUserCategoryId()));
+        }
+
+        if (transactionSearchRequest.getMinAmount() != null && transactionSearchRequest.getMaxAmount() != null) {
+            spec = spec.and(TransactionSpecification.hasAmountBetween(transactionSearchRequest.getMinAmount(), transactionSearchRequest.getMaxAmount()));
+        } else if (transactionSearchRequest.getMinAmount() != null) {
+            spec = spec.and(TransactionSpecification.hasMinAmount(transactionSearchRequest.getMinAmount()));
+        } else if (transactionSearchRequest.getMaxAmount() != null) {
+            spec = spec.and(TransactionSpecification.hasMaxAmount(transactionSearchRequest.getMaxAmount()));
+        }
+
+
+        if (transactionSearchRequest.getStartDate() != null && transactionSearchRequest.getEndDate() != null) {
+            spec = spec.and(TransactionSpecification.hasDateBetween(transactionSearchRequest.getStartDate(), transactionSearchRequest.getEndDate()));
+        } else if (transactionSearchRequest.getStartDate() != null) {
+            spec = spec.and(TransactionSpecification.hasTransactionDateAfter(transactionSearchRequest.getStartDate()));
+        } else if (transactionSearchRequest.getEndDate() != null) {
+            spec = spec.and(TransactionSpecification.hasTransactionDateBefore(transactionSearchRequest.getEndDate()));
+        }
+
+
+        if (transactionSearchRequest.getIsRecurring() != null) {
+            spec = spec.and(TransactionSpecification.isRecurring(transactionSearchRequest.getIsRecurring()));
+        }
+
+        if(transactionSearchRequest.getCategoryId() != null) {
+            spec = spec.and(TransactionSpecification.hasCategoryId(transactionSearchRequest.getCategoryId()));
+        }
+
+        if(transactionSearchRequest.getUserCategoryId() != null) {
+            spec = spec.and(TransactionSpecification.hasUserCategoryId(transactionSearchRequest.getUserCategoryId()));
+        }
+
+
+
+        Sort sort = (transactionSearchRequest.getSortDirection().equalsIgnoreCase("ASC"))
+                ? Sort.by(transactionSearchRequest.getSortBy()).ascending()
+                : Sort.by(transactionSearchRequest.getSortBy()).descending();
+
+        Pageable pageable = PageRequest.of(transactionSearchRequest.getPage(), transactionSearchRequest.getSize(), sort);
+        Page<Transaction> transactions = transactionRepository.findAll(spec, pageable);
+
+        return transactions.map(transactionMapper::toResponseDto);
+    }
+
 }

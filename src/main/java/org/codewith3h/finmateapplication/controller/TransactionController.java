@@ -6,7 +6,9 @@ import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.codewith3h.finmateapplication.EntityResolver;
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
+import org.codewith3h.finmateapplication.dto.request.TransactionSearchRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
@@ -36,6 +38,7 @@ public class TransactionController {
     @PostMapping
     public ResponseEntity<ApiResponse<TransactionResponse>> createTransaction(
             @Valid @RequestBody TransactionCreationRequest requestDto) {
+
         log.info("Creating transaction for user: {}", requestDto.getUserId());
 
         TransactionResponse transactionResponse = transactionService.createTransaction(requestDto);
@@ -96,6 +99,15 @@ public class TransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<Page<TransactionResponse>>> searchTransactions(
+            @Valid @RequestBody TransactionSearchRequest dto) {
+        log.info("Searching transactions with criteria for user: {}", dto.getUserId());
 
-
+        Page<TransactionResponse> response = transactionService.searchTransaction(dto);
+        ApiResponse<Page<TransactionResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Transactions fetched successfully");
+        apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
 }

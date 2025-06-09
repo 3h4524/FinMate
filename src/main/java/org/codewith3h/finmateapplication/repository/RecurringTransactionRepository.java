@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +16,6 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
     Page<RecurringTransaction> findByUserId (Integer userId, Pageable pageable);
 
     Optional<RecurringTransaction> findByUserIdAndId(Integer userId, Integer id);
+
+    List<RecurringTransaction> findByIsActiveTrueAndNextDateLessThanEqualAndEndDateGreaterThanEqual(LocalDate nextDate, LocalDate endDate);
 }

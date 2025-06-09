@@ -19,14 +19,15 @@ public class RecurringTransactionResponse {
     private Integer userId;
     private Integer categoryId;
     private Integer userCategoryId;
+    private String categoryName;
+    private String userCategoryName;
     private BigDecimal amount;
     private String note;
-    private Frequency  frequency;
+    private String  frequency;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate nextDate;
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 }

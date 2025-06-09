@@ -5,6 +5,7 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND_EXCEPTION(1001, "Transaction not found"),
     USER_NOT_FOUND_EXCEPTION(1002, "User not found"),
     CATEGORY_NOT_FOUND_EXCEPTION(1003, "Category not found"),
+    INVALID_FREQUENCY_EXCEPTION(1004, "Invalid Frequency"),
     ;
 
 

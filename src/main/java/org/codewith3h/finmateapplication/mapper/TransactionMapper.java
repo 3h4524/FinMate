@@ -1,6 +1,7 @@
     package org.codewith3h.finmateapplication.mapper;
 
     import jakarta.persistence.EntityNotFoundException;
+    import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest;
     import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
     import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
     import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
@@ -39,6 +40,8 @@
         @Mapping(source = "user.id", target = "userId")
         @Mapping(source = "category.id", target = "categoryId")
         @Mapping(source = "userCategory.id", target = "userCategoryId")
+        @Mapping(source = "category.name", target = "categoryName")
+        @Mapping(source = "userCategory.name", target = "userCategoryName")
         @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "mapInstantToLocalDateTime")
         @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "mapInstantToLocalDateTime")
         TransactionResponse toResponseDto(Transaction entity);
@@ -59,4 +62,5 @@
         @Mapping(target = "updatedAt", ignore = true)
         @Mapping(target = "category", source = "categoryId", qualifiedByName = "mapCategoryIdToCategory")
         void updateEntityFromDto(TransactionUpdateRequest dto, @MappingTarget Transaction entity, @Context CategoryRepository categoryRepository);
+
     }
