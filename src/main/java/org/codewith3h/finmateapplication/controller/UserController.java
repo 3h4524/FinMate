@@ -1,22 +1,24 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.servlet.http.HttpSession;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.request.CreateUserRequest;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    UserService userService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<User>> createUser(@RequestBody CreateUserRequest request) {
@@ -26,6 +28,15 @@ public class UserController {
         apiResponse.setMessage("User created successfully.");
         apiResponse.setResult(savedUser);
 
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/get_user_id_from_session")
+    public ResponseEntity<ApiResponse<String>> getUserIdFromSession(HttpSession session) {
+        session.setAttribute("userId", "6");
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Getting userId from session.");
+        apiResponse.setResult((String) session.getAttribute("userId"));
         return ResponseEntity.ok(apiResponse);
     }
 

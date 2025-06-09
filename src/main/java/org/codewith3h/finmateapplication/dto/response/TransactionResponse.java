@@ -29,4 +29,5 @@ public class TransactionResponse {
     String recurringPattern;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    String type;
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="helper_functions.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,6 +27,7 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
@@ -35,6 +38,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -42,6 +46,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
 <div class="flex min-h-screen">
     <!-- Sidebar -->
@@ -54,13 +59,20 @@
                 <span class="text-xl font-bold">FinMate</span>
             </div>
             <nav class="space-y-2">
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">Dashboard</div>
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors bg-teal-600 text-white">Goals</div>
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">Transactions</div>
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">Budget</div>
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">Reports</div>
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">Profile</div>
-                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">Settings</div>
+                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">
+                    Dashboard</div>
+                <div onclick="window.location.href = 'goal.html';" class="px-4 py-3 rounded-lg cursor-pointer transition-colors bg-teal-600 text-white">Goals
+                </div>
+                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">
+                    Transactions</div>
+                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">
+                    Budget</div>
+                <div onclick="window.location.href = 'financial_report.html';" class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">
+                    Reports</div>
+                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">
+                    Profile</div>
+                <div class="px-4 py-3 rounded-lg cursor-pointer transition-colors text-gray-300 hover:bg-gray-800">
+                    Settings</div>
             </nav>
         </div>
     </div>
@@ -70,9 +82,12 @@
         <div class="bg-white shadow-sm border-b px-8 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                    <button onclick="window.location.href = 'goal.html';" id="backButton" class="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    <button onclick="window.location.href = 'goal.html';" id="backButton"
+                            class="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 19l-7-7 7-7"></path>
                         </svg>
                         Back to Goals
                     </button>
@@ -82,9 +97,12 @@
         </div>
 
         <div class="flex-1 p-8">
-            <div id="errorMessage" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <div id="errorMessage"
+                 class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
+                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span class="text-red-800"></span>
             </div>
@@ -96,7 +114,8 @@
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 id="goalName" class="text-xl font-semibold text-gray-900 mb-1"></h2>
-                            <p id="goalIsLongTerm" class="text-sm text-gray-600 rounded-full inline-block px-2 py-1"></p>
+                            <p id="goalIsLongTerm"
+                               class="text-sm text-gray-600 rounded-full inline-block px-2 py-1"></p>
                         </div>
                         <div id="goalStatus" class="px-4 py-2 rounded-full text-sm font-medium"></div>
                     </div>
@@ -135,20 +154,27 @@
                         <h3 class="text-lg font-semibold text-gray-900">Progress Chart</h3>
                         <div class="flex items-center space-x-2">
                             <button id="lineChartButton" class="p-2 rounded-lg text-gray-400 hover:text-gray-600">
-                                <svg fill="currentColor" class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4,23a1,1,0,0,1-1-1V19a1,1,0,0,1,2,0v3A1,1,0,0,1,4,23Zm9-1V15a1,1,0,0,0-2,0v7a1,1,0,0,0,2,0Zm7-11a1,1,0,0,0-1,1V22a1,1,0,0,0,2,0V12A1,1,0,0,0,20,11Zm.382-9.923A.991.991,0,0,0,20,1H16a1,1,0,0,0,0,2h1.586L12,8.586,8.707,5.293a1,1,0,0,0-1.414,0l-4,4a1,1,0,0,0,1.414,1.414L8,7.414l3.293,3.293a1,1,0,0,0,1.414,0L19,4.414V6a1,1,0,0,0,2,0V2a1,1,0,0,0-.618-.923Z"/>
+                                <svg fill="currentColor" class="w-5 h-5" viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                            d="M4,23a1,1,0,0,1-1-1V19a1,1,0,0,1,2,0v3A1,1,0,0,1,4,23Zm9-1V15a1,1,0,0,0-2,0v7a1,1,0,0,0,2,0Zm7-11a1,1,0,0,0-1,1V22a1,1,0,0,0,2,0V12A1,1,0,0,0,20,11Zm.382-9.923A.991.991,0,0,0,20,1H16a1,1,0,0,0,0,2h1.586L12,8.586,8.707,5.293a1,1,0,0,0-1.414,0l-4,4a1,1,0,0,0,1.414,1.414L8,7.414l3.293,3.293a1,1,0,0,0,1.414,0L19,4.414V6a1,1,0,0,0,2,0V2a1,1,0,0,0-.618-.923Z" />
                                 </svg>
                             </button>
 
                             <button id="barChartButton" class="p-2 rounded-lg text-gray-400 hover:text-gray-600">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2 22H22" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M9.75 4V22H14.25V4C14.25 2.9 13.8 2 12.45 2H11.55C10.2 2 9.75 2.9 9.75 4Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                    <path d="M3 10V22H7V10C7 8.9 6.6 8 5.4 8H4.6C3.4 8 3 8.9 3 10Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
-                                    <path d="M17 15V22H21V15C21 13.9 20.6 13 19.4 13H18.6C17.4 13 17 13.9 17 15Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round"
-                                          stroke-linejoin="round"/>
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2 22H22" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10"
+                                          stroke-linecap="round" stroke-linejoin="round" />
+                                    <path
+                                            d="M9.75 4V22H14.25V4C14.25 2.9 13.8 2 12.45 2H11.55C10.2 2 9.75 2.9 9.75 4Z"
+                                            stroke="#292D32" stroke-width="1.5" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    <path d="M3 10V22H7V10C7 8.9 6.6 8 5.4 8H4.6C3.4 8 3 8.9 3 10Z" stroke="#292D32"
+                                          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M17 15V22H21V15C21 13.9 20.6 13 19.4 13H18.6C17.4 13 17 13.9 17 15Z"
+                                          stroke="#292D32" stroke-width="1.5" stroke-linecap="round"
+                                          stroke-linejoin="round" />
                                 </svg>
                             </button>
                         </div>
@@ -166,16 +192,19 @@
                         <div class="flex items-center space-x-2">
                             <button id="addContributionButton"
                                     class="flex items-center bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 4v16m8-8H4" />
                                 </svg>
                                 Add Contribution
                             </button>
                             <button id="refreshGoalContributionsButton"
                                     class="flex items-center bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
-                                <svg class="w-4 h-4 mr-2 animate-spin-on-hover" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="w-4 h-4 mr-2 animate-spin-on-hover" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M4 12a8 8 0 0116 0 8 8 0 01-16 0zm14.5-2.5A6.5 6.5 0 005.5 9.5m-1.414 1.414L2 13h5v-5l-2.086 2.086M19.5 14.5A6.5 6.5 0 006.5 14.5m1.414-1.414L10 11h-5v5l2.086-2.086"/>
+                                          d="M4 12a8 8 0 0116 0 8 8 0 01-16 0zm14.5-2.5A6.5 6.5 0 005.5 9.5m-1.414 1.414L2 13h5v-5l-2.086 2.086M19.5 14.5A6.5 6.5 0 006.5 14.5m1.414-1.414L10 11h-5v5l2.086-2.086" />
                                 </svg>
                                 Refresh
                             </button>
@@ -183,25 +212,30 @@
                     </div>
                     <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start
+                                Date</label>
                             <input type="date" id="startDate"
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors">
                         </div>
                         <div>
-                            <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                            <label for="endDate" class="block text-sm font-medium text-gray-700 mb-1">End
+                                Date</label>
                             <input type="date" id="endDate"
                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors">
                         </div>
                     </div>
                     <div class="flex justify-end mb-4">
-                        <button id="clearFiltersButton" class="text-sm text-teal-600 hover:text-teal-800 font-medium">Clear Filters</button>
+                        <button id="clearFiltersButton"
+                                class="text-sm text-teal-600 hover:text-teal-800 font-medium">Clear Filters</button>
                     </div>
                     <div id="contributionsList" class="divide-y divide-gray-200"></div>
                 </div>
 
                 <!-- Add Contribution Modal -->
-                <div id="addContributionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div class="bg-white rounded-2xl shadow-2xl p-0 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto animate-slide-up">
+                <div id="addContributionModal"
+                     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div
+                            class="bg-white rounded-2xl shadow-2xl p-0 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto animate-slide-up">
                         <!-- Header -->
                         <div class="bg-gradient-to-r from-teal-600 to-teal-700 text-white p-6 rounded-t-2xl">
                             <div class="flex items-center justify-between">
@@ -209,9 +243,11 @@
                                     <h2 class="text-2xl font-bold">Add New Contribution</h2>
                                     <p class="text-teal-100 text-sm mt-1">Contribute to your financial goal</p>
                                 </div>
-                                <button id="closeModalButton" class="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg">
+                                <button id="closeModalButton"
+                                        class="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </button>
                             </div>
@@ -221,26 +257,31 @@
                             <!-- Contribution Details -->
                             <div class="bg-gray-50 rounded-xl p-5">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                    <svg class="w-5 h-5 text-teal-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-teal-600 mr-2" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+                                        </path>
                                     </svg>
                                     Contribution Details
                                 </h3>
                                 <div class="space-y-4">
                                     <div>
-                                        <label for="contributionAmount" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <label for="contributionAmount"
+                                               class="block text-sm font-semibold text-gray-700 mb-2">
                                             Amount ($) *
                                         </label>
                                         <div class="relative">
-                                            <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                                                <span
+                                                        class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
                                             <input type="number" id="contributionAmount" step="0.01"
                                                    class="w-full border-2 border-gray-200 rounded-xl pl-8 pr-4 py-3 focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 text-gray-900"
                                                    placeholder="100.00" required min="0.01">
                                         </div>
                                     </div>
                                     <div>
-                                        <label for="contributionNote" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <label for="contributionNote"
+                                               class="block text-sm font-semibold text-gray-700 mb-2">
                                             Note (Optional)
                                         </label>
                                         <input type="text" id="contributionNote"
@@ -248,7 +289,8 @@
                                                placeholder="e.g., Monthly savings">
                                     </div>
                                     <div>
-                                        <label for="contributionDate" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <label for="contributionDate"
+                                               class="block text-sm font-semibold text-gray-700 mb-2">
                                             Contribution Date (mm/dd/yyyy) *
                                         </label>
                                         <input type="date" id="contributionDate"
@@ -309,40 +351,7 @@
     const formError = document.getElementById('formError');
 
     // API configuration
-    const API_BASE_URL = 'http://localhost:8080/FinMateApplication';
-
-    // Helper functions
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(amount);
-    }
-
-    function formatDate_ddMMyyyy(date) {
-        const d = new Date(date);
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        return day + '/' + month + '/' + year;
-    }
-
-    function getStatusColor(status) {
-        switch (status) {
-            case 'COMPLETED':
-                return 'bg-green-200 text-green-800';
-            case 'FAILED':
-                return 'bg-red-200 text-red-800';
-            case 'CANCEL':
-                return 'bg-gray-200 text-gray-600';
-            default:
-                return 'bg-yellow-200 text-yellow-800';
-        }
-    }
-
-    function getProgressColor(progress) {
-        if (progress >= 80) return 'bg-green-500';
-        if (progress >= 50) return 'bg-blue-500';
-        if (progress >= 25) return 'bg-yellow-500';
-        return 'bg-red-500';
-    }
+    const API_BASE_URL = 'http://localhost:8080';
 
     function renderError() {
         errorMessage.classList.remove('hidden');
@@ -451,7 +460,7 @@
             },
             options: {
                 scales: {
-                    y: {beginAtZero: true}
+                    y: { beginAtZero: true }
                 }
             }
         });
@@ -620,13 +629,11 @@
         try {
             const res = await fetch(`${API_BASE_URL}/goal_tracking/get-goal-id-from-session`);
             const data = await res.json();
-            console.log("data", data);
-            if (data.error) {
-                console.log(data.error);
-            } else {
-                console.log(data.goalId);
-                await fetchGoalDetails(data.goalId);
-            }
+
+            console.log("data: ", data);
+
+            console.log("goalId: ", data.result);
+            await fetchGoalDetails(data.result);
         } catch (err) {
             console.log(err);
         }
@@ -635,4 +642,5 @@
     loadGoalIdFromSession();
 </script>
 </body>
+
 </html>

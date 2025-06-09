@@ -42,10 +42,14 @@ public interface GoalProgressMapper {
     @Mapping(target = "amount", source = "amount")
     @Mapping(target = "percentage", source = "percentage")
     @Mapping(target = "isLongTerm", source = "goal.isLongTerm")
-    @Mapping(target = "timeRemaining", expression = "java(calculateTimeRemaining(goalProgress.getGoal().getDeadline()))")
+    @Mapping(target = "timeRemaining", expression = "java(calculateTimeRemaining(goalProgress.getGoal().getDeadline(), goalProgress.getGoal().getStatus()))")
     GoalProgressResponse toGoalProgressResponse(GoalProgress goalProgress);
 
-    default String calculateTimeRemaining(LocalDate deadline) {
+    default String calculateTimeRemaining(LocalDate deadline, String status) {
+        if ("COMPLETED".equals(status)) {
+            return "Finished";
+        }
+
         if (deadline == null) {
             return "N/A";
         }

@@ -12,6 +12,10 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
 import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -92,52 +96,36 @@ public class GoalProgressService {
     }
 
 
-    // This function is for testing purposes only and is not part of the final implementation. Hehe
-    public List<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String filter) {
+    public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String status, int page, int size) {
+        List<Goal> userGoals = goalRepository.findGoalsByUser_IdAndStatusIsNot(userId, status);
 
-        List<Goal> userGoals = goalRepository.findByUserId(userId);
         for (Goal goal : userGoals) {
             ensureTodayProgressForGoal(goal);
         }
 
-        List<GoalProgress> allProgresses = goalProgressRepository.findByGoal_User_Id(userId);
+        Page<GoalProgress> progressPage = goalProgressRepository.findByGoal_User_Id(userId, PageRequest.of(page, size));
+
+        List<GoalProgress> filteredProgresses = progressPage.getContent().stream()
+                .filter(goalProgress -> !goalProgress.getGoal().getStatus().equals(status))
+                .toList();
+
         Map<Integer, GoalProgress> latestProgressByGoalId = new HashMap<>();
-        List<GoalProgressResponse> responses = new ArrayList<>();
-
-        LocalDate now = LocalDate.now();
-
-        for (GoalProgress progress : allProgresses) {
+        for (GoalProgress progress : filteredProgresses) {
             LocalDate progressDate = progress.getProgressDate();
             int goalId = progress.getGoal().getId();
 
-            // Kiểm tra filter
-            boolean isValid = false;
-            if (filter == null || filter.isEmpty()) {
-                isValid = true;
-            } else if ("weekly".equalsIgnoreCase(filter)) {
-                // Cùng tuần năm
-                isValid = isSameWeek(progressDate, now);
-            } else if ("monthly".equalsIgnoreCase(filter)) {
-                isValid = progressDate.getMonth() == now.getMonth()
-                        && progressDate.getYear() == now.getYear();
-            } else if ("yearly".equalsIgnoreCase(filter)) {
-                isValid = progressDate.getYear() == now.getYear();
-            }
-
-            // Nếu progress nằm trong khoảng thời gian phù hợp
-            if (isValid) {
-                GoalProgress existing = latestProgressByGoalId.get(goalId);
-                if (existing == null || progressDate.isAfter(existing.getProgressDate())) {
-                    latestProgressByGoalId.put(goalId, progress);
-                }
+            GoalProgress existing = latestProgressByGoalId.get(goalId);
+            if (existing == null || progressDate.isAfter(existing.getProgressDate())) {
+                latestProgressByGoalId.put(goalId, progress);
             }
         }
 
-        for (GoalProgress progress : latestProgressByGoalId.values()) {
-            responses.add(goalProgressMapper.toGoalProgressResponse(progress));
-        }
+        List<GoalProgressResponse> responses = latestProgressByGoalId.values().stream()
+                .map(goalProgressMapper::toGoalProgressResponse)
+                .toList();
 
-        return responses;
+        System.out.println("returning " + responses.size() + " progress responses");
+        return new PageImpl<>(responses, PageRequest.of(page, size), progressPage.getTotalElements());
     }
 
     private void ensureTodayProgressForGoal(Goal goal) {
@@ -165,7 +153,16 @@ public class GoalProgressService {
     }
 
 
-    public List<GoalProgressResponse> getListGoalProgressByGoalId(int goalId) {
-        return goalProgressRepository.findGoalProgressesByGoal_Id(goalId).stream().map(goalProgressMapper::toGoalProgressResponse).collect(Collectors.toList());
+    public Page<GoalProgressResponse> getListGoalProgressByGoalId(int goalId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_Id(goalId, pageable);
+
+        List<GoalProgressResponse> responses = progressPage.getContent().stream()
+                .map(goalProgressMapper::toGoalProgressResponse)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, progressPage.getTotalElements());
+
     }
 }
