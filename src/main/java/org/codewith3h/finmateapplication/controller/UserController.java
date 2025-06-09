@@ -1,15 +1,13 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.request.CreateUserRequest;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -28,5 +26,12 @@ public class UserController {
 
         return ResponseEntity.ok(apiResponse);
     }
-
+    @GetMapping("/get_user_id_from_session")
+    public ResponseEntity<ApiResponse<String>> getUserIdFromSession(HttpSession session) {
+        session.setAttribute("userId", "4");
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Getting userId from session.");
+        apiResponse.setResult((String) session.getAttribute("userId"));
+        return ResponseEntity.ok(apiResponse);
+    }
 }

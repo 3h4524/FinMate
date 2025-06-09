@@ -3,6 +3,7 @@ package org.codewith3h.finmateapplication.service;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
+import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.BudgetAnalysisResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetResponse;
 import org.codewith3h.finmateapplication.entity.*;
@@ -53,10 +54,11 @@ public class BudgetService {
             throw new RuntimeException("Số tiền ngân sách phải lớn hơn 0.");
         }
 
-        if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) &&
-                !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) &&
-                !"MONTHLY".equalsIgnoreCase(request.getPeriodType()) &&
-                !"YEARLY".equalsIgnoreCase(request.getPeriodType())) {
+        if (request.getPeriodType() == null ||
+                (!"DAILY".equalsIgnoreCase(request.getPeriodType()) &&
+                        !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) &&
+                        !"MONTHLY".equalsIgnoreCase(request.getPeriodType()) &&
+                        !"YEARLY".equalsIgnoreCase(request.getPeriodType()))) {
             throw new RuntimeException("Chu kỳ phải là DAILY, WEEKLY, MONTHLY hoặc YEARLY.");
         }
 
@@ -118,6 +120,87 @@ public class BudgetService {
         } catch (Exception e) {
             throw new RuntimeException("Tạo ngân sách thất bại. Vui lòng kiểm tra dữ liệu nhập.");
         }
+    }
+
+    public BudgetResponse updateBudget(Integer budgetId, UpdateBudgetRequest request) {
+        Budget budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new RuntimeException("Ngân sách không tồn tại."));
+
+        if (!budget.getUser().getId().equals(request.getUserId())) {
+            throw new RuntimeException("Bạn không có quyền chỉnh sửa ngân sách này.");
+        }
+
+        if (request.getAmount() != null) {
+            if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new RuntimeException("Số tiền ngân sách phải lớn hơn 0.");
+            }
+            budget.setAmount(request.getAmount());
+        }
+
+        if (request.getPeriodType() != null) {
+            if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) &&
+                    !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) &&
+                    !"MONTHLY".equalsIgnoreCase(request.getPeriodType()) &&
+                    !"YEARLY".equalsIgnoreCase(request.getPeriodType())) {
+                throw new RuntimeException("Chu kỳ phải là DAILY, WEEKLY, MONTHLY hoặc YEARLY.");
+            }
+            budget.setPeriodType(request.getPeriodType());
+        }
+
+        if (request.getNotificationThreshold() != null) {
+            if (request.getNotificationThreshold() < 0 || request.getNotificationThreshold() > 100) {
+                throw new RuntimeException("Ngưỡng cảnh báo phải nằm trong khoảng 0-100.");
+            }
+            budget.setNotificationThreshold(request.getNotificationThreshold());
+        }
+
+        if (request.getStartDate() != null) {
+            LocalDate today = LocalDate.now();
+            if (request.getStartDate().isBefore(today)) {
+                throw new RuntimeException("Ngày bắt đầu phải từ hôm nay trở đi.");
+            }
+            budget.setStartDate(request.getStartDate());
+        }
+
+        if (request.getEndDate() != null) {
+            if (!request.getEndDate().isAfter(budget.getStartDate())) {
+                throw new RuntimeException("Ngày kết thúc phải sau ngày bắt đầu.");
+            }
+            budget.setEndDate(request.getEndDate());
+        }
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại."));
+            budget.setCategory(category);
+        }
+
+        if (request.getUserCategoryId() != null) {
+            UserCategory userCategory = userCategoryRepository.findById(request.getUserCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục người dùng không tồn tại."));
+            budget.setUserCategory(userCategory);
+        }
+
+        budget.setUpdatedAt(Instant.now());
+        budgetRepository.save(budget);
+
+        BudgetResponse response = budgetMapper.toBudgetResponse(budget);
+        BigDecimal currentSpending = calculateCurrentSpending(budget);
+        response.setCurrentSpending(currentSpending);
+        response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), currentSpending));
+        response.setStatus(determineStatus(response.getPercentageUsed(), budget.getNotificationThreshold()));
+        return response;
+    }
+
+    public void deleteBudget(Integer budgetId, Integer userId) {
+        Budget budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new RuntimeException("Ngân sách không tồn tại."));
+
+        if (!budget.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền xóa ngân sách này.");
+        }
+
+        budgetRepository.delete(budget);
     }
 
     public Page<BudgetResponse> getBudgets(Integer userId, String periodType, LocalDate startDate, Pageable pageable) {

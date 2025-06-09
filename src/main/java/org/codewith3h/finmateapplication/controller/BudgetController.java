@@ -1,6 +1,7 @@
 package org.codewith3h.finmateapplication.controller;
 
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
+import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetAnalysisResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetResponse;
@@ -28,13 +29,35 @@ public class BudgetController {
     public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(
             @RequestHeader(name = "userId") Integer userId,
             @RequestBody CreateBudgetRequest request) {
-        if (userId == null) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(null, "Thiếu userId trong header."));
-        }
+
         request.setUserId(userId);
         BudgetResponse response = budgetService.createBudget(request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<BudgetResponse>> updateBudget(
+            @RequestHeader(name = "userId") Integer userId,
+            @PathVariable("id") Integer budgetId,
+            @RequestBody UpdateBudgetRequest request) {
+
+        request.setUserId(userId);
+        BudgetResponse response = budgetService.updateBudget(budgetId, request);
+        ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteBudget(
+            @RequestHeader(name = "userId") Integer userId,
+            @PathVariable("id") Integer budgetId) {
+
+        budgetService.deleteBudget(budgetId, userId);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Budget deleted successfully.");
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -47,9 +70,7 @@ public class BudgetController {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         System.out.println("Fetch tới get List budgets");
-        if (userId == null) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(null, "Thiếu userId trong header."));
-        }
+
         Pageable pageable = PageRequest.of(page, size);
         Page<BudgetResponse> response = budgetService.getBudgets(userId, periodType, startDate, pageable);
         ApiResponse<Page<BudgetResponse>> apiResponse = new ApiResponse<>();
@@ -64,9 +85,7 @@ public class BudgetController {
             @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-        if (userId == null) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>(null, "Thiếu userId trong header."));
-        }
+
         Pageable pageable = PageRequest.of(page, size);
         Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(userId, periodType, startDate, pageable);
         ApiResponse<Page<BudgetAnalysisResponse>> apiResponse = new ApiResponse<>();
