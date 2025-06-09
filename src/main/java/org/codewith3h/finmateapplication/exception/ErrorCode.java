@@ -11,7 +11,8 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND_EXCEPTION(1001, "Transaction not found"),
     CATEGORY_NOT_FOUND_EXCEPTION(1003, "Category not found"),
     INVALID_FREQUENCY_EXCEPTION(1004, "Invalid Frequency"),
-
+    INVALID_INPUT(1001, "Invalid input data"),
+    BUDGET_EXISTS(1002, "Budget already exists"),
     ;
 
 
