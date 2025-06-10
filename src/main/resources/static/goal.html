@@ -7,7 +7,7 @@
     <title>Goal Progress</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="helper_functions.js"></script>
+    <script src="helper_functions.js?v=1"></script>
 
     <script>
         tailwind.config = {
@@ -440,7 +440,15 @@
             document.getElementById('averageProgress').textContent = `${averageProgress}%`;
             goalsList.innerHTML = goals.map(goal => `
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:bg-gray-50 hover:shadow-md transition-all">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">${goal.name}</h3>
+                <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 truncate max-w-[70%]">${goal.name}</h3>
+                            ${goal.status === 'IN_PROGRESS' ? `
+                            <button onclick="cancelGoal('${goal.goalId}');" class="flex items-center text-red-600 hover:text-red-700 font-medium">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                Cancel
+                            </button>` : ''}
+                </div>
+
                 <div class="flex items-center justify-between mb-4">
                     <p class="text-sm text-gray-600 rounded-full inline-block px-2 py-1 ${goal.isLongTerm ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
                         ${goal.isLongTerm ? 'Long Term' : 'Short Term'}
@@ -477,6 +485,31 @@
         }
     }
 
+    // function
+    async function cancelGoal(goalId) {
+        console.log("trying to cancel Goal", goalId);
+        try {
+            const response = await fetch(`${API_BASE_URL}/goal/cancel/${goalId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+
+            if (!response.ok) {
+                throw new Error('Failed to cancel goal')
+            }
+
+            showResult("Cancelled Goal Successfully", "warning");
+            await fetchGoalProgress();
+
+        } catch (err) {
+            showResult(err, "warning");
+        }
+    }
+
+
     // Modal functionality
     function closeModal() {
         newGoalModal.classList.add('hidden');
@@ -499,18 +532,6 @@
         tomorrow.setDate(tomorrow.getDate() + 1);
         document.getElementById('startDateModal').valueAsDate = today;
         document.getElementById('deadlineModal').valueAsDate = tomorrow;
-    }
-
-    function showSuccess() {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Congratulations you have successfully created a new goal!',
-            showConfirmButton: true,
-            timer: 2000,
-            timerProgressBar: true
-        });
     }
 
     // Event listeners for modal
@@ -584,7 +605,7 @@
                 body: JSON.stringify(goalData)
             });
             if (!response.ok) throw new Error('Failed to create goal');
-            showSuccess();
+            showResult("Congratulations you have successfully created a new goal!", "success");
             closeModal();
             newGoalModal.classList.add('hidden');
             newGoalForm.reset();
@@ -614,7 +635,7 @@
         try {
             await fetchUserId(); // Wait for userId to be fetched
             await fetchGoalProgress(); // Then fetch goals
-            // Promise.all([fetchGoalProgress(), fetchTransaction()]); // nếu muốn fetch 2 cái khác song song
+            // await Promise.all([fetchGoalProgress(), fetchTransaction()]); // nếu muốn fetch 2 cái khác song song
         } catch (err) {
             error = 'Failed to initialize app: ' + err.message;
             console.error(error);

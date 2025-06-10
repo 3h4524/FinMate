@@ -39,3 +39,16 @@ function generateColors(count) {
     }
     return colors;
 }
+
+function showResult(title, status) {
+    console.log(`${title}: ${status}`);
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: status,
+        title: title,
+        showConfirmButton: true,
+        timer: 2000,
+        timerProgressBar: true
+    });
+}

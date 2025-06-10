@@ -34,7 +34,7 @@ public class GoalTrackingController {
             @RequestHeader(name = "userId") Integer userId,
             @RequestParam(name = "status", required = false, defaultValue = "CANCELLED") String status,
             @RequestParam(name = "page", defaultValue = "0", required = false) @Min(0) int page,
-            @RequestParam(name = "size", defaultValue = "10", required = false) @Min(1) int size) {
+            @RequestParam(name = "size", defaultValue = "100", required = false) @Min(1) int size) {
         System.out.println("getGoalProgresses");
         Page<GoalProgressResponse> goalProgressResponseList = goalProgressService.getAllGoalProgressesUniqueByDate(userId, status, page, size);
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
@@ -47,7 +47,7 @@ public class GoalTrackingController {
     public ResponseEntity<ApiResponse<Page<GoalProgressResponse>>> getGoalProgress(
             @PathVariable(name = "goal_id") Integer goal_id,
             @RequestParam(name = "page", defaultValue = "0", required = false) @Min(0) int page,
-            @RequestParam(name = "size", defaultValue = "10", required = false) @Min(1) int size) {
+            @RequestParam(name = "size", defaultValue = "100", required = false) @Min(1) int size) {
         Page<GoalProgressResponse> list = goalProgressService.getListGoalProgressByGoalId(goal_id, page, size);
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("List of goals progresses");

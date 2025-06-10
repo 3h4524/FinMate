@@ -1,13 +1,18 @@
 package org.codewith3h.finmateapplication.service;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
+import org.codewith3h.finmateapplication.dto.request.GoalUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalProgress;
+import org.codewith3h.finmateapplication.entity.Transaction;
+import org.codewith3h.finmateapplication.exception.AppException;
+import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.GoalMapper;
 import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
 import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
@@ -44,5 +49,32 @@ public class GoalService {
 
         return goalMapper.toGoalResponse(goal);
     }
+
+    public void  cancelFinancialGoal(Integer goalId) {
+
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+
+        log.info("Cancelling Financial Goal for goalId: {}, name: {}", goalId, goal.getName());
+
+        goal.setStatus("CANCELLED");
+
+        goalRepository.save(goal);
+
+        log.info("Financial Goal Canceled for goalId: {}, name: {}", goalId, goal.getName());
+
+    }
+
+    public GoalResponse updateGoal(@Valid GoalUpdateRequest request, Integer goalId) {
+        log.info("Updating Financial Goal for goalId: {}, name: {}", goalId, request.getName());
+
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+
+        goalMapper.updateGoal(goal, request);
+
+        log.info("Financial Goal Updated for goalId: {}, name: {}", goalId, request.getName());
+
+        return goalMapper.toGoalResponse(goalRepository.save(goal));
+    }
+
 
 }

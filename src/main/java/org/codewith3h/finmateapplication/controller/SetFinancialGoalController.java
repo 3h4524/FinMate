@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
+import org.codewith3h.finmateapplication.dto.request.GoalUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.service.GoalService;
@@ -24,6 +25,22 @@ public class SetFinancialGoalController {
         ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Goal created successfully.");
         apiResponse.setResult(goal);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PatchMapping("/cancel/{goalId}")
+    public ResponseEntity<Void> cancelGoal(@PathVariable(name = "goalId") Integer goalId) {
+        System.out.println("patch cancel goalId: " + goalId);
+        goalService.cancelFinancialGoal(goalId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{goalId}")
+    public ResponseEntity<ApiResponse<GoalResponse>> updateGoal(@RequestBody @Valid GoalUpdateRequest request, @PathVariable Integer goalId) {
+        GoalResponse response = goalService.updateGoal(request, goalId);
+        ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Goal updated successfully.");
+        apiResponse.setResult(response);
         return ResponseEntity.ok(apiResponse);
     }
 }

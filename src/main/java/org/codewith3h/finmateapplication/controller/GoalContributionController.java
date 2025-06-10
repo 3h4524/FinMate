@@ -30,7 +30,7 @@ public class GoalContributionController {
     public ResponseEntity<ApiResponse<Page<GoalContributionResponse>>> getContributions(
             @PathVariable int goalId,
             @RequestParam(name = "page", defaultValue = "0", required = false) @Min(0) int page,
-            @RequestParam(name = "size", defaultValue = "10", required = false) @Min(1) int size) {
+            @RequestParam(name = "size", defaultValue = "100", required = false) @Min(1) int size) {
         Page<GoalContributionResponse> contributions = goalContributionService.getContributionsByGoalId(goalId, PageRequest.of(page, size));
         ApiResponse<Page<GoalContributionResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("List of contributions for goal " + goalId);

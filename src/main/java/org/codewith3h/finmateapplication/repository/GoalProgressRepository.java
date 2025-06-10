@@ -18,4 +18,8 @@ public interface GoalProgressRepository extends JpaRepository<GoalProgress, Inte
     Page<GoalProgress> findByGoal_User_Id(Integer userId, Pageable pageable);
 
     Page<GoalProgress> findGoalProgressesByGoal_Id(Integer goalId, Pageable pageable);
+
+    Page<GoalProgress> findGoalProgressesByGoal_User_IdAndProgressDateAndGoal_StatusIsNot(Integer goalUserId, LocalDate progressDate, String status, Pageable pageable);
+
+    Page<GoalProgress> findGoalProgressesByGoal_User_IdAndGoal_StatusIsNot(Integer goalUserId, String status, Pageable pageable);
 }

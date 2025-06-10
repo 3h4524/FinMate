@@ -16,4 +16,6 @@ public interface GoalRepository extends JpaRepository<Goal,Integer> {
     List<Goal> findByUserId(Integer user_id);
 
     List<Goal> findGoalsByUser_IdAndStatusIsNot(Integer userId, String status);
+
+    List<Goal> findByUserIdAndStatusIs(Integer userId, String status);
 }

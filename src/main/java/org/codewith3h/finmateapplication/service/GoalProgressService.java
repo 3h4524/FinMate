@@ -97,35 +97,47 @@ public class GoalProgressService {
 
 
     public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String status, int page, int size) {
-        List<Goal> userGoals = goalRepository.findGoalsByUser_IdAndStatusIsNot(userId, status);
+        updateTodayGoalProgressList(userId);
 
-        for (Goal goal : userGoals) {
-            ensureTodayProgressForGoal(goal);
-        }
+        Pageable pageable = PageRequest.of(page, size);
 
-        Page<GoalProgress> progressPage = goalProgressRepository.findByGoal_User_Id(userId, PageRequest.of(page, size));
+        Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_User_IdAndGoal_StatusIsNot(userId, status, pageable);
 
-        List<GoalProgress> filteredProgresses = progressPage.getContent().stream()
-                .filter(goalProgress -> !goalProgress.getGoal().getStatus().equals(status))
-                .toList();
-
-        Map<Integer, GoalProgress> latestProgressByGoalId = new HashMap<>();
-        for (GoalProgress progress : filteredProgresses) {
-            LocalDate progressDate = progress.getProgressDate();
-            int goalId = progress.getGoal().getId();
-
-            GoalProgress existing = latestProgressByGoalId.get(goalId);
-            if (existing == null || progressDate.isAfter(existing.getProgressDate())) {
-                latestProgressByGoalId.put(goalId, progress);
-            }
-        }
-
-        List<GoalProgressResponse> responses = latestProgressByGoalId.values().stream()
+        List<GoalProgressResponse> responses = progressPage.getContent().stream()
+                .collect(Collectors.groupingBy(goalProgress ->
+                                goalProgress.getGoal().getId(),
+                        Collectors.maxBy(Comparator.comparing(GoalProgress::getProgressDate))
+                ))
+                .values()
+                .stream()
+                .flatMap(Optional::stream)
                 .map(goalProgressMapper::toGoalProgressResponse)
                 .toList();
 
         System.out.println("returning " + responses.size() + " progress responses");
         return new PageImpl<>(responses, PageRequest.of(page, size), progressPage.getTotalElements());
+    }
+
+    public Page<GoalProgressResponse> getListGoalProgressByGoalId(int goalId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_Id(goalId, pageable);
+
+        List<GoalProgressResponse> responses = progressPage.getContent().stream()
+                .map(goalProgressMapper::toGoalProgressResponse)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, progressPage.getTotalElements());
+
+    }
+
+
+    private void updateTodayGoalProgressList(Integer userId) {
+        List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, "IN_PROGRESS");
+        for (Goal goal : userGoals) {
+            System.out.println("Goal id " + goal.getId() + " status " + goal.getStatus());
+            ensureTodayProgressForGoal(goal);
+        }
     }
 
     private void ensureTodayProgressForGoal(Goal goal) {
@@ -144,25 +156,5 @@ public class GoalProgressService {
         progress.setAmount(goal.getCurrentAmount());
         progress.setPercentage(goalProgressMapper.calculatePercentage(goal));
         goalProgressRepository.save(progress);
-    }
-
-    private boolean isSameWeek(LocalDate date1, LocalDate date2) {
-        WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        return date1.get(weekFields.weekOfYear()) == date2.get(weekFields.weekOfYear())
-                && date1.getYear() == date2.getYear();
-    }
-
-
-    public Page<GoalProgressResponse> getListGoalProgressByGoalId(int goalId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_Id(goalId, pageable);
-
-        List<GoalProgressResponse> responses = progressPage.getContent().stream()
-                .map(goalProgressMapper::toGoalProgressResponse)
-                .toList();
-
-        return new PageImpl<>(responses, pageable, progressPage.getTotalElements());
-
     }
 }
