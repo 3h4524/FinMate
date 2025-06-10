@@ -13,6 +13,8 @@ public enum ErrorCode {
     INVALID_FREQUENCY_EXCEPTION(1009, "Invalid Frequency"),
     INVALID_INPUT(1010, "Invalid input data"),
     BUDGET_EXISTS(1011, "Budget already exists"),
+    NO_WALLET_FOR_USER_EXCEPTION(1012, "No wallet for given user"),
+    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed")
     ;
 
 

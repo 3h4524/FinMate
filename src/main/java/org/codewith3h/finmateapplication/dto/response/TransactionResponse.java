@@ -21,6 +21,7 @@ public class TransactionResponse {
     String userCategoryName;
     BigDecimal amount;
     String note;
+    String type;
     LocalDate transactionDate;
     String paymentMethod;
     String location;

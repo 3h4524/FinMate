@@ -7,17 +7,11 @@ import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionSearchRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
-import org.codewith3h.finmateapplication.entity.Category;
-import org.codewith3h.finmateapplication.entity.Transaction;
-import org.codewith3h.finmateapplication.entity.User;
-import org.codewith3h.finmateapplication.entity.UserCategory;
+import org.codewith3h.finmateapplication.entity.*;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.TransactionMapper;
-import org.codewith3h.finmateapplication.repository.CategoryRepository;
-import org.codewith3h.finmateapplication.repository.TransactionRepository;
-import org.codewith3h.finmateapplication.repository.UserCategoryRepository;
-import org.codewith3h.finmateapplication.repository.UserRepository;
+import org.codewith3h.finmateapplication.repository.*;
 import org.codewith3h.finmateapplication.specification.TransactionSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +23,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Slf4j
@@ -42,9 +38,11 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final UserCategoryRepository  userCategoryRepository;
+    private final WalletRepository walletRepository;
 
 
     //create transaction
+    @Transactional
     public TransactionResponse createTransaction(TransactionCreationRequest transactionCreationRequest) {
         log.info("Creating new transaction for user: {}", transactionCreationRequest.getUserId());
         log.info("Creating transaction for userId: {}, categoryId: {}, userCategoryId: {}",
@@ -52,21 +50,47 @@ public class TransactionService {
                 transactionCreationRequest.getCategoryId(),
                 transactionCreationRequest.getUserCategoryId());
 
-        Transaction transaction = transactionMapper.toEntity(transactionCreationRequest);
         User user = userRepository.findById(transactionCreationRequest.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        log.info("User: {}", user.toString());
-        log.info("User: {}", user);
-        transaction.setUser(user);
+
+        Wallet wallet = walletRepository.findByUserId(transactionCreationRequest.getUserId())
+                        .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
+
+        Category category = null;
+        UserCategory userCategory = null;
+        String transactionType = null;
+
         if(transactionCreationRequest.getCategoryId() != null){
-            Category category = categoryRepository.findById(transactionCreationRequest.getCategoryId())
+             category = categoryRepository.findById(transactionCreationRequest.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
-            transaction.setCategory(category);
+             transactionType = category.getType();
         } else if (transactionCreationRequest.getUserCategoryId() != null){
-            UserCategory userCategory = userCategoryRepository.findById(transactionCreationRequest.getUserCategoryId())
+            userCategory = userCategoryRepository.findById(transactionCreationRequest.getUserCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
-            transaction.setUserCategory(userCategory);
+            transactionType = userCategory.getType();
+        } else {
+            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION);
         }
+
+        BigDecimal amount = transactionCreationRequest.getAmount().setScale(2, RoundingMode.HALF_UP);
+        BigDecimal currentBalance = wallet.getBalance();
+        BigDecimal newBalance = "INCOME".equalsIgnoreCase(transactionType)
+                ? currentBalance.add(amount)
+                : currentBalance.subtract(amount);
+
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            log.error("Negative balance not allowed for userId: {}. Current balance: {}," +
+                    "transaction amount: {}, type: {}", transactionCreationRequest.getUserId(), newBalance ,amount, transactionType);
+            throw new AppException(ErrorCode.NEGATIVE_BALANCE_NOT_ALLOWED);
+        }
+
+        Transaction transaction = transactionMapper.toEntity(transactionCreationRequest);
+        transaction.setUser(user);
+        transaction.setCategory(category);
+        transaction.setUserCategory(userCategory);
+
+        wallet.setBalance(newBalance);
+        walletRepository.save(wallet);
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
@@ -85,22 +109,82 @@ public class TransactionService {
     }
 
     //delete transaction
+    @Transactional
     public void deleteTransaction(Integer transactionId, Integer userId) {
         log.info ("Deleting Transaction {} for user {}", transactionId, userId);
 
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
 
+        Wallet wallet = walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
+
+        String transactionType = transaction.getCategory() != null
+                ? transaction.getCategory().getType()
+                : transaction.getUserCategory().getType();
+
+        BigDecimal amount = transaction.getAmount().setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal currentBalance = wallet.getBalance();
+
+        currentBalance = "INCOME".equalsIgnoreCase(transactionType)
+                ? currentBalance.subtract(amount)
+                : currentBalance.add(amount);
+
+        if(currentBalance.compareTo(BigDecimal.ZERO) < 0) {
+            log.error("Negative balance not allowed for userId: {}. Current balance: {}," +
+                    "transaction amount: {}, type: {}", userId, wallet.getBalance() ,amount, transactionType);
+            throw new AppException(ErrorCode.NEGATIVE_BALANCE_NOT_ALLOWED);
+        }
+
+        wallet.setBalance(currentBalance);
+        walletRepository.save(wallet);
         transactionRepository.delete(transaction);
-        log.info("Transaction deleted with ID: {}", transaction.getId());
+        log.info("Transaction deleted with ID: {}. New Balance", transactionId);
     }
 
-    //update transaction
+    @Transactional
     public TransactionResponse updateTransaction(Integer transactionId, Integer userId, TransactionUpdateRequest transactionUpdateRequest) {
+
         log.info("Updating transaction {} for user {}", transactionId, userId);
+
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
+
+        Wallet wallet = walletRepository.findByUserId(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
+
+        String currentType = (transaction.getCategory() != null)
+                ? transaction.getCategory().getType()
+                : transaction.getUserCategory().getType();
+        BigDecimal currentAmount = transaction.getAmount().setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal balance = wallet.getBalance();
+
+        balance = ("INCOME".equalsIgnoreCase(currentType))
+                ? balance.subtract(currentAmount)
+                : balance.add(currentAmount);
+
         transactionMapper.updateEntityFromDto(transactionUpdateRequest, transaction, categoryRepository);
+
+        String newType = transaction.getCategory() != null
+                ? transaction.getCategory().getType()
+                : transaction.getUserCategory().getType();
+        BigDecimal newAmount = transaction.getAmount().setScale(2, RoundingMode.HALF_UP);
+
+        balance = ("INCOME".equalsIgnoreCase(newType))
+                ? balance.add(newAmount)
+                : balance.subtract(newAmount);
+
+        if(balance.compareTo(BigDecimal.ZERO) < 0) {
+            log.error("Negative balance not allowed for userId: {}. Current balance: {}, Transaction amount: {}, Type: {}",
+                    userId, balance, newAmount, newType);
+            throw new AppException(ErrorCode.NEGATIVE_BALANCE_NOT_ALLOWED);
+        }
+
+        wallet.setBalance(balance);
+        walletRepository.save(wallet);
+
         Transaction updatedTransaction = transactionRepository.save(transaction);
         log.info("Transaction updated with ID: {}", transactionId);
         return transactionMapper.toResponseDto(updatedTransaction);
@@ -121,7 +205,7 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public Page<TransactionResponse> searchTransaction(TransactionSearchRequest transactionSearchRequest){
-
+        log.info("dto: {}", transactionSearchRequest);
         log.info("Searching transactions with criteria for user: {}", transactionSearchRequest.getUserId());
 
         Specification<Transaction> spec = (root, query, cb) -> cb.conjunction();
