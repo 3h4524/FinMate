@@ -1,4 +1,4 @@
-package org.codewith3h.finmateapplication;
+package org.codewith3h.finmateapplication.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

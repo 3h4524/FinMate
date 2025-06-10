@@ -14,7 +14,9 @@ public enum ErrorCode {
     INVALID_INPUT(1010, "Invalid input data"),
     BUDGET_EXISTS(1011, "Budget already exists"),
     NO_WALLET_FOR_USER_EXCEPTION(1012, "No wallet for given user"),
-    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed")
+    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed"),
+    EMAIL_EXISTED_EXCEPTION(1014, "Email already exists"),
+    EMAIL_NOT_VERIFIED_EXCEPTION(1015, "Email not verified"),
     ;
 
 
