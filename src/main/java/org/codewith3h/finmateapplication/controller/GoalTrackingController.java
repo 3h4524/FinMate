@@ -1,6 +1,5 @@
 package org.codewith3h.finmateapplication.controller;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,9 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -56,23 +52,6 @@ public class GoalTrackingController {
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("List of goals progresses");
         apiResponse.setResult(list);
-        return ResponseEntity.ok(apiResponse);
-    }
-
-    @PostMapping("/store-goal-id")
-    public void storeGoalId(@RequestBody Map<String, String> body, HttpSession session) {
-        String goalId = body.get("goalId");
-        System.out.println("storeGoalId: " + goalId);
-        session.setAttribute("goalId", goalId);
-    }
-
-    @GetMapping("/get-goal-id-from-session")
-    public ResponseEntity<ApiResponse<String>> getGoalIdFromSession(HttpSession session) {
-        String goalId = (String) session.getAttribute("goalId");
-        System.out.println("getGoalIdFromSession: " + goalId);
-        ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("Getting goal id from session");
-        apiResponse.setResult(goalId);
         return ResponseEntity.ok(apiResponse);
     }
 
