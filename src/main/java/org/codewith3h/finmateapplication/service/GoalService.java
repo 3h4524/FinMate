@@ -109,4 +109,8 @@ public class GoalService {
         }
     }
 
+    public GoalResponse getGoal(Integer goalId) {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+        return goalMapper.toGoalResponse(goal);
+    }
 }

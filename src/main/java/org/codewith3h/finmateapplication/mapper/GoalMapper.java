@@ -14,6 +14,7 @@ public interface GoalMapper {
     @Mapping(source = "userId", target = "user.id")
     Goal toGoal(CreateGoalRequest request);
 
+    @Mapping(source = "user.id", target = "userId")
     GoalResponse toGoalResponse(Goal goal);
 
     void updateGoal(@MappingTarget Goal goal, GoalUpdateRequest request);
