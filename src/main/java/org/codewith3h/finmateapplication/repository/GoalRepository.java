@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -18,4 +19,8 @@ public interface GoalRepository extends JpaRepository<Goal,Integer> {
     List<Goal> findGoalsByUser_IdAndStatusIsNot(Integer userId, String status);
 
     List<Goal> findByUserIdAndStatusIs(Integer userId, String status);
+
+    List<Goal> findGoalByStatus(String status);
+
+    Page<Goal> findGoalByStatusAndDeadlineBefore(String status, LocalDate deadlineBefore, Pageable pageable);
 }

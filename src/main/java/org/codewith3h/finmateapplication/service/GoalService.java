@@ -89,6 +89,7 @@ public class GoalService {
 
     public void updateStatusAfterContributeOrChange(Goal goal) {
         if (goal.getStatus() == null) {
+            log.info("Goal status is null, set default status for goalId: {}, name: {}", goal.getId(), goal.getName());
             goal.setStatus("IN_PROGRESS");
         }
 
