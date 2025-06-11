@@ -30,14 +30,4 @@ public class UserController {
 
         return ResponseEntity.ok(apiResponse);
     }
-
-    @GetMapping("/get_user_id_from_session")
-    public ResponseEntity<ApiResponse<String>> getUserIdFromSession(HttpSession session) {
-        session.setAttribute("userId", "6");
-        ApiResponse<String> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("Getting userId from session.");
-        apiResponse.setResult((String) session.getAttribute("userId"));
-        return ResponseEntity.ok(apiResponse);
-    }
-
 }
