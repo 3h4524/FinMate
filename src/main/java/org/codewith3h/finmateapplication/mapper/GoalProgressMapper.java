@@ -32,15 +32,11 @@ public interface GoalProgressMapper {
     }
 
 
-    @Mapping(target = "id", source = "id")
     @Mapping(target = "goalId", source = "goal.id")
     @Mapping(target = "name", source = "goal.name")
     @Mapping(target = "status", source = "goal.status")
     @Mapping(target = "targetAmount", source = "goal.targetAmount")
     @Mapping(target = "deadline", source = "goal.deadline")
-    @Mapping(target = "progressDate", source = "progressDate")
-    @Mapping(target = "amount", source = "amount")
-    @Mapping(target = "percentage", source = "percentage")
     @Mapping(target = "isLongTerm", source = "goal.isLongTerm")
     @Mapping(target = "timeRemaining", expression = "java(calculateTimeRemaining(goalProgress.getGoal().getDeadline(), goalProgress.getGoal().getStatus()))")
     GoalProgressResponse toGoalProgressResponse(GoalProgress goalProgress);

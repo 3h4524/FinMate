@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class GoalProgressResponse {
-    Integer id;
     Integer goalId;
     String name;
     String status;
