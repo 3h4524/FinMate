@@ -1,6 +1,7 @@
 package org.codewith3h.finmateapplication.controller;
 
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
+import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetAnalysisResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetResponse;
@@ -33,6 +34,30 @@ public class BudgetController {
         BudgetResponse response = budgetService.createBudget(request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<BudgetResponse>> updateBudget(
+            @RequestHeader(name = "userId") Integer userId,
+            @PathVariable("id") Integer budgetId,
+            @RequestBody UpdateBudgetRequest request) {
+
+        request.setUserId(userId);
+        BudgetResponse response = budgetService.updateBudget(budgetId, request);
+        ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteBudget(
+            @RequestHeader(name = "userId") Integer userId,
+            @PathVariable("id") Integer budgetId) {
+
+        budgetService.deleteBudget(budgetId, userId);
+        ApiResponse<String> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Budget deleted successfully.");
         return ResponseEntity.ok(apiResponse);
     }
 
