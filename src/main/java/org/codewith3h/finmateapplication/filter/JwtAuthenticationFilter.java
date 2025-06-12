@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.filter;
 
+import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.util.JwtUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String email = jwtUtil.extractEmail(token);
                 String role = jwtUtil.extractRole(token);
-                if (email != null && jwtUtil.validateToken(token, email)) {
+                if (email != null && jwtUtil.validateToken(token)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     email,
@@ -47,4 +48,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    private boolean isPublicEndpoint(String requestURI) {
+        return requestURI.startsWith("/api/v1/auth/") ||
+                requestURI.startsWith("/error") ||
+                requestURI.endsWith(".html") ||
+                requestURI.startsWith("/css/") ||
+                requestURI.startsWith("/js/") ||
+                requestURI.startsWith("/images/") ||
+                requestURI.equals("/favicon.ico");
+    }
+
+
 }

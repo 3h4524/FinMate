@@ -1,17 +1,20 @@
 package org.codewith3h.finmateapplication.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
+@Slf4j
 public class JwtUtil {
 
     @Value("${jwt.secret}")
@@ -20,52 +23,61 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    public String generateToken(String email, String role) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
-        return createToken(claims, email);
+    private byte[] secretKey;
+    private final Set<String> invalidatedTokens = new HashSet<>();
+
+
+    public String generateToken(String email, String role) throws JOSEException {
+        // Tao header
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+
+        JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
+                .subject(email)
+                .claim("scope", role)
+                .issueTime(new Date())
+                .expirationTime(new Date(System.currentTimeMillis() + expiration * 1000))
+                .build();
+
+
+        SignedJWT signedJWT = new SignedJWT(header, claimSet);
+
+        JWSSigner signer = new MACSigner(secret.getBytes());
+
+        signedJWT.sign(signer);
+
+        return signedJWT.serialize();
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+    public String extractEmail(String token) throws Exception {
+        return parseToken(token).getJWTClaimsSet().getSubject();
     }
 
-    public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractRole(String token) throws Exception {
+        return parseToken(token).getJWTClaimsSet().getClaim("scope").toString();
     }
 
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
+    public boolean validateToken(String token) throws Exception{
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        boolean signatureValid = signedJWT.verify( new MACVerifier(secret.getBytes()));
+        boolean notExpired = signedJWT.getJWTClaimsSet().getExpirationTime().after(new Date());
+
+        return signatureValid && notExpired;
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    private SignedJWT parseToken(String token) throws Exception {
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        if(!signedJWT.verify(new MACVerifier(secret.getBytes()))){
+            throw new  Exception("Invalid JWT token");
+        };
+        return signedJWT;
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    public Boolean validateToken(String token, String email) {
-        final String extractedEmail = extractEmail(token);
-        return (extractedEmail.equals(email) && !isTokenExpired(token));
-    }
-
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    public void invalidateToken(String token) {
+        try {
+            invalidatedTokens.add(token);
+            log.info("Token invalidated successfully");
+        } catch (Exception e) {
+            log.error("Error invalidating token: {}", e.getMessage());
+        }
     }
 }

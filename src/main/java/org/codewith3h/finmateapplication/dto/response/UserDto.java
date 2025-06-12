@@ -10,5 +10,7 @@ public class UserDto {
     private String email;
     private String name;
     private String role;
-    private boolean premium;
+    private boolean isPremium;
+    private String token;
+    private boolean verified;
 }

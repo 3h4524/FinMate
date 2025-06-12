@@ -13,7 +13,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "premium", ignore = true)
+    @Mapping(target = "isPremium", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "lastLoginAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -22,7 +22,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
-    @Mapping(target = "premium", ignore = true)
+    @Mapping(target = "isPremium", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "lastLoginAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

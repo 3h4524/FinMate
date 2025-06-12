@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
@@ -48,6 +49,7 @@ public class TransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping("/{transactionId}")
     public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(
             @PathVariable @Positive Integer  transactionId,

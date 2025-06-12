@@ -1,39 +1,45 @@
 package org.codewith3h.finmateapplication.exception;
 
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+
+@Getter
 public enum ErrorCode {
-    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error"),
-    USER_NOT_FOUND(1001, "User not found"),
-    NO_GOAL_FOUND(1002, "No goal found"),
-    EXCEED_MAX_LENGTH_OF_NAME(1003, "Name exceeds maximum length: 100"),
-    USER_ID_IS_REQUIRED(1004, "User id is required"),
-    AMOUNT_MUST_BE_POSITIVE(1005, "Amount must be greater than 0"),
-    GOAL_ID_IS_REQUIRED(1006, "Goal id is required"),
-    TRANSACTION_NOT_FOUND_EXCEPTION(1007, "Transaction not found"),
-    CATEGORY_NOT_FOUND_EXCEPTION(1008, "Category not found"),
-    INVALID_FREQUENCY_EXCEPTION(1009, "Invalid Frequency"),
-    INVALID_INPUT(1010, "Invalid input data"),
-    BUDGET_EXISTS(1011, "Budget already exists"),
-    NO_WALLET_FOR_USER_EXCEPTION(1012, "No wallet for given user"),
-    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed"),
-    EMAIL_EXISTED_EXCEPTION(1014, "Email already exists"),
-    EMAIL_NOT_VERIFIED_EXCEPTION(1015, "Email not verified"),
+    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
+    USER_NOT_FOUND(1001, "User not found", HttpStatus.BAD_REQUEST),
+    NO_GOAL_FOUND(1002, "No goal found", HttpStatus.BAD_REQUEST),
+    EXCEED_MAX_LENGTH_OF_NAME(1003, "Name exceeds maximum length: 100", HttpStatus.BAD_REQUEST),
+    USER_ID_IS_REQUIRED(1004, "User id is required", HttpStatus.BAD_REQUEST),
+    AMOUNT_MUST_BE_POSITIVE(1005, "Amount must be greater than 0", HttpStatus.BAD_REQUEST),
+    GOAL_ID_IS_REQUIRED(1006, "Goal id is required", HttpStatus.BAD_REQUEST),
+    TRANSACTION_NOT_FOUND_EXCEPTION(1007, "Transaction not found", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_FOUND_EXCEPTION(1008, "Category not found", HttpStatus.NOT_FOUND),
+    INVALID_FREQUENCY_EXCEPTION(1009, "Invalid Frequency", HttpStatus.BAD_REQUEST),
+    INVALID_INPUT(1010, "Invalid input data",  HttpStatus.BAD_REQUEST),
+    BUDGET_EXISTS(1011, "Budget already exists",  HttpStatus.BAD_REQUEST),
+    NO_WALLET_FOR_USER_EXCEPTION(1012, "No wallet for given user",  HttpStatus.NOT_FOUND),
+    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed",   HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTED_EXCEPTION(1014, "Email already exists",   HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED_EXCEPTION(1015, "Email not verified",    HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_FOUND_EXCEPTION(1016, "Email not found", HttpStatus.NOT_FOUND),
+    USER_ALREADY_EXISTS(1017, "User already exists", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1018, "Password is incorrect", HttpStatus.BAD_REQUEST),
+    INVALID_VERIFICATION_CODE_EXCEPTION(1019, "Verification code is incorrect or expiry", HttpStatus.BAD_REQUEST),
+    INCORRECT_VERIFICATION_CODE_EXCEPTION(1020, "Incorrect verification code", HttpStatus.BAD_REQUEST),
+    EMAIL_ALREADY_VERIFIED_EXCEPTION(1021, "Email already verified", HttpStatus.BAD_REQUEST),
+    IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code",  HttpStatus.BAD_REQUEST),
     ;
 
 
     private int code;
     private String message;
+    private HttpStatusCode statusCode;
 
-    ErrorCode(int code, String message) {
+    ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
+        this.statusCode = statusCode;
     }
 
 }
