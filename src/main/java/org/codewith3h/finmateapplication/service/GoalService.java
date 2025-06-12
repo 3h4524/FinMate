@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -106,6 +107,12 @@ public class GoalService {
             goal.setStatus("FAILED");
             goalRepository.save(goal);
             log.info("Goal {} set to FAILED", goal.getId());
+        } else if (!goal.getDeadline().isBefore(today) &&
+                goal.getCurrentAmount().compareTo(goal.getTargetAmount()) < 0 &&
+                goal.getStatus().equals("FAILED")) {
+            goal.setStatus("IN_PROGRESS");
+            goalRepository.save(goal);
+            log.info("Goal {} set to IN_PROGRESS", goal.getId());
         }
     }
 
