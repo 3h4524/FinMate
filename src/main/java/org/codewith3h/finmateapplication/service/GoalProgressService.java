@@ -12,6 +12,10 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
 import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -92,52 +96,48 @@ public class GoalProgressService {
     }
 
 
-    // This function is for testing purposes only and is not part of the final implementation. Hehe
-    public List<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String filter) {
+    public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String status, int page, int size) {
+        updateTodayGoalProgressList(userId);
 
-        List<Goal> userGoals = goalRepository.findByUserId(userId);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_User_IdAndGoal_StatusIsNot(userId, status, pageable);
+
+        List<GoalProgressResponse> responses = progressPage.getContent().stream()
+                .collect(Collectors.groupingBy(goalProgress ->
+                                goalProgress.getGoal().getId(),
+                        Collectors.maxBy(Comparator.comparing(GoalProgress::getProgressDate))
+                ))
+                .values()
+                .stream()
+                .flatMap(Optional::stream)
+                .map(goalProgressMapper::toGoalProgressResponse)
+                .toList();
+
+        System.out.println("returning " + responses.size() + " progress responses");
+        return new PageImpl<>(responses, PageRequest.of(page, size), progressPage.getTotalElements());
+    }
+
+    public Page<GoalProgressResponse> getListGoalProgressByGoalId(int goalId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_Id(goalId, pageable);
+
+        List<GoalProgressResponse> responses = progressPage.getContent().stream()
+                .map(goalProgressMapper::toGoalProgressResponse)
+                .toList();
+
+        return new PageImpl<>(responses, pageable, progressPage.getTotalElements());
+
+    }
+
+
+    private void updateTodayGoalProgressList(Integer userId) {
+        List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, "IN_PROGRESS");
         for (Goal goal : userGoals) {
+            System.out.println("Goal id " + goal.getId() + " status " + goal.getStatus());
             ensureTodayProgressForGoal(goal);
         }
-
-        List<GoalProgress> allProgresses = goalProgressRepository.findByGoal_User_Id(userId);
-        Map<Integer, GoalProgress> latestProgressByGoalId = new HashMap<>();
-        List<GoalProgressResponse> responses = new ArrayList<>();
-
-        LocalDate now = LocalDate.now();
-
-        for (GoalProgress progress : allProgresses) {
-            LocalDate progressDate = progress.getProgressDate();
-            int goalId = progress.getGoal().getId();
-
-            // Kiểm tra filter
-            boolean isValid = false;
-            if (filter == null || filter.isEmpty()) {
-                isValid = true;
-            } else if ("weekly".equalsIgnoreCase(filter)) {
-                // Cùng tuần năm
-                isValid = isSameWeek(progressDate, now);
-            } else if ("monthly".equalsIgnoreCase(filter)) {
-                isValid = progressDate.getMonth() == now.getMonth()
-                        && progressDate.getYear() == now.getYear();
-            } else if ("yearly".equalsIgnoreCase(filter)) {
-                isValid = progressDate.getYear() == now.getYear();
-            }
-
-            // Nếu progress nằm trong khoảng thời gian phù hợp
-            if (isValid) {
-                GoalProgress existing = latestProgressByGoalId.get(goalId);
-                if (existing == null || progressDate.isAfter(existing.getProgressDate())) {
-                    latestProgressByGoalId.put(goalId, progress);
-                }
-            }
-        }
-
-        for (GoalProgress progress : latestProgressByGoalId.values()) {
-            responses.add(goalProgressMapper.toGoalProgressResponse(progress));
-        }
-
-        return responses;
     }
 
     private void ensureTodayProgressForGoal(Goal goal) {
@@ -156,16 +156,5 @@ public class GoalProgressService {
         progress.setAmount(goal.getCurrentAmount());
         progress.setPercentage(goalProgressMapper.calculatePercentage(goal));
         goalProgressRepository.save(progress);
-    }
-
-    private boolean isSameWeek(LocalDate date1, LocalDate date2) {
-        WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        return date1.get(weekFields.weekOfYear()) == date2.get(weekFields.weekOfYear())
-                && date1.getYear() == date2.getYear();
-    }
-
-
-    public List<GoalProgressResponse> getListGoalProgressByGoalId(int goalId) {
-        return goalProgressRepository.findGoalProgressesByGoal_Id(goalId).stream().map(goalProgressMapper::toGoalProgressResponse).collect(Collectors.toList());
     }
 }

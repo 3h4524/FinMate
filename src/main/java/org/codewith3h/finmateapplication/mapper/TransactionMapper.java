@@ -1,12 +1,11 @@
     package org.codewith3h.finmateapplication.mapper;
 
-    import jakarta.persistence.EntityNotFoundException;
-    import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest;
     import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
     import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
     import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
     import org.codewith3h.finmateapplication.entity.Category;
     import org.codewith3h.finmateapplication.entity.Transaction;
+    import org.codewith3h.finmateapplication.entity.UserCategory;
     import org.codewith3h.finmateapplication.exception.AppException;
     import org.codewith3h.finmateapplication.exception.ErrorCode;
     import org.codewith3h.finmateapplication.repository.CategoryRepository;
@@ -45,7 +44,16 @@
         @Mapping(source = "category.type", target = "type")
         @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "mapInstantToLocalDateTime")
         @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "mapInstantToLocalDateTime")
+        @Mapping(target = "type", expression = "java(resolveType(entity.getCategory(), entity.getUserCategory()))")
         TransactionResponse toResponseDto(Transaction entity);
+
+        @Named("resolveType")
+        default String resolveType(Category category, UserCategory userCategory) {
+            if (category != null && category.getType() != null) {
+                return category.getType();
+            }
+            return userCategory != null ? userCategory.getType() : null;
+        }
 
         List<TransactionResponse> toResponseDtoList (List<Transaction> entities);
 

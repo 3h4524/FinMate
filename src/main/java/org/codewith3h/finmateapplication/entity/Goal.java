@@ -2,7 +2,10 @@ package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
@@ -12,7 +15,10 @@ import java.time.LocalDate;
 @Entity
 @DynamicInsert
 @Data
+@Builder
 @Table(name = "Goals")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Goal {
     @Id
     @Column(name = "goal_id", nullable = false)

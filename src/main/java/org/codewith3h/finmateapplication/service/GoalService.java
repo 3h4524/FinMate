@@ -1,20 +1,29 @@
 package org.codewith3h.finmateapplication.service;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.codewith3h.finmateapplication.dto.request.CreateGoalContributionRequest;
 import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
+import org.codewith3h.finmateapplication.dto.request.GoalUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalProgress;
+import org.codewith3h.finmateapplication.exception.AppException;
+import org.codewith3h.finmateapplication.exception.ErrorCode;
+import org.codewith3h.finmateapplication.mapper.GoalContributionMapper;
 import org.codewith3h.finmateapplication.mapper.GoalMapper;
 import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
+import org.codewith3h.finmateapplication.repository.GoalContributionRepository;
 import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Set;
 
 
 @Service
@@ -26,23 +35,87 @@ public class GoalService {
     GoalProgressRepository goalProgressRepository;
     GoalMapper goalMapper;
     GoalProgressMapper goalProgressMapper;
+    GoalContributionRepository goalContributionRepository;
+    GoalContributionMapper goalContributionMapper;
 
     public GoalResponse createFinancialGoal(CreateGoalRequest request) {
         log.info("Creating Financial Goal for userId: {} , goal name: {}, target: {}, deadline: {}",
                 request.getUserId(), request.getName(), request.getTargetAmount(), request.getDeadline());
 
-        Goal goal = goalMapper.toGoal(request);
-        goalRepository.save(goal);
-        GoalProgress goalProgress = goalProgressRepository.save(goalProgressMapper.toGoalProgress(goal));
-
+        Goal goalCreated = goalRepository.save(goalMapper.toGoal(request));
+        GoalProgress goalProgress = goalProgressRepository.save(goalProgressMapper.toGoalProgress(goalCreated));
+        System.out.println("goalCreated: " + goalCreated);
         log.info("Creating Goal Progress for goalId: {}, progress date: {}",
-                goal.getId(), goalProgress.getProgressDate());
+                goalCreated.getId(), goalProgress.getProgressDate());
 
-        if (goal.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0)
+        if (goalCreated.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0) {
             log.info("Creating new goal contribution for goalId {}, with note: Initial contribution, amount: {}",
-                    goal.getId(), goal.getCurrentAmount());
+                    goalCreated.getId(), goalCreated.getCurrentAmount());
+            CreateGoalContributionRequest goalContributionRequest = new CreateGoalContributionRequest(goalCreated.getId(), goalCreated.getCurrentAmount(), "Initial contribution", LocalDate.now());
+            goalContributionRepository.save(goalContributionMapper.toGoalContribution(goalContributionRequest));
+        }
 
-        return goalMapper.toGoalResponse(goal);
+        updateStatusAfterContributeOrChange(goalCreated);
+        log.info("Create goal finished: {}", goalCreated);
+        return goalMapper.toGoalResponse(goalCreated);
     }
 
+    public void cancelFinancialGoal(Integer goalId) {
+
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+
+        log.info("Cancelling Financial Goal for goalId: {}, name: {}", goalId, goal.getName());
+
+        goal.setStatus("CANCELLED");
+
+        goalRepository.save(goal);
+
+        log.info("Financial Goal Canceled for goalId: {}, name: {}", goalId, goal.getName());
+
+    }
+
+    public GoalResponse updateGoal(@Valid GoalUpdateRequest request, Integer goalId) {
+        log.info("Updating Financial Goal for goalId: {}, name: {}", goalId, request.getName());
+
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+
+        goalMapper.updateGoal(goal, request);
+        updateStatusAfterContributeOrChange(goal); // Kiểm tra trạng thái sau khi cập nhật
+        log.info("Financial Goal Updated for goalId: {}, name: {}", goalId, request.getName());
+
+        return goalMapper.toGoalResponse(goalRepository.save(goal));
+    }
+
+    public void updateStatusAfterContributeOrChange(Goal goal) {
+        if (goal.getStatus() == null) {
+            log.info("Goal status is null, set default status for goalId: {}, name: {}", goal.getId(), goal.getName());
+            goal.setStatus("IN_PROGRESS");
+        }
+
+        LocalDate today = LocalDate.now();
+        if (goal.getCurrentAmount().compareTo(goal.getTargetAmount()) >= 0 &&
+                !goal.getDeadline().isBefore(today) &&
+                !Set.of("COMPLETED", "CANCELLED", "FAILED").contains(goal.getStatus())) {
+            goal.setStatus("COMPLETED");
+            goalRepository.save(goal);
+            log.info("Goal {} set to COMPLETED", goal.getId());
+        } else if (goal.getDeadline().isBefore(today) &&
+                goal.getCurrentAmount().compareTo(goal.getTargetAmount()) < 0 &&
+                !Set.of("COMPLETED", "CANCELLED", "FAILED").contains(goal.getStatus())) {
+            goal.setStatus("FAILED");
+            goalRepository.save(goal);
+            log.info("Goal {} set to FAILED", goal.getId());
+        } else if (!goal.getDeadline().isBefore(today) &&
+                goal.getCurrentAmount().compareTo(goal.getTargetAmount()) < 0 &&
+                goal.getStatus().equals("FAILED")) {
+            goal.setStatus("IN_PROGRESS");
+            goalRepository.save(goal);
+            log.info("Goal {} set to IN_PROGRESS", goal.getId());
+        }
+    }
+
+    public GoalResponse getGoal(Integer goalId) {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+        return goalMapper.toGoalResponse(goal);
+    }
 }
