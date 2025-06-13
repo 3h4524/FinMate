@@ -29,6 +29,7 @@ public enum ErrorCode {
     INCORRECT_VERIFICATION_CODE_EXCEPTION(1020, "Incorrect verification code", HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_VERIFIED_EXCEPTION(1021, "Email already verified", HttpStatus.BAD_REQUEST),
     IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code",  HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1023, "Incorrect token for verification", HttpStatus.BAD_REQUEST),
     ;
 
 

@@ -63,7 +63,7 @@ public class AuthenticationService {
             log.info("Login successful for email: {}", email);
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            String token = jwtUtil.generateToken(user.getId(), user.getRole());
             if (token == null || token.isEmpty()) {
                 log.error("Failed to generate token for user: {}", email);
             }
@@ -109,7 +109,7 @@ public class AuthenticationService {
             }
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            String token = jwtUtil.generateToken(user.getId(), user.getRole());
 
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                     .token(token)

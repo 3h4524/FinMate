@@ -18,12 +18,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.codewith3h.finmateapplication.filter.JwtAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Arrays;
+import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +37,7 @@ public class SecurityConfig {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+    private final Set<String> PUBLIC_ENDPOINT = Set.of("/api/v1/auth/**");
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,14 +49,10 @@ public class SecurityConfig {
                         // Cho phép tất cả OPTIONS requests (quan trọng cho CORS)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Cho phép tất cả auth endpoints
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers((RequestMatcher) PUBLIC_ENDPOINT).permitAll()
                         // Các endpoints khác
-                        .requestMatchers("/api/v1/users/profile").permitAll()
-                        .requestMatchers("/api/v1/dashboard").permitAll()
-                        .requestMatchers("/api/v1/transactions/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         // Static resources
-                        .requestMatchers("/*.html", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
@@ -75,15 +74,10 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Cho phép tất cả origins trong development
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+        corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
     }
 }

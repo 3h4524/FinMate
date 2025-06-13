@@ -40,8 +40,6 @@
         @Mapping(source = "category.id", target = "categoryId")
         @Mapping(source = "userCategory.id", target = "userCategoryId")
         @Mapping(source = "category.name", target = "categoryName")
-        @Mapping(source = "userCategory.name", target = "userCategoryName")
-        @Mapping(source = "category.type", target = "type")
         @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "mapInstantToLocalDateTime")
         @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "mapInstantToLocalDateTime")
         @Mapping(target = "type", expression = "java(resolveType(entity.getCategory(), entity.getUserCategory()))")
@@ -53,6 +51,11 @@
                 return category.getType();
             }
             return userCategory != null ? userCategory.getType() : null;
+        }
+
+        @Named("resolveId")
+        default Integer resolveId(Category category, UserCategory userCategory) {
+            return category != null ? category.getId() : userCategory.getId();
         }
 
         List<TransactionResponse> toResponseDtoList (List<Transaction> entities);
