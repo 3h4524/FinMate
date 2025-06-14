@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,7 +97,6 @@ public class GoalProgressService {
 
     public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String status, int page, int size) {
         updateTodayGoalProgressList(userId);
-
         Pageable pageable = PageRequest.of(page, size);
 
         Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_User_IdAndGoal_StatusIsNot(userId, status, pageable);
@@ -126,9 +124,7 @@ public class GoalProgressService {
         List<GoalProgressResponse> responses = progressPage.getContent().stream()
                 .map(goalProgressMapper::toGoalProgressResponse)
                 .toList();
-
         return new PageImpl<>(responses, pageable, progressPage.getTotalElements());
-
     }
 
 

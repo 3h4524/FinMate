@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/contributions")
 @Data
@@ -42,7 +40,8 @@ public class GoalContributionController {
     public ResponseEntity<ApiResponse<GoalContributionResponse>> createGoalContribution(@RequestBody @Valid CreateGoalContributionRequest request) {
         GoalContributionResponse goalContributionResponse = goalContributionService.createGoalContribution(request);
         ApiResponse<GoalContributionResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("Goal Contribution created successfully.");
+        apiResponse.setMessage("Congratulations you have successfully created a new goal contribution!");
+        apiResponse.setCode(1000);
         apiResponse.setResult(goalContributionResponse);
         return ResponseEntity.ok(apiResponse);
     }

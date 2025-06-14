@@ -20,8 +20,6 @@ public class GoalResponse {
     BigDecimal targetAmount;
     LocalDate startDate;
     LocalDate deadline;
-    Boolean isLongTerm;
     String status;
     Boolean notificationEnabled;
-
 }

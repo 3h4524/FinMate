@@ -8,7 +8,6 @@ import org.codewith3h.finmateapplication.dto.request.CreateGoalRequest;
 import org.codewith3h.finmateapplication.dto.request.GoalUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.GoalResponse;
-import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.service.GoalService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +23,8 @@ public class SetFinancialGoalController {
     public ResponseEntity<ApiResponse<GoalResponse>> createGoal(@RequestBody @Valid CreateGoalRequest request) {
         GoalResponse goal = goalService.createFinancialGoal(request);
         ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("Goal created successfully.");
+        apiResponse.setMessage("Congratulations you have successfully created a new goal!");
+        apiResponse.setCode(1000);
         apiResponse.setResult(goal);
         return ResponseEntity.ok(apiResponse);
     }
