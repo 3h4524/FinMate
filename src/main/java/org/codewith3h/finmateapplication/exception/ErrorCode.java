@@ -16,22 +16,22 @@ public enum ErrorCode {
     TRANSACTION_NOT_FOUND_EXCEPTION(1007, "Transaction not found", HttpStatus.NOT_FOUND),
     CATEGORY_NOT_FOUND_EXCEPTION(1008, "Category not found", HttpStatus.NOT_FOUND),
     INVALID_FREQUENCY_EXCEPTION(1009, "Invalid Frequency", HttpStatus.BAD_REQUEST),
-    INVALID_INPUT(1010, "Invalid input data",  HttpStatus.BAD_REQUEST),
-    BUDGET_EXISTS(1011, "Budget already exists",  HttpStatus.BAD_REQUEST),
-    NO_WALLET_FOR_USER_EXCEPTION(1012, "No wallet for given user",  HttpStatus.NOT_FOUND),
-    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed",   HttpStatus.BAD_REQUEST),
-    EMAIL_EXISTED_EXCEPTION(1014, "Email already exists",   HttpStatus.BAD_REQUEST),
-    EMAIL_NOT_VERIFIED_EXCEPTION(1015, "Email not verified",    HttpStatus.BAD_REQUEST),
+    INVALID_INPUT(1010, "Invalid input data", HttpStatus.BAD_REQUEST),
+    BUDGET_EXISTS(1011, "Budget already exists", HttpStatus.BAD_REQUEST),
+    NO_WALLET_FOR_USER_EXCEPTION(1012, "No wallet for given user", HttpStatus.NOT_FOUND),
+    NEGATIVE_BALANCE_NOT_ALLOWED(1013, "Negative balance not allowed", HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTED_EXCEPTION(1014, "Email already exists", HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED_EXCEPTION(1015, "Email not verified", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_FOUND_EXCEPTION(1016, "Email not found", HttpStatus.NOT_FOUND),
     USER_ALREADY_EXISTS(1017, "User already exists", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1018, "Password is incorrect", HttpStatus.BAD_REQUEST),
     INVALID_VERIFICATION_CODE_EXCEPTION(1019, "Verification code is incorrect or expiry", HttpStatus.BAD_REQUEST),
     INCORRECT_VERIFICATION_CODE_EXCEPTION(1020, "Incorrect verification code", HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_VERIFIED_EXCEPTION(1021, "Email already verified", HttpStatus.BAD_REQUEST),
-    IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code",  HttpStatus.BAD_REQUEST),
+    IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(1023, "Incorrect token for verification", HttpStatus.BAD_REQUEST),
-    ;
-
+    BUDGET_NOT_FOUND(1024, "Budget not found", HttpStatus.NOT_FOUND),
+    UNAUTHORIZED(1025, "Unauthorized access", HttpStatus.FORBIDDEN);
 
     private int code;
     private String message;
@@ -42,5 +42,4 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
-
 }
