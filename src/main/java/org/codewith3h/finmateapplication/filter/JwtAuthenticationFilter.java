@@ -31,14 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
-                String email = jwtUtil.extractEmail(token);
+                Integer userId = jwtUtil.extractId(token);
                 String role = jwtUtil.extractRole(token);
-                if (email != null && jwtUtil.validateToken(token)) {
+                if (userId != null && jwtUtil.validateToken(token)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    email,
+                                    userId,
                                     null,
-                                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+                                    Collections.singletonList(new SimpleGrantedAuthority("SCOPE_" + role))
                             );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
@@ -48,16 +48,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
-
-    private boolean isPublicEndpoint(String requestURI) {
-        return requestURI.startsWith("/api/v1/auth/") ||
-                requestURI.startsWith("/error") ||
-                requestURI.endsWith(".html") ||
-                requestURI.startsWith("/css/") ||
-                requestURI.startsWith("/js/") ||
-                requestURI.startsWith("/images/") ||
-                requestURI.equals("/favicon.ico");
-    }
-
 
 }

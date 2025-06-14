@@ -24,6 +24,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -37,47 +38,40 @@ public class SecurityConfig {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
-    private final Set<String> PUBLIC_ENDPOINT = Set.of("/api/v1/auth/**");
+    private final String[] PUBLIC_ENDPOINT = {"/api/v1/auth/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Cho phép tất cả OPTIONS requests (quan trọng cho CORS)
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Cho phép tất cả auth endpoints
-                        .requestMatchers((RequestMatcher) PUBLIC_ENDPOINT).permitAll()
-                        // Các endpoints khác
-                        .requestMatchers("/error").permitAll()
-                        // Static resources
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
-                );
-
+                .authorizeHttpRequests(request ->
+                        request.requestMatchers(HttpMethod.OPTIONS).permitAll()
+                                .requestMatchers(PUBLIC_ENDPOINT).permitAll()
+                                .anyRequest().authenticated());
         return http.build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder(){
-        SecretKeySpec key = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
+        SecretKeySpec key = new  SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
         return NimbusJwtDecoder
                 .withSecretKey(key)
-                .macAlgorithm(MacAlgorithm.HS512)
+                .macAlgorithm(MacAlgorithm.HS256)
                 .build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Origin", "Accept"));
+        configuration.setAllowCredentials(true);
 
-        corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
-        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }
