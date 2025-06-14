@@ -18,15 +18,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.codewith3h.finmateapplication.filter.JwtAuthenticationFilter;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
@@ -38,40 +35,55 @@ public class SecurityConfig {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
-    private final String[] PUBLIC_ENDPOINT = {"/api/v1/auth/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(HttpMethod.OPTIONS).permitAll()
-                                .requestMatchers(PUBLIC_ENDPOINT).permitAll()
-                                .anyRequest().authenticated());
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Cho phép tất cả OPTIONS requests (quan trọng cho CORS)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Cho phép tất cả auth endpoints
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        // Các endpoints khác
+                        .requestMatchers("/api/v1/users/profile").permitAll()
+                        .requestMatchers("/api/v1/dashboard").permitAll()
+                        .requestMatchers("/api/v1/transactions/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        // Static resources
+                        .requestMatchers("/*.html", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
+                );
+
         return http.build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder(){
-        SecretKeySpec key = new  SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
+        SecretKeySpec key = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
         return NimbusJwtDecoder
                 .withSecretKey(key)
-                .macAlgorithm(MacAlgorithm.HS256)
+                .macAlgorithm(MacAlgorithm.HS512)
                 .build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5500"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Origin", "Accept"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Cho phép tất cả origins trong development
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

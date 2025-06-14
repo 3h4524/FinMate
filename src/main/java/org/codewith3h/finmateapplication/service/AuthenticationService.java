@@ -63,7 +63,7 @@ public class AuthenticationService {
             log.info("Login successful for email: {}", email);
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getId(), user.getRole());
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
             if (token == null || token.isEmpty()) {
                 log.error("Failed to generate token for user: {}", email);
             }
@@ -71,7 +71,10 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(token)
                     .isVerified(user.getVerified())
-        .build();
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .role(user.getRole())
+                    .build();
     }
 
     public AuthenticationResponse processGoogleLogin(String email, String name, boolean emailVerified) throws JOSEException {
@@ -109,11 +112,14 @@ public class AuthenticationService {
             }
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getId(), user.getRole());
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                     .token(token)
                     .isVerified(user.getVerified())
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .role(user.getRole())
                     .build();
 
             log.info("Google login successful for user: {}", user.getEmail());
@@ -167,10 +173,25 @@ public class AuthenticationService {
     @Transactional
     public ApiResponse<String> forgotPassword(String email) {
         try {
+            // Check if email exists
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
+
+            // Check if user is verified
+            if (!user.getVerified()) {
+                throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED_EXCEPTION);
+            }
+
             emailService.sendPasswordResetEmail(email);
             return ApiResponse.<String>builder()
                     .code(1000)
                     .message("Password reset instructions sent")
+                    .build();
+        } catch (AppException e) {
+            log.error("Forgot password failed: {}", e.getMessage());
+            return ApiResponse.<String>builder()
+                    .code(e.getErrorCode().getCode())
+                    .message(e.getMessage())
                     .build();
         } catch (Exception e) {
             log.error("Forgot password failed: {}", e.getMessage());
