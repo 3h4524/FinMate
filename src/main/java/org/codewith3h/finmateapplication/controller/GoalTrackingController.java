@@ -39,6 +39,7 @@ public class GoalTrackingController {
         Page<GoalProgressResponse> goalProgressResponseList = goalProgressService.getAllGoalProgressesUniqueByDate(userId, status, page, size);
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(goalProgressResponseList);
+        apiResponse.setCode(1000);
         System.out.println("return getGoalProgresses");
         return ResponseEntity.ok(apiResponse);
     }
