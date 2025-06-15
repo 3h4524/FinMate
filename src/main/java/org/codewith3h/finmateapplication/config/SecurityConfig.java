@@ -32,12 +32,8 @@ public class SecurityConfig {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
-<<<<<<< HEAD
-    private final String[] PUBLIC_ENDPOINT = {"/api/v1/auth/**", "/budget/**", "/goal_tracking/**", "/contributions/**"};
-=======
-    private final String[] PUBLIC_ENDPOINT = {"/api/v1/auth/**"};
->>>>>>> 3666f3c29e6368ee9add1f5508127c743cca1f18
 
+    private final String[] PUBLIC_ENDPOINT = {"/api/v1/auth/**"};
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

@@ -17,6 +17,8 @@ import org.codewith3h.finmateapplication.repository.UserCategoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@PreAuthorize("hasRole('ROLE_USER')")
 public class BudgetService {
 
     BudgetRepository budgetRepository;
@@ -46,9 +49,12 @@ public class BudgetService {
     }
 
     public BudgetResponse createBudget(CreateBudgetRequest request) {
-        System.out.println("Vao createBudgetService: userId " + request.getUserId());
-        if (request.getUserId() == null || request.getAmount() == null || request.getPeriodType() == null ||
-                request.getStartDate() == null || (request.getCategoryId() == null)) {
+        Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (request.getUserId() == null || !currentUserId.equals(request.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (request.getAmount() == null || request.getPeriodType() == null || request.getStartDate() == null || request.getCategoryId() == null) {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
@@ -56,9 +62,7 @@ public class BudgetService {
             throw new AppException(ErrorCode.AMOUNT_MUST_BE_POSITIVE);
         }
 
-        if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) &&
-            !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) &&
-            !"MONTHLY".equalsIgnoreCase(request.getPeriodType())) {
+        if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) && !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) && !"MONTHLY".equalsIgnoreCase(request.getPeriodType())) {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
@@ -72,10 +76,6 @@ public class BudgetService {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        if (request.getEndDate() != null && !request.getEndDate().isAfter(request.getStartDate())) {
-            throw new AppException(ErrorCode.INVALID_INPUT);
-        }
-
         LocalDate endDate = request.getEndDate();
         if (endDate == null) {
             if ("DAILY".equalsIgnoreCase(request.getPeriodType())) {
@@ -85,17 +85,15 @@ public class BudgetService {
             } else if ("MONTHLY".equalsIgnoreCase(request.getPeriodType())) {
                 endDate = request.getStartDate().plusMonths(1).minusDays(1);
             }
+        } else if (!endDate.isAfter(request.getStartDate())) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
-        Category category = null;
-        UserCategory userCategory = null;
-        if (request.getCategoryId() != null) {
-            category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
-        }
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
 
         Optional<Budget> existingBudget = budgetRepository.findByUserIdAndPeriodTypeAndStartDateAndCategoryId(
-                request.getUserId(), request.getPeriodType(), request.getStartDate(), request.getCategoryId());
+                currentUserId, request.getPeriodType(), request.getStartDate(), request.getCategoryId());
         if (existingBudget.isPresent()) {
             throw new AppException(ErrorCode.BUDGET_EXISTS);
         }
@@ -106,7 +104,10 @@ public class BudgetService {
         budget.setNotificationThreshold(notificationThreshold);
         budget.setEndDate(endDate);
         budget.setCategory(category);
-        budget.setUserCategory(userCategory);
+        budget.setUserCategory(null);
+        budget.setUser(new User());
+        budget.getUser().setId(currentUserId);
+
         try {
             budgetRepository.save(budget);
             BudgetResponse response = budgetMapper.toBudgetResponse(budget);
@@ -123,8 +124,8 @@ public class BudgetService {
     public BudgetResponse updateBudget(Integer budgetId, UpdateBudgetRequest request) {
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new AppException(ErrorCode.BUDGET_NOT_FOUND));
-
-        if (!budget.getUser().getId().equals(request.getUserId())) {
+        Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!budget.getUser().getId().equals(currentUserId)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -136,9 +137,7 @@ public class BudgetService {
         }
 
         if (request.getPeriodType() != null) {
-            if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) &&
-                    !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) &&
-                    !"MONTHLY".equalsIgnoreCase(request.getPeriodType())) {
+            if (!"DAILY".equalsIgnoreCase(request.getPeriodType()) && !"WEEKLY".equalsIgnoreCase(request.getPeriodType()) && !"MONTHLY".equalsIgnoreCase(request.getPeriodType())) {
                 throw new AppException(ErrorCode.INVALID_INPUT);
             }
             budget.setPeriodType(request.getPeriodType());
@@ -189,20 +188,19 @@ public class BudgetService {
         return response;
     }
 
-    public void deleteBudget(Integer budgetId, Integer userId) {
+    public void deleteBudget(Integer budgetId) {
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new AppException(ErrorCode.BUDGET_NOT_FOUND));
-
-        if (!budget.getUser().getId().equals(userId)) {
+        Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!budget.getUser().getId().equals(currentUserId) && !hasRole("ROLE_ADMIN")) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-
         budgetRepository.delete(budget);
     }
 
-    public Page<BudgetResponse> getBudgets(Integer userId, String periodType, LocalDate startDate, Pageable pageable) {
-        Page<Budget> budgets = budgetRepository.findByUser_Id(userId, pageable);
-        budgets.forEach(budget -> System.out.println(budget.toString()));
+    public Page<BudgetResponse> getBudgets(String periodType, LocalDate startDate, Pageable pageable) {
+        Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Page<Budget> budgets = budgetRepository.findByUser_Id(currentUserId, pageable);
         if (budgets.isEmpty()) {
             throw new AppException(ErrorCode.BUDGET_NOT_FOUND);
         }
@@ -212,22 +210,24 @@ public class BudgetService {
                 .filter(budget -> startDate == null || budget.getStartDate().equals(startDate))
                 .collect(Collectors.toList());
 
-        Page<Budget> filteredPage = new PageImpl<>(filteredBudgets, pageable, filteredBudgets.size());
+        List<BudgetResponse> responseList = filteredBudgets.stream()
+                .map(budget -> {
+                    BudgetResponse response = budgetMapper.toBudgetResponse(budget);
+                    BigDecimal currentSpending = calculateCurrentSpending(budget);
+                    response.setCurrentSpending(currentSpending);
+                    response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), currentSpending));
+                    response.setStatus(determineStatus(response.getPercentageUsed(), budget.getNotificationThreshold()));
+                    return response;
+                })
+                .collect(Collectors.toList());
 
-        return filteredPage.map(budget -> {
-            BudgetResponse response = budgetMapper.toBudgetResponse(budget);
-            BigDecimal currentSpending = calculateCurrentSpending(budget);
-            response.setCurrentSpending(currentSpending);
-            response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), currentSpending));
-            response.setStatus(determineStatus(response.getPercentageUsed(), budget.getNotificationThreshold()));
-            return response;
-        });
+        return new PageImpl<>(responseList, pageable, filteredBudgets.size());
+
     }
 
-    public Page<BudgetAnalysisResponse> getBudgetAnalysis(Integer userId, String periodType, LocalDate startDate, Pageable pageable) {
-        Page<Budget> budgets = budgetRepository.findByUser_Id(userId, pageable);
-        System.out.println("list budgetS: ");
-        budgets.forEach(budget -> System.out.println(budget.toString()));
+    public Page<BudgetAnalysisResponse> getBudgetAnalysis(String periodType, LocalDate startDate, Pageable pageable) {
+        Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Page<Budget> budgets = budgetRepository.findByUser_Id(currentUserId, pageable);
         if (budgets.isEmpty()) {
             throw new AppException(ErrorCode.BUDGET_NOT_FOUND);
         }
@@ -260,8 +260,6 @@ public class BudgetService {
                 budget.getStartDate(),
                 budget.getEndDate() != null ? budget.getEndDate() : LocalDate.now()
         );
-
-        System.out.println("cal: transactions: " + transactions.toString());
         return transactions.stream()
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
@@ -286,5 +284,10 @@ public class BudgetService {
         } else {
             return "On Track";
         }
+    }
+
+    private boolean hasRole(String role) {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+                .stream().anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
     }
 }
