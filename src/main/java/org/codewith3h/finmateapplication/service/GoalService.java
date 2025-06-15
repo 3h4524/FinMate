@@ -19,6 +19,7 @@ import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
 import org.codewith3h.finmateapplication.repository.GoalContributionRepository;
 import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ import java.util.Set;
 @Service
 @Data
 @Slf4j
+@PreAuthorize("hasRole('ROLE_USER')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoalService {
     GoalRepository goalRepository;
@@ -37,6 +39,7 @@ public class GoalService {
     GoalProgressMapper goalProgressMapper;
     GoalContributionRepository goalContributionRepository;
     GoalContributionMapper goalContributionMapper;
+
 
     public GoalResponse createFinancialGoal(CreateGoalRequest request) {
         log.info("Creating Financial Goal for userId: {} , goal name: {}, target: {}, deadline: {}",

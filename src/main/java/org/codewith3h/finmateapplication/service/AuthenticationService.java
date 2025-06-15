@@ -71,6 +71,9 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(token)
                     .isVerified(user.getVerified())
+                    .name(user.getName())
+                    .role(user.getRole())
+                    .email(user.getEmail())
         .build();
     }
 
@@ -114,6 +117,9 @@ public class AuthenticationService {
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                     .token(token)
                     .isVerified(user.getVerified())
+                    .name(user.getName())
+                    .role(user.getRole())
+                    .email(user.getEmail())
                     .build();
 
             log.info("Google login successful for user: {}", user.getEmail());

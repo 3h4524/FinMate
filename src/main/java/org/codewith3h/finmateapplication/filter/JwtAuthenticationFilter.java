@@ -11,6 +11,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -38,9 +39,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(
                                     userId,
                                     null,
-                                    Collections.singletonList(new SimpleGrantedAuthority("SCOPE_" + role))
+                                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
                             );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.err.println("Auth: " + SecurityContextHolder.getContext().getAuthentication());
                 }
             } catch (Exception e) {
                 logger.warn(e.getMessage());
