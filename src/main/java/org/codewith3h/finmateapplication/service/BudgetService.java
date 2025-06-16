@@ -1,7 +1,9 @@
 package org.codewith3h.finmateapplication.service;
 
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.codewith3h.finmateapplication.EntityResolver;
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.BudgetAnalysisResponse;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Data
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @PreAuthorize("hasRole('ROLE_USER')")
 public class BudgetService {
@@ -39,13 +42,11 @@ public class BudgetService {
     UserCategoryRepository userCategoryRepository;
     TransactionRepository transactionRepository;
     BudgetMapper budgetMapper;
+    EntityResolver entityResolver;
 
-    public BudgetService(BudgetRepository budgetRepository, CategoryRepository categoryRepository, UserCategoryRepository userCategoryRepository, TransactionRepository transactionRepository, BudgetMapper budgetMapper) {
-        this.budgetRepository = budgetRepository;
-        this.categoryRepository = categoryRepository;
-        this.userCategoryRepository = userCategoryRepository;
-        this.transactionRepository = transactionRepository;
-        this.budgetMapper = budgetMapper;
+    public BudgetResponse getBudgetById(Integer budgetId) {
+        Budget budget = budgetRepository.findById(budgetId).orElseThrow(() -> new AppException(ErrorCode.BUDGET_NOT_FOUND));
+        return budgetMapper.toBudgetResponse(budget);
     }
 
     public BudgetResponse createBudget(CreateBudgetRequest request) {
@@ -98,7 +99,7 @@ public class BudgetService {
             throw new AppException(ErrorCode.BUDGET_EXISTS);
         }
 
-        Budget budget = budgetMapper.toBudget(request);
+        Budget budget = budgetMapper.toBudget(request, entityResolver);
         budget.setCreatedAt(Instant.now());
         budget.setUpdatedAt(Instant.now());
         budget.setNotificationThreshold(notificationThreshold);
@@ -201,14 +202,15 @@ public class BudgetService {
     public Page<BudgetResponse> getBudgets(String periodType, LocalDate startDate, Pageable pageable) {
         Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Page<Budget> budgets = budgetRepository.findByUser_Id(currentUserId, pageable);
+
         if (budgets.isEmpty()) {
             throw new AppException(ErrorCode.BUDGET_NOT_FOUND);
         }
 
         List<Budget> filteredBudgets = budgets.getContent().stream()
                 .filter(budget -> periodType == null || budget.getPeriodType().equalsIgnoreCase(periodType))
-                .filter(budget -> startDate == null || budget.getStartDate().equals(startDate))
-                .collect(Collectors.toList());
+                .toList();
+
 
         List<BudgetResponse> responseList = filteredBudgets.stream()
                 .map(budget -> {
@@ -239,6 +241,7 @@ public class BudgetService {
 
         Page<Budget> filteredPage = new PageImpl<>(filteredBudgets, pageable, filteredBudgets.size());
 
+        System.out.println("filteredBudgets: " + filteredBudgets);
         return filteredPage.map(budget -> {
             BudgetAnalysisResponse response = new BudgetAnalysisResponse();
             response.setBudgetId(budget.getId());

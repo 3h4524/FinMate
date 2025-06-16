@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 @Table(name = "Budgets")
 @DynamicInsert
 @DynamicUpdate
+@ToString
 public class Budget {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

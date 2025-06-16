@@ -46,6 +46,18 @@ public class BudgetController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BudgetResponse>> getBudgetById(@PathVariable("id") Integer budgetId) {
+
+        BudgetResponse response = budgetService.getBudgetById(budgetId);
+        ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(response);
+        apiResponse.setMessage("Success");
+        apiResponse.setCode(1000);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteBudget(
             @PathVariable("id") Integer budgetId) {
@@ -65,17 +77,19 @@ public class BudgetController {
         Page<BudgetResponse> response = budgetService.getBudgets(periodType, startDate, pageable);
         ApiResponse<Page<BudgetResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+        apiResponse.setCode(1000);
+        apiResponse.setMessage("Success");
+        System.out.println("response: " + response.getContent().size());
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/analysis")
     public ResponseEntity<ApiResponse<Page<BudgetAnalysisResponse>>> getBudgetAnalysis(
             @RequestParam(name = "period", required = false) String periodType,
-            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(periodType, startDate, pageable);
+        Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(periodType, null, pageable);
         ApiResponse<Page<BudgetAnalysisResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
         return ResponseEntity.ok(apiResponse);
