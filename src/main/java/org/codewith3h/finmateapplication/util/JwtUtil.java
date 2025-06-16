@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
+import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,12 +33,13 @@ public class JwtUtil {
     private final Set<String> invalidatedTokens = new HashSet<>();
 
 
-    public String generateToken(Integer id, String role) throws JOSEException {
+    public String generateToken(User user) throws JOSEException {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 
         JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
-                .subject(id.toString())
-                .claim("scope", role)
+                .subject(user.getId().toString())
+                .claim("username", user.getName())
+                .claim("scope", user.getRole())
                 .issueTime(new Date())
                 .expirationTime(new Date(System.currentTimeMillis() + expiration))
                 .build();
@@ -52,7 +54,6 @@ public class JwtUtil {
     }
 
 
-
     public Integer extractId(String token) throws Exception {
         return Integer.parseInt(parseToken(token).getJWTClaimsSet().getSubject());
     }
@@ -61,18 +62,20 @@ public class JwtUtil {
         return parseToken(token).getJWTClaimsSet().getClaim("scope").toString();
     }
 
-    public boolean validateToken(String token) throws Exception{
+    public boolean validateToken(String token) throws Exception {
         SignedJWT signedJWT = SignedJWT.parse(token);
         boolean validSignature = signedJWT.verify(new MACVerifier(secret.getBytes()));
         boolean validExpirationTime = signedJWT.getJWTClaimsSet().getExpirationTime().after(new Date());
 
         return validSignature && validExpirationTime;
     }
+
     private SignedJWT parseToken(String token) throws Exception {
         SignedJWT signedJWT = SignedJWT.parse(token);
-        if(!signedJWT.verify(new MACVerifier(secret.getBytes()))){
+        if (!signedJWT.verify(new MACVerifier(secret.getBytes()))) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
-        };
+        }
+        ;
         return signedJWT;
     }
 
