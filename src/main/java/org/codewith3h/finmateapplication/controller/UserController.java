@@ -48,8 +48,8 @@ public class UserController {
                 return ResponseEntity.status(401).body(response);
             }
 
-            String email = jwtUtil.extractEmail(token);
-            User user = userRepository.findByEmail(email)
+            Integer userId = jwtUtil.extractId(token);
+            User user = userRepository.findById(userId)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
             UserDto userDto = UserDto.builder()

@@ -93,8 +93,8 @@ public class AuthController {
             return ResponseEntity.status(401).body(response);
         }
 
-        String userEmail = jwtUtil.extractEmail(token);
-        if (userEmail == null) {
+        Integer userId = jwtUtil.extractId(token);
+        if (userId == null) {
             log.warn("Unauthorized access attempt to /home: No email found in token");
             ApiResponse<String> response = new ApiResponse<>();
             response.setCode(9999);
@@ -103,7 +103,7 @@ public class AuthController {
             return ResponseEntity.status(401).body(response);
         }
 
-        log.info("User {} authorized to access home page", userEmail);
+        log.info("User {} authorized to access home page", userId);
         ApiResponse<String> response = new ApiResponse<>();
         response.setCode(1000);
         response.setMessage("Authorized");
@@ -218,8 +218,8 @@ public class AuthController {
             return ResponseEntity.ok(response);
         }
 
-        String userEmail = jwtUtil.extractEmail(token);
-        if (userEmail == null) {
+        Integer userId = jwtUtil.extractId(token);
+        if (userId == null) {
             response.setResult(false);
             return ResponseEntity.ok(response);
         }

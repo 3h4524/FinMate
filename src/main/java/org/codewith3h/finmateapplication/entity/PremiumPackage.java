@@ -53,5 +53,4 @@ import java.time.Instant;
         @ColumnDefault("getdate()")
         @Column(name = "updated_at")
         private Instant updatedAt;
-
     }

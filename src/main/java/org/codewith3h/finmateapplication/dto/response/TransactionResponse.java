@@ -19,6 +19,7 @@ public class TransactionResponse {
     Integer userCategoryId;
     String categoryName;
     String userCategoryName;
+    String icon;
     BigDecimal amount;
     String note;
     String type;

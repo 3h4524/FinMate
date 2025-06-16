@@ -30,6 +30,8 @@ public enum ErrorCode {
     EMAIL_ALREADY_VERIFIED_EXCEPTION(1021, "Email already verified", HttpStatus.BAD_REQUEST),
     IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code",  HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(1023, "Incorrect token for verification", HttpStatus.BAD_REQUEST),
+    TOKEN_EXPIRED(1024, "Token is expired", HttpStatus.BAD_REQUEST),
+    PREMIUM_REQUIRED(1025, "This feature requires premium to active", HttpStatus.BAD_REQUEST)
     ;
 
 

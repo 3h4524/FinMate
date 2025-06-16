@@ -9,6 +9,7 @@ import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.WalletResponse;
 import org.codewith3h.finmateapplication.service.WalletService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +21,7 @@ public class WalletController {
 
     private final WalletService  walletService;
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping
     public ResponseEntity<ApiResponse<WalletResponse>> updateWallet(
             @Valid @RequestBody UpdateWalletRequest request){
@@ -36,6 +38,7 @@ public class WalletController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
     public ResponseEntity<ApiResponse<WalletResponse>> getWallet(
             @RequestParam Integer userId

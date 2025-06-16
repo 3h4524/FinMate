@@ -25,7 +25,7 @@ public class JwtUtil {
 
     private final Set<String> invalidatedTokens = new HashSet<>();
 
-    public String generateToken(String email, String role) throws JOSEException {
+    public String generateToken(Integer userId, String role) throws JOSEException {
         if (secret == null || secret.isEmpty()) {
             throw new IllegalStateException("JWT secret key is not configured");
         }
@@ -33,7 +33,7 @@ public class JwtUtil {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(userId.toString())
                 .claim("scope", role)
                 .issueTime(new Date())
                 .expirationTime(new Date(System.currentTimeMillis() + expiration * 1000))
@@ -46,8 +46,8 @@ public class JwtUtil {
         return signedJWT.serialize();
     }
 
-    public String extractEmail(String token) throws Exception {
-        return parseToken(token).getJWTClaimsSet().getSubject();
+    public Integer extractId(String token) throws Exception {
+        return Integer.parseInt(parseToken(token).getJWTClaimsSet().getSubject());
     }
 
     public String extractRole(String token) throws Exception {

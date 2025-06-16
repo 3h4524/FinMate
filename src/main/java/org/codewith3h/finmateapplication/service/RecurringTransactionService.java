@@ -7,10 +7,12 @@ import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.dto.response.RecurringTransactionResponse;
 import org.codewith3h.finmateapplication.entity.RecurringTransaction;
+import org.codewith3h.finmateapplication.entity.TransactionReminder;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.RecurringTransactionMapper;
 import org.codewith3h.finmateapplication.repository.RecurringTransactionRepository;
+import org.codewith3h.finmateapplication.repository.TransactionReminderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class RecurringTransactionService{
     private final RecurringTransactionMapper  recurringTransactionMapper;
     private final TransactionService transactionService;
     private final EntityResolver entityResolver;
+    private final TransactionReminderRepository transactionReminderRepository;
 
         public RecurringTransactionResponse createRecurringTransaction(RecurringTransactionRequest dto) {
 
@@ -51,4 +54,6 @@ public class RecurringTransactionService{
             }
             return recurringTransactionMapper.toResponseDto(saved);
         }
+
+//
 }

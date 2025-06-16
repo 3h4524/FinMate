@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +21,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     Optional<Transaction> findByIdAndUserId(Integer transactionId, Integer userId);
 
-    Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+    Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     Page<Transaction> findByUserIdAndCategoryId(Integer userId, Integer categoryId, Pageable pageable);
 
@@ -30,6 +32,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     void deleteByUserId(Integer userId);
 
     Long countByUserId(Integer userId);
+
+    List<Transaction> findAll(Specification<Transaction> spec);
 
     Page<Transaction> findAll(Specification<Transaction> spec, Pageable pageable);
 
@@ -57,4 +61,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    Optional<Transaction> findOne(Specification<Transaction> spec);
+
 }
