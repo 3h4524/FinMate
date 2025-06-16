@@ -1,10 +1,7 @@
 package org.codewith3h.finmateapplication;
 
 import lombok.RequiredArgsConstructor;
-import org.codewith3h.finmateapplication.entity.Category;
-import org.codewith3h.finmateapplication.entity.Transaction;
-import org.codewith3h.finmateapplication.entity.User;
-import org.codewith3h.finmateapplication.entity.UserCategory;
+import org.codewith3h.finmateapplication.entity.*;
 import org.codewith3h.finmateapplication.repository.*;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +13,7 @@ public class EntityResolver {
     private final UserCategoryRepository userCategoryRepository;
     private final TransactionRepository transactionRepository;
     private final RecurringTransactionRepository  recurringTransactionRepository;
+    private final PremiumPackageRepository premiumPackageRepository;
 
     public User resolverUser(Integer Id){
         return userRepository.getReferenceById(Id);
@@ -32,4 +30,6 @@ public class EntityResolver {
     public UserCategory resolverUserCategory(Integer Id){
         return userCategoryRepository.getReferenceById(Id);
     }
+
+    public PremiumPackage resolverPremiumPackage(Integer Id){return premiumPackageRepository.getReferenceById(Id);}
 }
