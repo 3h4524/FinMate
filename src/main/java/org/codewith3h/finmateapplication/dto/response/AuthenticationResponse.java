@@ -11,4 +11,5 @@ public class AuthenticationResponse {
     private String email;
     private String name;
     private String role;
+    private Boolean isDelete;
 }

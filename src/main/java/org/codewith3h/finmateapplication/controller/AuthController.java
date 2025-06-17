@@ -34,7 +34,9 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Slf4j
-public class AuthController {
+public class
+AuthController {
+
 
     private final JwtUtil jwtUtil;
     private final RestTemplate restTemplate;

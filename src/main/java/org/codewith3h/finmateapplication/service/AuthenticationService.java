@@ -63,7 +63,7 @@ public class AuthenticationService {
             log.info("Login successful for email: {}", email);
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
             if (token == null || token.isEmpty()) {
                 log.error("Failed to generate token for user: {}", email);
             }
@@ -74,6 +74,7 @@ public class AuthenticationService {
                     .email(user.getEmail())
                     .name(user.getName())
                     .role(user.getRole())
+                    .isDelete(user.getIsDelete())
                     .build();
     }
 
@@ -112,7 +113,7 @@ public class AuthenticationService {
             }
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+            String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
 
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                     .token(token)
@@ -120,6 +121,7 @@ public class AuthenticationService {
                     .email(user.getEmail())
                     .name(user.getName())
                     .role(user.getRole())
+                    .isDelete(user.getIsDelete())
                     .build();
 
             log.info("Google login successful for user: {}", user.getEmail());
@@ -166,6 +168,7 @@ public class AuthenticationService {
 
             return AuthenticationResponse.builder()
                     .isVerified(true)
+                    .isDelete(user.getIsDelete())
                     .build();
     }
 

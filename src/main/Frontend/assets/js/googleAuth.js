@@ -18,6 +18,12 @@ async function handleGoogleSignIn(response) {
     try {
         const result = await apiService.processGoogleLogin(response.credential);
         
+        // Check if user is banned
+        if (result.isDelete) {
+            showNotification('Your account has been banned. Please contact support for assistance.', 'error');
+            return;
+        }
+        
         if (!result.verified) {
             sessionStorage.setItem('requiresVerification', 'true');
             sessionStorage.setItem('pendingVerificationEmail', result.email);
@@ -25,12 +31,21 @@ async function handleGoogleSignIn(response) {
             return;
         }
         
+        showNotification('Google login successful! Redirecting...', 'success');
+        
+        // Validate token before storing
+        if (!result.token) {
+            throw new Error('Invalid token received from server');
+        }
+
         // Store authentication state and user data in localStorage
         localStorage.setItem('token', result.token);
         localStorage.setItem('userData', JSON.stringify({
             email: result.email,
             name: result.name,
-            role: result.role
+            role: result.role,
+            userId: result.userId,
+            premium: result.premium
         }));
 
         // Verify token is stored correctly
@@ -53,7 +68,6 @@ async function handleGoogleSignIn(response) {
             throw new Error('Invalid token format');
         }
         
-        showNotification('Login successful! Redirecting...', 'success');
         setTimeout(() => {
             // Verify token one last time before redirect
             const finalToken = localStorage.getItem('token');
@@ -62,7 +76,7 @@ async function handleGoogleSignIn(response) {
                 showNotification('Authentication failed. Please try again.', 'error');
                 return;
             }   
-            window.location.href = '/pages/home.html';
+            window.location.href = 'home.html';
         }, 1000);
     } catch (error) {
         console.error('Google login error:', error);

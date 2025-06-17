@@ -92,5 +92,13 @@ public class User {
     private LocalDateTime passwordResetTokenExpiry;
 
     @Column(name = "isDelete")
-    private boolean isDelete;
+    private Boolean isDelete;
+
+    public void setIsDelete(boolean isDelete) {
+        this.isDelete = isDelete;
+    }
+
+    public boolean isDelete() {
+        return isDelete != null && isDelete;
+    }
 }

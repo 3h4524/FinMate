@@ -25,7 +25,7 @@ public class JwtUtil {
 
     private final Set<String> invalidatedTokens = new HashSet<>();
 
-    public String generateToken(String email, String role) throws JOSEException {
+    public String generateToken(String email, String role, Integer userId) throws JOSEException {
         if (secret == null || secret.isEmpty()) {
             throw new IllegalStateException("JWT secret key is not configured");
         }
@@ -35,6 +35,7 @@ public class JwtUtil {
         JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
                 .subject(email)
                 .claim("scope", role)
+                .claim("userId", userId)
                 .issueTime(new Date())
                 .expirationTime(new Date(System.currentTimeMillis() + expiration * 1000))
                 .build();
@@ -46,12 +47,33 @@ public class JwtUtil {
         return signedJWT.serialize();
     }
 
+    public String generateToken(String email, String role) throws JOSEException {
+        return generateToken(email, role, null);
+    }
+
     public String extractEmail(String token) throws Exception {
         return parseToken(token).getJWTClaimsSet().getSubject();
     }
 
     public String extractRole(String token) throws Exception {
         return parseToken(token).getJWTClaimsSet().getClaim("scope").toString();
+    }
+
+    public Integer extractId(String token) throws Exception {
+        Object userIdClaim = parseToken(token).getJWTClaimsSet().getClaim("userId");
+        if (userIdClaim == null) {
+            return null;
+        }
+        if (userIdClaim instanceof Integer) {
+            return (Integer) userIdClaim;
+        }
+        if (userIdClaim instanceof Long) {
+            return ((Long) userIdClaim).intValue();
+        }
+        if (userIdClaim instanceof String) {
+            return Integer.parseInt((String) userIdClaim);
+        }
+        return null;
     }
 
     public boolean validateToken(String token) throws Exception {
