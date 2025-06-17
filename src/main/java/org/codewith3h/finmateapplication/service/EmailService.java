@@ -110,18 +110,8 @@ public class EmailService {
 
     @Async
     public void sendPasswordResetEmail(String toEmail) throws MessagingException {
-        // Check if email exists
-        User user = userRepository.findByEmail(toEmail)
-                .orElseThrow(() -> {
-                    logger.error("Password reset requested for non-existent email: {}", toEmail);
-                    return new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION);
-                });
-        
-        // Check if user is verified
-        if (!user.getVerified()) {
-            logger.error("Password reset requested for unverified email: {}", toEmail);
-            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED_EXCEPTION);
-        }
+        User  user = userRepository.findByEmail(toEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
         
         String token = createPasswordResetToken(user);
         
@@ -129,10 +119,10 @@ public class EmailService {
             logger.info("Attempting to send password reset email to: {}", toEmail);
 
             String subject = "Password Reset Request - FinMate";
-            String resetLink = "http://127.0.0.1:5500/pages/reset-password.html?token=" + token;
+            String resetLink = "http://127.0.0.1:5500/reset-password.html?token=" + token;
 
             String content = String.format(
-                    "Hello %s!\n\n" +
+                    "Hello!\n\n" +
                             "We received a request to reset your FinMate account password.\n\n" +
                             "Please click the link below to reset your password:\n\n" +
                             "%s\n\n" +
@@ -142,7 +132,6 @@ public class EmailService {
                             "This is an automated email, please do not reply.\n\n" +
                             "Best regards,\n" +
                             "FinMate Team",
-                    user.getName(),
                     resetLink,
                     passwordResetExpiryMinutes
             );
@@ -160,11 +149,6 @@ public class EmailService {
             logger.info("Password reset email sent successfully to: {}", toEmail);
         } catch (Exception e) {
             logger.error("Failed to send password reset email to {}: {}", toEmail, e.getMessage(), e);
-            // Clear the reset token since email failed
-            user.setPasswordResetToken(null);
-            user.setPasswordResetTokenExpiry(null);
-            userRepository.save(user);
-            
             if (e instanceof MessagingException) {
                 throw (MessagingException) e;
             }

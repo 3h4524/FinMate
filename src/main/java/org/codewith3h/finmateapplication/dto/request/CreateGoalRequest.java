@@ -32,6 +32,5 @@ public class CreateGoalRequest {
     @NotNull(message = "Target Date is required")
     private LocalDate deadline;
 
-    private Boolean isLongTerm;
 }
 

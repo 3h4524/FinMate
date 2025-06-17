@@ -21,8 +21,6 @@ public class GoalProgressResponse {
     BigDecimal amount;
     BigDecimal percentage;
     String timeRemaining;
-    Boolean isLongTerm;
-
 }
 
 

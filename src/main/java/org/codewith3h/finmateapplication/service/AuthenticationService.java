@@ -53,7 +53,6 @@ public class AuthenticationService {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
 
-
             if (!passwordEncoder.matches(password, user.getPasswordHash())) {
                 log.error("Login failed: Invalid password for email: {}", email);
                 throw new AppException(ErrorCode.INVALID_PASSWORD);
@@ -63,7 +62,7 @@ public class AuthenticationService {
             log.info("Login successful for email: {}", email);
 
             // Generate token
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
+            String token = jwtUtil.generateToken(user);
             if (token == null || token.isEmpty()) {
                 log.error("Failed to generate token for user: {}", email);
             }
@@ -71,130 +70,114 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(token)
                     .isVerified(user.getVerified())
-                    .email(user.getEmail())
                     .name(user.getName())
                     .role(user.getRole())
+                    .email(user.getEmail())
                     .isDelete(user.getIsDelete())
+                    .userId(user.getId())
+                    .premium(user.getIsPremium())
                     .build();
     }
 
     public AuthenticationResponse processGoogleLogin(String email, String name, boolean emailVerified) throws JOSEException {
         log.info("Processing Google login for email: {}", email);
-//         Check if user exists
-            Optional<User> existingUser = userRepository.findByEmail(email);
-            User user;
+        // Check if user exists
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        User user;
 
-            if (existingUser.isPresent()) {
-                log.info("User found, updating information");
-                user = existingUser.get();
-                // Update user information if needed
-                if (!user.getName().equals(name)) {
-                    user.setName(name);
-                    user = userRepository.save(user);
-                }
-            } else {
-                log.info("Creating new user from Google login");
-                // Create new user with all required fields
-                user = User.builder()
-                        .name(name)
-                        .email(email)
-                        .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString()))
-                        .role("USER")
-                        .verified(emailVerified)
-                        .isPremium(false)
-                        .resendAttempts(0)
-                        .verificationCode(null)
-                        .verificationCodeExpiry(null)
-                        .passwordResetToken(null)
-                        .passwordResetTokenExpiry(null)
-                        .resendLockoutUntil(null)
-                        .build();
+        if (existingUser.isPresent()) {
+            log.info("User found, updating information");
+            user = existingUser.get();
+            // Update user information if needed
+            if (!user.getName().equals(name)) {
+                user.setName(name);
                 user = userRepository.save(user);
             }
-
-            // Generate token
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
-
-            AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
-                    .token(token)
-                    .isVerified(user.getVerified())
-                    .email(user.getEmail())
-                    .name(user.getName())
-                    .role(user.getRole())
-                    .isDelete(user.getIsDelete())
+        } else {
+            log.info("Creating new user from Google login");
+            // Create new user with all required fields
+            user = User.builder()
+                    .name(name)
+                    .email(email)
+                    .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .role("USER")
+                    .verified(emailVerified)
+                    .isPremium(false)
+                    .resendAttempts(0)
+                    .verificationCode(null)
+                    .verificationCodeExpiry(null)
+                    .passwordResetToken(null)
+                    .passwordResetTokenExpiry(null)
+                    .resendLockoutUntil(null)
                     .build();
+            user = userRepository.save(user);
+        }
 
-            log.info("Google login successful for user: {}", user.getEmail());
-            return authenticationResponse;
+        // Generate token
+        String token = jwtUtil.generateToken(user);
 
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .token(token)
+                .isVerified(user.getVerified())
+                .name(user.getName())
+                .role(user.getRole())
+                .email(user.getEmail())
+                .isDelete(user.getIsDelete())
+                .userId(user.getId())
+                .premium(user.getIsPremium())
+                .build();
+
+        log.info("Google login successful for user: {}", user.getEmail());
+        return authenticationResponse;
     }
-
 
     public ApiResponse<String> registerUser(RegisterRequest request) {
-            log.info("Starting user registration for email: {}", request.getEmail());
+        log.info("Starting user registration for email: {}", request.getEmail());
 
+        // Check if email already exists
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.error("Registration failed: Email already exists: {}", request.getEmail());
+            throw new AppException(ErrorCode.EMAIL_EXISTED_EXCEPTION);
+        }
+        User user = userService.createUser(request);
+        userRepository.save(user);
+        log.info("User created successfully with ID: {}", user.getId());
 
-            // Check if email already exists
-            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-                log.error("Registration failed: Email already exists: {}", request.getEmail());
-                throw new AppException(ErrorCode.EMAIL_EXISTED_EXCEPTION);
-            }
-            User user = userService.createUser(request);
-            userRepository.save(user);
-            log.info("User created successfully with ID: {}", user.getId());
-
-            return ApiResponse.<String>builder()
-                    .code(1000)
-                    .message("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.")
-                    .build();
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.")
+                .build();
     }
+
     @Transactional
     public AuthenticationResponse verifyEmail(String email, String verificationCode) throws JOSEException {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
 
+        if (!emailService.verifyEmail(email, verificationCode)) {
+            user.setResendAttempts(user.getResendAttempts() + 1);
+        }
 
-            if (!emailService.verifyEmail(email, verificationCode)) {
-                user.setResendAttempts(user.getResendAttempts() + 1);
-            }
+        user.setVerified(true);
+        user.setResendAttempts(0);
+        user.setResendLockoutUntil(null);
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiry(null);
+        userRepository.save(user);
 
-            user.setVerified(true);
-            user.setResendAttempts(0);
-            user.setResendLockoutUntil(null);
-            user.setVerificationCode(null);
-            user.setVerificationCodeExpiry(null);
-            userRepository.save(user);
-
-
-            return AuthenticationResponse.builder()
-                    .isVerified(true)
-                    .isDelete(user.getIsDelete())
-                    .build();
+        return AuthenticationResponse.builder()
+                .isVerified(true)
+                .isDelete(user.getIsDelete())
+                .build();
     }
-
 
     @Transactional
     public ApiResponse<String> forgotPassword(String email) {
         try {
-            // Check if email exists
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
-
-            // Check if user is verified
-            if (!user.getVerified()) {
-                throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED_EXCEPTION);
-            }
-
             emailService.sendPasswordResetEmail(email);
             return ApiResponse.<String>builder()
                     .code(1000)
                     .message("Password reset instructions sent")
-                    .build();
-        } catch (AppException e) {
-            log.error("Forgot password failed: {}", e.getMessage());
-            return ApiResponse.<String>builder()
-                    .code(e.getErrorCode().getCode())
-                    .message(e.getMessage())
                     .build();
         } catch (Exception e) {
             log.error("Forgot password failed: {}", e.getMessage());
@@ -207,7 +190,6 @@ public class AuthenticationService {
 
     @Transactional
     public ApiResponse<String> processPasswordReset(ResetPasswordRequest request) {
-
         String token = request.getToken();
         String newPassword = request.getNewPassword();
         try {
@@ -232,14 +214,13 @@ public class AuthenticationService {
         }
     }
 
-
     private String extractToken(String token) {
         return token.contains("token=") ?
                 token.substring(token.indexOf("token=") + 6) :
                 token;
     }
 
-        private void resetPassword(String token, String newPassword) {
+    private void resetPassword(String token, String newPassword) {
         User user = userRepository.findByPasswordResetToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid token"));
 
@@ -253,6 +234,4 @@ public class AuthenticationService {
         user.setPasswordResetTokenExpiry(null);
         userRepository.save(user);
     }
-
-
 }

@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.*;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
@@ -34,10 +35,10 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Slf4j
-public class
-AuthController {
+@RequiredArgsConstructor
+public class AuthController {
 
-
+//    private final UserService userService;
     private final JwtUtil jwtUtil;
     private final RestTemplate restTemplate;
     private final AuthenticationService authenticationService;
@@ -45,13 +46,6 @@ AuthController {
 
     @Value("${google.oauth2.client-id}")
     private String googleClientId;
-
-    public AuthController(JwtUtil jwtUtil, RestTemplate restTemplate, AuthenticationService authenticationService, EmailService emailService) {
-        this.jwtUtil = jwtUtil;
-        this.restTemplate = restTemplate;
-        this.authenticationService = authenticationService;
-        this.emailService = emailService;
-    }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
@@ -63,54 +57,11 @@ AuthController {
     public ResponseEntity<ApiResponse<AuthenticationResponse>> login(@Valid @RequestBody LoginRequest loginRequest) throws JOSEException {
             log.info("Received login request for email: {}", loginRequest.getEmail());
             AuthenticationResponse authenticationResponse = authenticationService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
-            
             ApiResponse<AuthenticationResponse> response = new ApiResponse<>();
-            response.setCode(1000);
             response.setMessage("Login successfully");
+            log.info("Login successful for user: {}", loginRequest.getEmail());
             response.setResult(authenticationResponse);
             return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/home")
-    public ResponseEntity<ApiResponse<String>> redirectToHome(HttpServletRequest request) throws Exception {
-        log.info("Received home page request.");
-
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Unauthorized access attempt to /home: Missing or invalid Authorization header");
-            ApiResponse<String> response = new ApiResponse<>();
-            response.setCode(9999);
-            response.setMessage("Unauthorized: Invalid or missing token");
-            response.setResult(null);
-            return ResponseEntity.status(401).body(response);
-        }
-
-        String token = authHeader.substring(7);
-        if (!jwtUtil.validateToken(token)) {
-            log.warn("Unauthorized access attempt to /home: Invalid token");
-            ApiResponse<String> response = new ApiResponse<>();
-            response.setCode(9999);
-            response.setMessage("Unauthorized: Invalid token");
-            response.setResult(null);
-            return ResponseEntity.status(401).body(response);
-        }
-
-        String userEmail = jwtUtil.extractEmail(token);
-        if (userEmail == null) {
-            log.warn("Unauthorized access attempt to /home: No email found in token");
-            ApiResponse<String> response = new ApiResponse<>();
-            response.setCode(9999);
-            response.setMessage("Unauthorized: Invalid token format");
-            response.setResult(null);
-            return ResponseEntity.status(401).body(response);
-        }
-
-        log.info("User {} authorized to access home page", userEmail);
-        ApiResponse<String> response = new ApiResponse<>();
-        response.setCode(1000);
-        response.setMessage("Authorized");
-        response.setResult("home.html");
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/google")
@@ -125,6 +76,8 @@ AuthController {
                             .message("Token không được để trống")
                             .build());
         }
+
+
 
         log.info("Verifying Google token");
             // Verify token with Google
@@ -164,6 +117,78 @@ AuthController {
 
     }
 
+    @GetMapping("/home")
+    public ResponseEntity<ApiResponse<String>> redirectToHome(HttpServletRequest request) throws Exception {
+        log.info("Received home page request.");
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Unauthorized access attempt to /home: Missing or invalid Authorization header");
+            ApiResponse<String> response = new ApiResponse<>();
+            response.setCode(9999);
+            response.setMessage("Unauthorized: Invalid or missing token");
+            response.setResult(null);
+            return ResponseEntity.status(401).body(response);
+        }
+
+        String token = authHeader.substring(7);
+        if (!jwtUtil.validateToken(token)) {
+            log.warn("Unauthorized access attempt to /home: Invalid token");
+            ApiResponse<String> response = new ApiResponse<>();
+            response.setCode(9999);
+            response.setMessage("Unauthorized: Invalid token");
+            response.setResult(null);
+            return ResponseEntity.status(401).body(response);
+        }
+
+        Integer userId = jwtUtil.extractId(token);
+        if (userId == null) {
+            log.warn("Unauthorized access attempt to /home: No email found in token");
+            ApiResponse<String> response = new ApiResponse<>();
+            response.setCode(9999);
+            response.setMessage("Unauthorized: Invalid token format");
+            response.setResult(null);
+            return ResponseEntity.status(401).body(response);
+        }
+
+        log.info("User {} authorized to access home page", userId);
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setCode(1000);
+        response.setMessage("Authorized");
+        response.setResult("home.html");
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization");
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+                // Invalidate the token by adding it to a blacklist or                                                                                                                                                                                                                                           marking it as expired
+                jwtUtil.invalidateToken(token);
+            }
+
+            // Clear security context
+            SecurityContextHolder.clearContext();
+
+            log.info("User logged out successfully");
+            return ResponseEntity.ok(ApiResponse.<String>builder()
+                    .code(1000)
+                    .message("Logout successful")
+                    .build());
+        } catch (Exception e) {
+            log.error("Error during logout: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<String>builder()
+                            .code(9999)
+                            .message("Logout failed: " + e.getMessage())
+                            .build());
+        }
+    }
+
     @PostMapping("/resend-verification")
     public ResponseEntity<ApiResponse<String>> resendVerificationEmail(@RequestBody EmailRequest request) throws MessagingException {
         String email = request.getEmail();
@@ -174,7 +199,7 @@ AuthController {
                 .message("Send otp successfully")
                 .build());
     }
-
+//
     @PostMapping("/verify-email")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> verifyEmail(@RequestBody EmailRequest request) throws JOSEException {
         String email = request.getEmail();
@@ -187,20 +212,17 @@ AuthController {
         response.setResult(authenticationResponse);
         return ResponseEntity.ok(response);
     }
-
+//
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody EmailRequest request) {
         String email = request.getEmail();
         log.info("Received forgot password request for email: {}", email);
-        ApiResponse<String> response = authenticationService.forgotPassword(email);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authenticationService.forgotPassword(email));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
-        log.info("Received password reset request");
-        ApiResponse<String> response = authenticationService.processPasswordReset(request);
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(authenticationService.processPasswordReset(request));
     }
 
     @GetMapping("/verify-token")
@@ -220,8 +242,8 @@ AuthController {
             return ResponseEntity.ok(response);
         }
 
-        String userEmail = jwtUtil.extractEmail(token);
-        if (userEmail == null) {
+        Integer userId = jwtUtil.extractId(token);
+        if (userId == null) {
             response.setResult(false);
             return ResponseEntity.ok(response);
         }

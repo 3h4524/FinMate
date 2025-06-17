@@ -16,14 +16,15 @@ import org.codewith3h.finmateapplication.repository.GoalRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @Data
 @Slf4j
+@PreAuthorize("hasRole('ROLE_USER')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoalContributionService {
     GoalContributionRepository goalContributionRepository;

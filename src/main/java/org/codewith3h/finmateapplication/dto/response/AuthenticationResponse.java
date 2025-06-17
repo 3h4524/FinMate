@@ -12,4 +12,6 @@ public class AuthenticationResponse {
     private String name;
     private String role;
     private Boolean isDelete;
+    private Integer userId;
+    private Boolean premium;
 }

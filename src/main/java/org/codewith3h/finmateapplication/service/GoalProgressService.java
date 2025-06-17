@@ -16,16 +16,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Data
+@PreAuthorize("hasRole('ROLE_USER')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoalProgressService {
 
@@ -36,6 +38,8 @@ public class GoalProgressService {
     public GoalProgressResponse getGoalProgressesByGoalId(int goalId) {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
+
+        System.err.println("test go progress goal id " + goalId);
 
         trackingGoalStatusAndUpdateIfNeeded(goal);
 
@@ -98,7 +102,6 @@ public class GoalProgressService {
 
     public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String status, int page, int size) {
         updateTodayGoalProgressList(userId);
-
         Pageable pageable = PageRequest.of(page, size);
 
         Page<GoalProgress> progressPage = goalProgressRepository.findGoalProgressesByGoal_User_IdAndGoal_StatusIsNot(userId, status, pageable);
@@ -126,9 +129,7 @@ public class GoalProgressService {
         List<GoalProgressResponse> responses = progressPage.getContent().stream()
                 .map(goalProgressMapper::toGoalProgressResponse)
                 .toList();
-
         return new PageImpl<>(responses, pageable, progressPage.getTotalElements());
-
     }
 
 
