@@ -31,6 +31,7 @@ public enum ErrorCode {
     IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code",  HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(1023, "Incorrect token for verification", HttpStatus.BAD_REQUEST),
     PREMIUM_PACKAGE_NOT_FOUND(1024, "Premium package not found", HttpStatus.NOT_FOUND),
+    CANNOT_CREATE_PAYMENT_EXCEPTION(1025, "Cannot create payment transaction",  HttpStatus.BAD_REQUEST),
     ;
 
 

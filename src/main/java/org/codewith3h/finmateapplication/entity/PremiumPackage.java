@@ -28,8 +28,8 @@ import java.time.Instant;
         @Column(name = "description")
         private String description;
 
-        @Column(name = "price", nullable = false, precision = 18, scale = 2)
-        private BigDecimal price;
+        @Column(name = "price", nullable = false)
+        private Integer price;
 
         @Column(name = "discount_percentage", precision = 5, scale = 2)
         private BigDecimal discountPercentage;
