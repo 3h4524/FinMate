@@ -1,16 +1,14 @@
 package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.*;
 
 import java.time.Instant;
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -25,6 +23,7 @@ public class Subscription {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -40,11 +39,10 @@ public class Subscription {
     @Column(name = "end_date")
     private Instant endDate;
 
-    @ColumnDefault("0")
-    @Column(name = "auto_renew")
-    private Boolean autoRenew;
-
     @Size(max = 20)
+    @Column(name = "amount")
+    private Integer amount;
+
     @Nationalized
     @ColumnDefault("'PENDING'")
     @Column(name = "status", length = 20)

@@ -6,6 +6,7 @@ import org.codewith3h.finmateapplication.dto.response.CategoryResponse;
 import org.codewith3h.finmateapplication.entity.Category;
 import org.codewith3h.finmateapplication.mapper.CategoryMapper;
 import org.codewith3h.finmateapplication.repository.CategoryRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +20,10 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
+    @PreAuthorize("hasRole('USER')")
     @Transactional(readOnly = true)
     public List<CategoryResponse> getCategories() {
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAllByNameNot("Điều chỉnh số dư");
         return categories.stream().map(categoryMapper :: toCategoryResponse).toList();
     }
 

@@ -2,18 +2,24 @@ package org.codewith3h.finmateapplication.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
 import org.codewith3h.finmateapplication.entity.EmailVerification;
+import org.codewith3h.finmateapplication.entity.Transaction;
+import org.codewith3h.finmateapplication.entity.TransactionReminder;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.repository.EmailVerificationRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
+import org.codewith3h.finmateapplication.scheduler.RecurringTransactionScheduler;
+import org.codewith3h.finmateapplication.specification.TransactionSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -21,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -110,8 +117,18 @@ public class EmailService {
 
     @Async
     public void sendPasswordResetEmail(String toEmail) throws MessagingException {
-        User  user = userRepository.findByEmail(toEmail)
-                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
+        // Check if email exists
+        User user = userRepository.findByEmail(toEmail)
+                .orElseThrow(() -> {
+                    logger.error("Password reset requested for non-existent email: {}", toEmail);
+                    return new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION);
+                });
+        
+        // Check if user is verified
+        if (!user.getVerified()) {
+            logger.error("Password reset requested for unverified email: {}", toEmail);
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED_EXCEPTION);
+        }
         
         String token = createPasswordResetToken(user);
         
@@ -119,10 +136,10 @@ public class EmailService {
             logger.info("Attempting to send password reset email to: {}", toEmail);
 
             String subject = "Password Reset Request - FinMate";
-            String resetLink = "http://127.0.0.1:5500/reset-password.html?token=" + token;
+            String resetLink = "http://127.0.0.1:5500/pages/reset-password.html?token=" + token;
 
             String content = String.format(
-                    "Hello!\n\n" +
+                    "Hello %s!\n\n" +
                             "We received a request to reset your FinMate account password.\n\n" +
                             "Please click the link below to reset your password:\n\n" +
                             "%s\n\n" +
@@ -132,6 +149,7 @@ public class EmailService {
                             "This is an automated email, please do not reply.\n\n" +
                             "Best regards,\n" +
                             "FinMate Team",
+                    user.getName(),
                     resetLink,
                     passwordResetExpiryMinutes
             );
@@ -149,6 +167,11 @@ public class EmailService {
             logger.info("Password reset email sent successfully to: {}", toEmail);
         } catch (Exception e) {
             logger.error("Failed to send password reset email to {}: {}", toEmail, e.getMessage(), e);
+            // Clear the reset token since email failed
+            user.setPasswordResetToken(null);
+            user.setPasswordResetTokenExpiry(null);
+            userRepository.save(user);
+            
             if (e instanceof MessagingException) {
                 throw (MessagingException) e;
             }
@@ -176,6 +199,22 @@ public class EmailService {
 
         logger.info("Verification record marked as verified for email {}. User status update should happen in AuthController.", email);
         return true;
+    }
+
+    @Async
+    @Transactional
+    public void sendCustomEmail(String toEmail, String subject, String content, Boolean isHTML) throws MessagingException {
+        User user = userRepository.findByEmail(toEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(content, isHTML);
+        mailSender.send(message);
+        logger.info("Email sent successfully to: {}", toEmail);
     }
 
 

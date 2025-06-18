@@ -24,6 +24,10 @@ import vn.payos.type.ItemData;
 import vn.payos.type.PaymentData;
 import vn.payos.type.PaymentLinkData;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Date;
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
@@ -48,7 +52,23 @@ public class PaymentService {
                 request.getUserId(), request.getPackageId(), premiumPackage.getPrice());
 
         String packageName = premiumPackage.getName();
-        Integer price = premiumPackage.getPrice();
+
+        // giam gia xong lay int gan nhat
+        int price;
+        BigDecimal discount = premiumPackage.getDiscountPercentage();
+
+        if (discount != null) {
+            price = BigDecimal.valueOf(premiumPackage.getPrice())
+                    .multiply(discount)
+                    .multiply(BigDecimal.valueOf(premiumPackage.getDurationValue()))
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .intValue();
+        } else {
+            price = premiumPackage.getPrice() * premiumPackage.getDurationValue(); // Không giảm giá
+        }
+
+
+        request.setAmount(price);
 
         Subscription subscription = subscriptionMapper.toSubscription(request, premiumPackageRepository, entityResolver);
 
@@ -61,11 +81,9 @@ public class PaymentService {
         String cancelUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
 
         System.err.println("Vao tao link");
-//        // Generate order code (Do trung` duoc.)
-//        String currentTimeString = String.valueOf(new Date().getTime());
-//        long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
-
-        // tui su dung orderCode = subscription.getId
+        // Generate order code (Do trung` duoc.) (ID + 6 chu so lay tu time)
+        String currentTimeString = String.valueOf(new Date().getTime());
+        long orderCode = Long.parseLong(subscription.getId() + currentTimeString.substring(currentTimeString.length() - 6));
 
         ItemData item = ItemData.builder()
                 .name(packageName)
@@ -74,7 +92,7 @@ public class PaymentService {
                 .build();
 
         PaymentData paymentData = PaymentData.builder()
-                .orderCode(subscription.getId().longValue())
+                .orderCode(orderCode)
                 .amount(price)
                 .description(description)
                 .returnUrl(returnUrl)
@@ -100,11 +118,12 @@ public class PaymentService {
     public boolean handlePaymentReturn(PaymentResponse response) {
         try {
             PaymentLinkData order = payOS.getPaymentLinkInformation(response.getOrderCode());
-            Long subscriptionId = order.getOrderCode();
+            String orderCodeStr = String.valueOf(order.getOrderCode());
+            Integer subscriptionId = Integer.parseInt(orderCodeStr.substring(0, orderCodeStr.length() - 6));
             String status = order.getStatus();
 
             log.info("Processing payment return for orderId: {}, status: {}", order.getOrderCode(), status);
-            Subscription subscription = subcriptionRepository.findSubscriptionById(subscriptionId.intValue());
+            Subscription subscription = subcriptionRepository.findSubscriptionById(subscriptionId);
 
             if (status.equals("PAID")) {
                 // xu ly success

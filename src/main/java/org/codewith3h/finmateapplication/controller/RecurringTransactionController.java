@@ -11,10 +11,7 @@ import org.codewith3h.finmateapplication.dto.response.RecurringTransactionRespon
 import org.codewith3h.finmateapplication.repository.RecurringTransactionRepository;
 import org.codewith3h.finmateapplication.service.RecurringTransactionService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/recurringTransactions")
@@ -34,6 +31,17 @@ public class RecurringTransactionController {
         apiResponse.setMessage("Recurring transaction created");
         apiResponse.setResult(response);
 
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @PostMapping("/confirm-recurring")
+    public ResponseEntity<ApiResponse<RecurringTransactionResponse>> confirmRecurringTransactionReminder(
+            @RequestParam String token) {
+        RecurringTransactionResponse response = recurringTransactionService.confirmRecurringTransactionReminder(token);
+        ApiResponse<RecurringTransactionResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Recurring transaction confirmed");
+        apiResponse.setResult(response);
         return ResponseEntity.ok(apiResponse);
     }
 }

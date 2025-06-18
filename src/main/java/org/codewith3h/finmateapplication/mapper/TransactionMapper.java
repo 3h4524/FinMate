@@ -41,9 +41,7 @@
         @Mapping(source = "userCategory.id", target = "userCategoryId")
         @Mapping(source = "category.name", target = "categoryName")
         @Mapping(source = "userCategory.name", target = "userCategoryName")
-        @Mapping(source = "category.type", target = "type")
-        @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "mapInstantToLocalDateTime")
-        @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "mapInstantToLocalDateTime")
+        @Mapping(target = "type", expression = "java(resolveType(entity.getCategory(), entity.getUserCategory()))")
         TransactionResponse toResponseDto(Transaction entity);
 
         @Named("resolveType")

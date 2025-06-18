@@ -16,6 +16,7 @@ import org.codewith3h.finmateapplication.repository.CategoryRepository;
 import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.codewith3h.finmateapplication.repository.WalletRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class WalletService {
     private final CategoryRepository categoryRepository;
     private final WalletMapper walletMapper;
 
+    @PreAuthorize("hasRole('USER')")
     public WalletResponse updateBalance(UpdateWalletRequest request){
         log.info("Updating balance for user Id: {}, new balance:{}", request.getUserId(), request.getBalance());
 
@@ -58,7 +60,7 @@ public class WalletService {
         String transactionType = newBalance.compareTo(currentBalance) < 0 ? "EXPENSE" : "INCOME";
         BigDecimal transactionAmount = newBalance.subtract(currentBalance).abs();
 
-        Category category = categoryRepository.findByNameAndType("khác", transactionType)
+        Category category = categoryRepository.findByNameAndType("Điều chỉnh số dư", transactionType)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
 
         Transaction transaction = Transaction.builder()
@@ -76,6 +78,7 @@ public class WalletService {
         return walletMapper.walletToWalletResponse(wallet);
     }
 
+    @PreAuthorize("hasRole('USER')")
     public WalletResponse getWalletForUser(Integer userId){
         log.info("Get ting wallet for user id: {}", userId);
         Wallet wallet = walletRepository.findByUserId(userId)

@@ -10,14 +10,12 @@ import org.codewith3h.finmateapplication.dto.response.PaymentResponse;
 import org.codewith3h.finmateapplication.service.PaymentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.payos.PayOS;
 
 @RestController
 @RequestMapping("/api/checkout")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
 public class CheckoutController {
-    PayOS payOS;
     PaymentService paymentService;
 
 

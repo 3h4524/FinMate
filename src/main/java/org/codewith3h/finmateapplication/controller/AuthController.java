@@ -5,7 +5,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.*;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
@@ -35,10 +34,8 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Slf4j
-@RequiredArgsConstructor
 public class AuthController {
 
-//    private final UserService userService;
     private final JwtUtil jwtUtil;
     private final RestTemplate restTemplate;
     private final AuthenticationService authenticationService;
@@ -46,6 +43,13 @@ public class AuthController {
 
     @Value("${google.oauth2.client-id}")
     private String googleClientId;
+
+    public AuthController(JwtUtil jwtUtil, RestTemplate restTemplate, AuthenticationService authenticationService, EmailService emailService) {
+        this.jwtUtil = jwtUtil;
+        this.restTemplate = restTemplate;
+        this.authenticationService = authenticationService;
+        this.emailService = emailService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegisterRequest request) {
@@ -57,64 +61,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthenticationResponse>> login(@Valid @RequestBody LoginRequest loginRequest) throws JOSEException {
             log.info("Received login request for email: {}", loginRequest.getEmail());
             AuthenticationResponse authenticationResponse = authenticationService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+            
             ApiResponse<AuthenticationResponse> response = new ApiResponse<>();
+            response.setCode(1000);
             response.setMessage("Login successfully");
-            log.info("Login successful for user: {}", loginRequest.getEmail());
             response.setResult(authenticationResponse);
             return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/google")
-    @Transactional
-    public ResponseEntity<ApiResponse<AuthenticationResponse>> googleLogin(@RequestBody Map<String, String> request) throws JOSEException {
-        String idToken = request.get("token");
-        if (idToken == null || idToken.isEmpty()) {
-            log.warn("Empty Google token received");
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.<AuthenticationResponse>builder()
-                            .code(9999)
-                            .message("Token không được để trống")
-                            .build());
-        }
-
-
-
-        log.info("Verifying Google token");
-            // Verify token with Google
-            String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
-            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
-
-            if (response == null) {
-                log.warn("Null response from Google token verification");
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.<AuthenticationResponse>builder()
-                                .code(9999)
-                                .message("Không thể xác thực token với Google")
-                                .build());
-            }
-
-            if (!response.has("email")) {
-                log.warn("Invalid Google token response: {}", response.toString());
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.<AuthenticationResponse>builder()
-                                .code(9999)
-                                .message("Token Google không hợp lệ")
-                                .build());
-            }
-
-            String email = response.get("email").asText();
-            String name = response.get("name").asText();
-            boolean emailVerified = response.get("email_verified").asBoolean();
-
-            log.info("Google token verified for email: {}", email);
-            AuthenticationResponse responseData = authenticationService.processGoogleLogin(email, name, emailVerified);
-
-            ApiResponse<AuthenticationResponse> responseClient = new ApiResponse<>();
-            responseClient.setMessage("Google login successfully.");
-            responseClient.setResult(responseData);
-            log.info("Google login successful for user: {}", email);
-            return ResponseEntity.ok(responseClient);
-
     }
 
     @GetMapping("/home")
@@ -159,34 +111,55 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-
-    @PostMapping("/logout")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
-        try {
-            String token = request.getHeader("Authorization");
-            if (token != null && token.startsWith("Bearer ")) {
-                token = token.substring(7);
-                // Invalidate the token by adding it to a blacklist or                                                                                                                                                                                                                                           marking it as expired
-                jwtUtil.invalidateToken(token);
-            }
-
-            // Clear security context
-            SecurityContextHolder.clearContext();
-
-            log.info("User logged out successfully");
-            return ResponseEntity.ok(ApiResponse.<String>builder()
-                    .code(1000)
-                    .message("Logout successful")
-                    .build());
-        } catch (Exception e) {
-            log.error("Error during logout: {}", e.getMessage());
+    @PostMapping("/google")
+    @Transactional
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> googleLogin(@RequestBody Map<String, String> request) throws JOSEException {
+        String idToken = request.get("token");
+        if (idToken == null || idToken.isEmpty()) {
+            log.warn("Empty Google token received");
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.<String>builder()
+                    .body(ApiResponse.<AuthenticationResponse>builder()
                             .code(9999)
-                            .message("Logout failed: " + e.getMessage())
+                            .message("Token không được để trống")
                             .build());
         }
+
+        log.info("Verifying Google token");
+            // Verify token with Google
+            String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
+            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+
+            if (response == null) {
+                log.warn("Null response from Google token verification");
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.<AuthenticationResponse>builder()
+                                .code(9999)
+                                .message("Không thể xác thực token với Google")
+                                .build());
+            }
+
+            if (!response.has("email")) {
+                log.warn("Invalid Google token response: {}", response.toString());
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.<AuthenticationResponse>builder()
+                                .code(9999)
+                                .message("Token Google không hợp lệ")
+                                .build());
+            }
+
+            String email = response.get("email").asText();
+            String name = response.get("name").asText();
+            boolean emailVerified = response.get("email_verified").asBoolean();
+
+            log.info("Google token verified for email: {}", email);
+            AuthenticationResponse responseData = authenticationService.processGoogleLogin(email, name, emailVerified);
+
+            ApiResponse<AuthenticationResponse> responseClient = new ApiResponse<>();
+            responseClient.setMessage("Google login successfully.");
+            responseClient.setResult(responseData);
+            log.info("Google login successful for user: {}", email);
+            return ResponseEntity.ok(responseClient);
+
     }
 
     @PostMapping("/resend-verification")
@@ -199,7 +172,7 @@ public class AuthController {
                 .message("Send otp successfully")
                 .build());
     }
-//
+
     @PostMapping("/verify-email")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> verifyEmail(@RequestBody EmailRequest request) throws JOSEException {
         String email = request.getEmail();
@@ -212,17 +185,20 @@ public class AuthController {
         response.setResult(authenticationResponse);
         return ResponseEntity.ok(response);
     }
-//
+
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody EmailRequest request) {
         String email = request.getEmail();
         log.info("Received forgot password request for email: {}", email);
-        return ResponseEntity.ok(authenticationService.forgotPassword(email));
+        ApiResponse<String> response = authenticationService.forgotPassword(email);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
-            return ResponseEntity.ok(authenticationService.processPasswordReset(request));
+        log.info("Received password reset request");
+        ApiResponse<String> response = authenticationService.processPasswordReset(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/verify-token")

@@ -36,6 +36,7 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final RestClient.Builder builder;
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<ApiResponse<TransactionResponse>> createTransaction(
             @Valid @RequestBody TransactionCreationRequest requestDto) {
@@ -49,7 +50,7 @@ public class TransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/{transactionId}")
     public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(
             @PathVariable @Positive Integer  transactionId,
@@ -65,6 +66,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{transactionId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<TransactionResponse>> getTransaction(
             @PathVariable @Positive Integer transactionId,
             @RequestParam @Positive Integer userId) {
@@ -76,6 +78,7 @@ public class TransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<Void> deleteTransaction(
             @PathVariable @Positive Integer transactionId,
@@ -86,6 +89,7 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TransactionResponse>>> getUserTransactions(
             @RequestParam Integer userId,
@@ -101,6 +105,7 @@ public class TransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<Page<TransactionResponse>>> searchTransactions(
             @Valid @RequestBody TransactionSearchRequest dto) {
@@ -111,5 +116,17 @@ public class TransactionController {
         apiResponse.setMessage("Transactions fetched successfully");
         apiResponse.setResult(response);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @RequestMapping(value = "/confirm-reminder", method = {RequestMethod.POST, RequestMethod.GET})
+    public ResponseEntity<ApiResponse<TransactionResponse>> confirmReminder(
+            @RequestParam String token
+    ){
+        TransactionResponse transactionResponse = transactionService.confirmTransactionReminder(token);
+
+        ApiResponse<TransactionResponse> response = new ApiResponse<>();
+        response.setMessage("Transaction confirmed successfully");
+        response.setResult(transactionResponse);
+        return ResponseEntity.ok(response);
     }
 }

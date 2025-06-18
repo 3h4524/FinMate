@@ -15,5 +15,6 @@ import org.mapstruct.ReportingPolicy;
 public interface CategoryMapper {
     @Mapping(source = "id", target = "categoryId")
     @Mapping(source = "name", target = "categoryName")
+    @Mapping(source = "type", target = "type")
     CategoryResponse toCategoryResponse(Category category);
 }

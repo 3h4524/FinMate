@@ -3,18 +3,12 @@ package org.codewith3h.finmateapplication.util;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.codewith3h.finmateapplication.entity.User;
-import org.codewith3h.finmateapplication.exception.AppException;
-import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,30 +23,28 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    private byte[] secretKey;
     private final Set<String> invalidatedTokens = new HashSet<>();
 
+    public String generateToken(Integer userId, String role) throws JOSEException {
+        if (secret == null || secret.isEmpty()) {
+            throw new IllegalStateException("JWT secret key is not configured");
+        }
 
-    public String generateToken(User user) throws JOSEException {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
-                .subject(user.getId().toString())
-                .claim("username", user.getName())
-                .claim("scope", user.getRole())
+                .subject(userId.toString())
+                .claim("scope", role)
                 .issueTime(new Date())
-                .expirationTime(new Date(System.currentTimeMillis() + expiration))
+                .expirationTime(new Date(System.currentTimeMillis() + expiration * 1000))
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(header, claimSet);
-
         JWSSigner signer = new MACSigner(secret.getBytes());
-
         signedJWT.sign(signer);
 
         return signedJWT.serialize();
     }
-
 
     public Integer extractId(String token) throws Exception {
         return Integer.parseInt(parseToken(token).getJWTClaimsSet().getSubject());
@@ -63,28 +55,45 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token) throws Exception {
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        boolean validSignature = signedJWT.verify(new MACVerifier(secret.getBytes()));
-        boolean validExpirationTime = signedJWT.getJWTClaimsSet().getExpirationTime().after(new Date());
+        if (token == null || token.isEmpty()) {
+            return false;
+        }
 
-        return validSignature && validExpirationTime;
+        if (invalidatedTokens.contains(token)) {
+            return false;
+        }
+
+        if (secret == null || secret.isEmpty()) {
+            throw new IllegalStateException("JWT secret key is not configured");
+        }
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        boolean signatureValid = signedJWT.verify(new MACVerifier(secret.getBytes()));
+        boolean notExpired = signedJWT.getJWTClaimsSet().getExpirationTime().after(new Date());
+
+        return signatureValid && notExpired;
     }
 
     private SignedJWT parseToken(String token) throws Exception {
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Token cannot be null or empty");
+        }
+
+        if (secret == null || secret.isEmpty()) {
+            throw new IllegalStateException("JWT secret key is not configured");
+        }
+
         SignedJWT signedJWT = SignedJWT.parse(token);
         if (!signedJWT.verify(new MACVerifier(secret.getBytes()))) {
-            throw new AppException(ErrorCode.INVALID_TOKEN);
+            throw new Exception("Invalid JWT token");
         }
-        ;
+
         return signedJWT;
     }
 
     public void invalidateToken(String token) {
-        try {
+        if (token != null && !token.isEmpty()) {
             invalidatedTokens.add(token);
-            log.info("Token invalidated successfully");
-        } catch (Exception e) {
-            log.error("Error invalidating token: {}", e.getMessage());
         }
     }
 }
