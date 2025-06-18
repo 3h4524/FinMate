@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.swing.text.html.Option;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,4 +65,23 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     Optional<Transaction> findOne(Specification<Transaction> spec);
 
+    @Query("""
+        SELECT CASE WHEN COUNT(t) > 0 THEN TRUE ELSE FALSE END
+        FROM Transaction t
+        WHERE t.user.id = :userId
+          AND t.amount = :amount
+          AND t.createdAt BETWEEN :from AND :to
+          AND (
+               (:categoryId IS NOT NULL AND t.category.id = :categoryId)
+            OR (:userCategoryId IS NOT NULL AND t.userCategory.id = :userCategoryId)
+          )
+    """)
+    boolean existsByUserIdAndAmountAndCreatedAtBetweenAndCategoryOrUserCategory(
+                @Param("userId") Integer userId,
+                @Param("amount") BigDecimal amount,
+                @Param("from") LocalDateTime from,
+                @Param("to") LocalDateTime to,
+                @Param("categoryId") Integer categoryId,
+                @Param("userCategoryId") Integer userCategoryId
+                );
 }

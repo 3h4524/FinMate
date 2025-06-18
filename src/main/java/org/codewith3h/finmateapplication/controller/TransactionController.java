@@ -118,7 +118,7 @@ public class TransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PostMapping("/confirm-reminder")
+    @RequestMapping(value = "/confirm-reminder", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<ApiResponse<TransactionResponse>> confirmReminder(
             @RequestParam String token
     ){

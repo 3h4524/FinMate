@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -79,39 +80,62 @@ public class RecurringTransactionScheduler {
     }
 
 //    // Hàm scan những transaction nào lặp lại trong vòng 1 tuần
-//    @Scheduled(cron = "0 0 * * * ?")
+//    @Scheduled(cron = "0 * * * * ?")
 //    @Transactional
 //    public void scanForRecurringTransactions(){
+//        log.info("Schedule is running!");
 //        List<User> premiumUsers = userRepository.findAllByIsPremium(true);
 //
 //        LocalDateTime now = LocalDateTime.now();
 //        LocalDateTime oneWeekAgo = now.minusDays(7);
 //        int currentHour = now.getHour();
 //
+//        log.info("now: {}", now);
+//        if(currentHour < 6 ||  currentHour > 22){
+//            return;
+//        }
+//
 //        for(User user : premiumUsers){
 //            Specification<Transaction> spec = TransactionSpecification.hasUserId(user.getId())
 //                    .and(TransactionSpecification.hasTransactionDateBetween(oneWeekAgo,now));
 //
-//            List<Transaction> transactions = transactionRepository.findAll(spec);
-//
+//                List<Transaction> transactions = transactionRepository.findAll(spec);
+//            log.info("transaction: {}", transactions);
 //            transactions.stream()
 //                    .filter(t -> {
 //                        LocalDateTime createdAt = t.getCreatedAt();
-//                        int transactionHour = createdAt.getHour();
-//                        return (transactionHour - currentHour) >= 1;
+//                        Duration duration = Duration.between(createdAt, now);
+//                        return createdAt.isBefore(now.plusHours(1)) && !createdAt.isBefore(now);
 //                    })
 //                    .collect(Collectors.groupingBy(
-//                            t -> new TransactionKey(
-//                                    t.getCategory() != null ? t.getCategory().getId() : null,
-//                                    t.getUserCategory() != null ? t.getUserCategory().getId() : null,
-//                                    t.getAmount()
-//                            ), Collectors.counting()
+//                            t -> {
+//                                TransactionKey key = new TransactionKey(
+//                                        t.getCategory() != null ? t.getCategory().getId() : null,
+//                                        t.getUserCategory() != null ? t.getUserCategory().getId() : null,
+//                                        t.getAmount()
+//                                );
+//                                log.info("transaction: {}", t);
+//                                return key;
+//                            }
+//                            , Collectors.counting()
 //                    ))
-//                    .entrySet().stream()
-//                    .filter(entry -> entry.getValue() >= 3)
-//                    .forEach( entry -> );
-//        }
+//                    .forEach((key, value) -> {
 //
+//                        if (value >= 1 &&
+//                                !transactionRepository.existsByUserIdAndAmountAndCreatedAtBetweenAndCategoryOrUserCategory(
+//                                        user.getId(),
+//                                        key.amount(),
+//                                        now.minusHours(1),
+//                                        now,
+//                                        key.categoryId(),
+//                                        key.userCategoryId()
+//                                )
+//                        ) {
+//                            log.info("executing schedule");
+//                            transactionService.sendReminderEmail(user, key);
+//                        }
+//                    });
+//        }
 //    }
     public record TransactionKey(Integer categoryId, Integer userCategoryId, BigDecimal amount){}
 

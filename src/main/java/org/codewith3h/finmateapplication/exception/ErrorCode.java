@@ -31,7 +31,9 @@ public enum ErrorCode {
     IN_RESENT_OTP_EXCEPTION(1022, "Please wait before requesting another verification code",  HttpStatus.BAD_REQUEST),
     INVALID_TOKEN(1023, "Incorrect token for verification", HttpStatus.BAD_REQUEST),
     TOKEN_EXPIRED(1024, "Token is expired", HttpStatus.BAD_REQUEST),
-    PREMIUM_REQUIRED(1025, "This feature requires premium to active", HttpStatus.BAD_REQUEST)
+    PREMIUM_REQUIRED(1025, "This feature requires premium to active", HttpStatus.BAD_REQUEST),
+    FEATURE_NOT_FOUND(1026, "Feature not found with feature code", HttpStatus.NOT_FOUND),
+    PREMIUM_PACKAGE_NOT_FOUND(1027, "Premium package not found with feature code", HttpStatus.NOT_FOUND),
     ;
 
 

@@ -45,9 +45,9 @@ public interface RecurringTransactionMapper {
     @Mapping(source = "id" , target = "recurringId")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "category.id", target = "categoryId")
+    @Mapping(source = "category.name", target = "categoryName")
     @Mapping(source = "userCategory.id", target = "userCategoryId")
-    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "mapInstantToLocalDateTime")
-    @Mapping(source = "updatedAt", target = "updatedAt", qualifiedByName = "mapInstantToLocalDateTime")
+    @Mapping(source = "userCategory.name", target = "userCategoryName")
     RecurringTransactionResponse toResponseDto(RecurringTransaction entity);
 
     List<RecurringTransactionResponse> toResponseDtoList(List<RecurringTransaction> entities);

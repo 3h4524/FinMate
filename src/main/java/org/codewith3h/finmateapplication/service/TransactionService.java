@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -286,12 +287,14 @@ public class TransactionService {
 
     public void sendReminderEmail(User user, RecurringTransactionScheduler.TransactionKey key){
         try {
+            log.info("Sending reminder email for user {}", user.getName());
             String token = UUID.randomUUID().toString();
             TransactionReminder reminder = TransactionReminder.builder()
                     .token(token)
                     .createdAt(LocalDateTime.now())
-                    .expiryTime(LocalDateTime.now().minusHours(24))
+                    .expiryTime(LocalDateTime.now().plusHours(24))
                     .email(user.getEmail())
+                    .isUsed(false)
                     .user(user)
                     .build();
 
@@ -316,8 +319,8 @@ public class TransactionService {
 
             String subject = "Recurring Transaction Reminder - FinMate";
 
-            String confirmSingleUrl = "http://127.0.0.1:8080/api/v1/transactions/confirm-reminder?token=" + token;
-            String confirmRecurringUrl = "http://127.0.0.1:8080/api/v1/recurringTransactions/confirm-recurring?token=" + token;
+            String confirmSingleUrl = "http://127.0.0.1:8080/api/transactions/confirm-reminder?token=" + token;
+            String confirmRecurringUrl = "http://127.0.0.1:8080/api/recurringTransactions/confirm-recurring?token=" + token;
 
             // HTML content for email with two buttons
             String content = String.format(
@@ -366,9 +369,9 @@ public class TransactionService {
         }
 
         User user = reminder.getUser();
-        if(!user.getIsPremium()){
-            throw new AppException(ErrorCode.PREMIUM_REQUIRED);
-        }
+//        if(!user.getIsPremium()){
+//            throw new AppException(ErrorCode.PREMIUM_REQUIRED);
+//        }
 
         Transaction originalTransaction = reminder.getTransaction();
 
@@ -381,7 +384,7 @@ public class TransactionService {
                         ? originalTransaction.getUserCategory().getId()
                         : null)
                 .amount(originalTransaction.getAmount())
-                .transactionDate(originalTransaction.getTransactionDate())
+                .transactionDate(LocalDate.now())
                 .note(originalTransaction.getNote())
                 .build();
 

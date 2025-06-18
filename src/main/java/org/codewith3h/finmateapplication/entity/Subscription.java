@@ -8,8 +8,10 @@ import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,6 +28,10 @@ public class Subscription {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "package_id", nullable = false)
+    private PremiumPackage premiumPackage;
+
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
@@ -40,6 +46,9 @@ public class Subscription {
     @Column(name = "auto_renew")
     private Boolean autoRenew;
 
+    @Column(name = "amount")
+    private BigDecimal amount;
+
     @Nationalized
     @ColumnDefault("'PENDING'")
     @Column(name = "status", length = 20)
@@ -51,10 +60,10 @@ public class Subscription {
 
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @ColumnDefault("getdate()")
     @Column(name = "updated_at")
-    private Instant updatedAt;
+    private LocalDateTime updatedAt;
 
 }

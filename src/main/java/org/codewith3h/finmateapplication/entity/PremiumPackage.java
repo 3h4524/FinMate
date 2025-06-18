@@ -3,13 +3,17 @@ package org.codewith3h.finmateapplication.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.codewith3h.finmateapplication.enums.DurationType;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-    @Getter
+@Getter
     @Setter
     @Entity
     @Table(name = "PremiumPackages")
@@ -34,23 +38,43 @@ import java.time.Instant;
         @Column(name = "discount_percentage", precision = 5, scale = 2)
         private BigDecimal discountPercentage;
 
-        @Column(name = "duration_days", nullable = false)
-        private Integer durationDays;
-
-        @Nationalized
-        @Lob
-        @Column(name = "features")
-        private String features;
-
         @ColumnDefault("1")
         @Column(name = "is_active")
-        private Boolean isActive;
+        private Boolean isActive = true;
 
         @ColumnDefault("getdate()")
         @Column(name = "created_at")
-        private Instant createdAt;
+        private LocalDateTime createdAt;
 
         @ColumnDefault("getdate()")
         @Column(name = "updated_at")
-        private Instant updatedAt;
+        private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "duration_type", nullable = false)
+    private DurationType durationType;
+
+    @Column(name = "duration_value", nullable = false)
+    private Integer durationValue;
+
+
+    @ManyToMany
+        @JoinTable(
+                name = "PremiumPackageFeatures",
+                joinColumns = @JoinColumn(name = "package_id"),
+                inverseJoinColumns = @JoinColumn(name = "feature_id")
+        )
+        private List<Feature> features = new ArrayList<>();
+
+
+        @PrePersist
+        public void prePersist(){
+            createdAt = LocalDateTime.now();
+            updatedAt = LocalDateTime.now();
+        }
+
+        @PreUpdate
+        public void preUpdate(){
+            updatedAt = LocalDateTime.now();
+        }
     }

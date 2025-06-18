@@ -35,9 +35,13 @@ public class RecurringTransactionController {
     }
 
 
-//    @PostMapping("/confirm-recurring")
-//    public ResponseEntity<ApiResponse<RecurringTransactionResponse>> confirmRecurringTransactionReminder(
-//            @RequestParam String token) {
-//
-//    }
+    @PostMapping("/confirm-recurring")
+    public ResponseEntity<ApiResponse<RecurringTransactionResponse>> confirmRecurringTransactionReminder(
+            @RequestParam String token) {
+        RecurringTransactionResponse response = recurringTransactionService.confirmRecurringTransactionReminder(token);
+        ApiResponse<RecurringTransactionResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Recurring transaction confirmed");
+        apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
