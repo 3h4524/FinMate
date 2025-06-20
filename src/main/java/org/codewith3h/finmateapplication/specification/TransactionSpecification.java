@@ -6,10 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-<<<<<<< HEAD
 import java.time.LocalDateTime;
-=======
->>>>>>> origin/authentication
 
 
 public class TransactionSpecification {
@@ -24,7 +21,7 @@ public class TransactionSpecification {
                 categoryId == null ? null : criteriaBuilder.equal(root.get("category").get("id"), categoryId);
     }
 
-    public static Specification<Transaction> hasUserCategoryId(Integer userCategoryId){
+    public static Specification<Transaction> hasUserCategoryId(Integer userCategoryId) {
         return (root, query, cb) ->
                 userCategoryId == null ? null : cb.equal(root.get("userCategory").get("id"), userCategoryId);
     }
@@ -36,7 +33,7 @@ public class TransactionSpecification {
 
     public static Specification<Transaction> hasMaxAmount(BigDecimal maxAmount) {
         return (root, query, criteriaBuilder) ->
-                maxAmount == null ? null : criteriaBuilder.equal(root.get("amount"),  maxAmount);
+                maxAmount == null ? null : criteriaBuilder.equal(root.get("amount"), maxAmount);
     }
 
     public static Specification<Transaction> hasAmountBetween(BigDecimal minAmount, BigDecimal maxAmount) {
@@ -56,11 +53,7 @@ public class TransactionSpecification {
     public static Specification<Transaction> hasDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> {
             if (startDate == null && endDate == null) {
-<<<<<<< HEAD
                 return criteriaBuilder.conjunction();
-=======
-                return null;
->>>>>>> origin/authentication
             } else if (startDate == null) {
                 return criteriaBuilder.lessThanOrEqualTo(root.get("transactionDate"), endDate);
             } else if (endDate == null) {
@@ -68,7 +61,7 @@ public class TransactionSpecification {
             } else {
                 return criteriaBuilder.between(root.get("transactionDate"), startDate, endDate);
             }
-         };
+        };
     }
 
     public static Specification<Transaction> hasTransactionDateAfter(LocalDate date) {
@@ -115,7 +108,6 @@ public class TransactionSpecification {
         spec.and(hasAmountBetween(minAmount, maxAmount));
         return spec;
     }
-<<<<<<< HEAD
 
     public static Specification<Transaction> hasTransactionDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return (root, query, criteriaBuilder) -> {
@@ -131,6 +123,5 @@ public class TransactionSpecification {
             return criteriaBuilder.conjunction();
         };
     }
-=======
->>>>>>> origin/authentication
+
 }

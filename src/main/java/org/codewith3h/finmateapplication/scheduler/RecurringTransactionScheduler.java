@@ -4,16 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.entity.RecurringTransaction;
-<<<<<<< HEAD
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.entity.User;
-=======
->>>>>>> origin/authentication
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.RecurringTransactionMapper;
 import org.codewith3h.finmateapplication.repository.RecurringTransactionRepository;
-<<<<<<< HEAD
 import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.codewith3h.finmateapplication.service.EmailService;
@@ -32,7 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-=======
+
 import org.codewith3h.finmateapplication.service.RecurringTransactionService;
 import org.codewith3h.finmateapplication.service.TransactionService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,7 +37,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
->>>>>>> origin/authentication
 
 @Component
 @RequiredArgsConstructor
@@ -49,17 +44,12 @@ import java.util.Locale;
 public class RecurringTransactionScheduler {
     private final RecurringTransactionMapper recurringTransactionMapper;
     private final TransactionService transactionService;
-    private final RecurringTransactionRepository  recurringTransactionRepository;
-<<<<<<< HEAD
+    private final RecurringTransactionRepository recurringTransactionRepository;
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final EmailService emailService;
 
     //Hàm tạo transaction dựa trên recurring transaction
-=======
-    private final RecurringTransactionService recurringTransactionService;
-
->>>>>>> origin/authentication
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleRecurringTransaction() {
         LocalDate today = LocalDate.now();
@@ -68,32 +58,28 @@ public class RecurringTransactionScheduler {
         List<RecurringTransaction> recurringTransactions = recurringTransactionRepository
                 .findByIsActiveTrueAndNextDateLessThanEqualAndEndDateGreaterThanEqual(today, today);
 
-        for(RecurringTransaction recurringTransaction : recurringTransactions){
-                TransactionCreationRequest request = recurringTransactionMapper
-                        .mapRecurringTransactionToTransactionRequestDto(recurringTransaction);
+        for (RecurringTransaction recurringTransaction : recurringTransactions) {
+            TransactionCreationRequest request = recurringTransactionMapper
+                    .mapRecurringTransactionToTransactionRequestDto(recurringTransaction);
 
-                request.setIsRecurring(true);
-                request.setTransactionDate(today);
-<<<<<<< HEAD
-                    transactionService.createTransaction(request);
-=======
-                transactionService.createTransaction(request);
->>>>>>> origin/authentication
+            request.setIsRecurring(true);
+            request.setTransactionDate(today);
+            transactionService.createTransaction(request);
 
-                LocalDate newNextDate = calculateNextDate(today, recurringTransaction.getFrequency());
-                recurringTransaction.setNextDate(newNextDate);
-                if(newNextDate.isAfter(recurringTransaction.getEndDate())){
-                    recurringTransaction.setIsActive(false);
-                }
+            LocalDate newNextDate = calculateNextDate(today, recurringTransaction.getFrequency());
+            recurringTransaction.setNextDate(newNextDate);
+            if (newNextDate.isAfter(recurringTransaction.getEndDate())) {
+                recurringTransaction.setIsActive(false);
+            }
 
-                recurringTransactionRepository.save(recurringTransaction);
+            recurringTransactionRepository.save(recurringTransaction);
 
-                log.info("Created transaction for recurring transaction Id: {}, next date set to: {}"
-                        , recurringTransaction.getId(), recurringTransaction.getNextDate());
+            log.info("Created transaction for recurring transaction Id: {}, next date set to: {}"
+                    , recurringTransaction.getId(), recurringTransaction.getNextDate());
         }
     }
 
-    private LocalDate calculateNextDate(LocalDate currentDate, String frequency){
+    private LocalDate calculateNextDate(LocalDate currentDate, String frequency) {
         return switch (frequency.toUpperCase()) {
             case "DAILY" -> currentDate.plusDays(1);
             case "WEEKLY" -> currentDate.plusWeeks(7);
@@ -101,9 +87,8 @@ public class RecurringTransactionScheduler {
             default -> throw new AppException(ErrorCode.INVALID_FREQUENCY_EXCEPTION);
         };
     }
-<<<<<<< HEAD
 
-//    // Hàm scan những transaction nào lặp lại trong vòng 1 tuần
+    //    // Hàm scan những transaction nào lặp lại trong vòng 1 tuần
 //    @Scheduled(cron = "0 * * * * ?")
 //    @Transactional
 //    public void scanForRecurringTransactions(){
@@ -161,8 +146,8 @@ public class RecurringTransactionScheduler {
 //                    });
 //        }
 //    }
-    public record TransactionKey(Integer categoryId, Integer userCategoryId, BigDecimal amount){}
+    public record TransactionKey(Integer categoryId, Integer userCategoryId, BigDecimal amount) {
+    }
 
-=======
->>>>>>> origin/authentication
+
 }

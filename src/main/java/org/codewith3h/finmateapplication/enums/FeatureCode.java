@@ -5,11 +5,11 @@ import lombok.Getter;
 
 @Getter
 public enum FeatureCode {
-    EXPORT_REPORT("Xuất báo cáo"),
+    EXPORT_REPORT("Xuất báo cáo finance"),
     UNLIMITED_CUSTOM_CATEGORY("Tạo danh mục tùy chỉnh không giới hạn"),
     UNLIMITED_BUDGET("Tạo ngân sách không giới hạn"),
-    SMART_REMINDER("Nhắc nhở thông minh"),
-    SYSTEM_ALERTS("Cảnh báo hệ thống");
+    SMART_REMINDER("Nhắc nhở thông minh từ AI"),
+    SYSTEM_ALERTS("Cảnh báo hệ thống khi vượt budget");
 
     private final String displayName;
 

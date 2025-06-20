@@ -210,9 +210,6 @@ public class TransactionService {
     @PreAuthorize("hasRole('USER')")
     public Page<TransactionResponse> getUserTransactions(Integer userId, int page, int size, String sortBy, String sortDirection) {
         log.info("Fetching transactions for user {} with pagination", userId);
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("UserName: {}", authentication.getName());
-        log.info("User role: {}", authentication.getAuthorities());
 
         Sort sort = sortDirection.equalsIgnoreCase("ASC")
                 ? Sort.by(sortBy).ascending()
@@ -285,78 +282,78 @@ public class TransactionService {
         return transactions.map(transactionMapper::toResponseDto);
     }
 
-    public void sendReminderEmail(User user, RecurringTransactionScheduler.TransactionKey key){
-        try {
-            log.info("Sending reminder email for user {}", user.getName());
-            String token = UUID.randomUUID().toString();
-            TransactionReminder reminder = TransactionReminder.builder()
-                    .token(token)
-                    .createdAt(LocalDateTime.now())
-                    .expiryTime(LocalDateTime.now().plusHours(24))
-                    .email(user.getEmail())
-                    .isUsed(false)
-                    .user(user)
-                    .build();
-
-            Specification<Transaction> spec = TransactionSpecification.hasUserId(user.getId())
-                    .and(key.categoryId() != null ? TransactionSpecification.hasCategoryId(key.categoryId())
-                            : TransactionSpecification.hasUserCategoryId(key.userCategoryId()));
-
-            Transaction transaction = transactionRepository.findOne(spec)
-                    .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
-
-            reminder.setTransaction(transaction);
-
-            transactionReminderRepository.save(reminder);
-
-            String categoryName = transaction.getCategory() != null
-                        ? transaction.getCategory().getName()
-                        : transaction.getUserCategory().getName();
-
-            String categoryType = transaction.getCategory() != null
-                        ? transaction.getCategory().getType()
-                        : transaction.getUserCategory().getType();
-
-            String subject = "Recurring Transaction Reminder - FinMate";
-
-            String confirmSingleUrl = "http://127.0.0.1:8080/api/transactions/confirm-reminder?token=" + token;
-            String confirmRecurringUrl = "http://127.0.0.1:8080/api/recurringTransactions/confirm-recurring?token=" + token;
-
-            // HTML content for email with two buttons
-            String content = String.format(
-                    "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>"
-                            + "<h2>Recurring Transaction Reminder</h2>"
-                            + "<p>Hello %s,</p>"
-                            + "<p>We noticed you have a recurring transaction:</p>"
-                            + "<ul>"
-                            + "<li><strong>Category:</strong> %s</li>"
-                            + "<li><strong>Amount:</strong> %s</li>"
-                            + "<li><strong>Type:</strong> %s</li>"
-                            + "</ul>"
-                            + "<p>Would you like to create this transaction again?</p>"
-                            + "<a href='%s' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px; margin-right: 10px;'>"
-                            + "Create Single Transaction</a>"
-                            + "<a href='%s' style='display: inline-block; padding: 10px 20px; color: white; background-color: #007bff; text-decoration: none; border-radius: 5px;'>"
-                            + "Create Recurring Transaction</a>"
-                            + "<p>The links will expire in 24 hours.</p>"
-                            + "<p>If you do not wish to create this transaction, please ignore this email.</p>"
-                            + "<hr>"
-                            + "<p style='font-size: 12px; color: #777;'>Best regards,<br>FinMate Team</p>"
-                            + "</div>",
-                    user.getName(),
-                    categoryName,
-                    key.amount(),
-                    categoryType,
-                    confirmSingleUrl,
-                    confirmRecurringUrl
-            );
-
-            emailService.sendCustomEmail(user.getEmail(), subject, content, true);
-
-        } catch (MessagingException e) {
-            log.error("Failed to send reminder email to {}: {}", user.getEmail(), e.getMessage());
-        }
-    }
+//    public void sendReminderEmail(User user, RecurringTransactionScheduler.TransactionKey key){
+//        try {
+//            log.info("Sending reminder email for user {}", user.getName());
+//            String token = UUID.randomUUID().toString();
+//            TransactionReminder reminder = TransactionReminder.builder()
+//                    .token(token)
+//                    .createdAt(LocalDateTime.now())
+//                    .expiryTime(LocalDateTime.now().plusHours(24))
+//                    .email(user.getEmail())
+//                    .isUsed(false)
+//                    .user(user)
+//                    .build();
+//
+//            Specification<Transaction> spec = TransactionSpecification.hasUserId(user.getId())
+//                    .and(key.categoryId() != null ? TransactionSpecification.hasCategoryId(key.categoryId())
+//                            : TransactionSpecification.hasUserCategoryId(key.userCategoryId()));
+//
+//            Transaction transaction = transactionRepository.findOne(spec)
+//                    .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
+//
+//            reminder.setTransaction(transaction);
+//
+//            transactionReminderRepository.save(reminder);
+//
+//            String categoryName = transaction.getCategory() != null
+//                        ? transaction.getCategory().getName()
+//                        : transaction.getUserCategory().getName();
+//
+//            String categoryType = transaction.getCategory() != null
+//                        ? transaction.getCategory().getType()
+//                        : transaction.getUserCategory().getType();
+//
+//            String subject = "Recurring Transaction Reminder - FinMate";
+//
+//            String confirmSingleUrl = "http://127.0.0.1:8080/api/transactions/confirm-reminder?token=" + token;
+//            String confirmRecurringUrl = "http://127.0.0.1:8080/api/recurringTransactions/confirm-recurring?token=" + token;
+//
+//            // HTML content for email with two buttons
+//            String content = String.format(
+//                    "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>"
+//                            + "<h2>Recurring Transaction Reminder</h2>"
+//                            + "<p>Hello %s,</p>"
+//                            + "<p>We noticed you have a recurring transaction:</p>"
+//                            + "<ul>"
+//                            + "<li><strong>Category:</strong> %s</li>"
+//                            + "<li><strong>Amount:</strong> %s</li>"
+//                            + "<li><strong>Type:</strong> %s</li>"
+//                            + "</ul>"
+//                            + "<p>Would you like to create this transaction again?</p>"
+//                            + "<a href='%s' style='display: inline-block; padding: 10px 20px; color: white; background-color: #28a745; text-decoration: none; border-radius: 5px; margin-right: 10px;'>"
+//                            + "Create Single Transaction</a>"
+//                            + "<a href='%s' style='display: inline-block; padding: 10px 20px; color: white; background-color: #007bff; text-decoration: none; border-radius: 5px;'>"
+//                            + "Create Recurring Transaction</a>"
+//                            + "<p>The links will expire in 24 hours.</p>"
+//                            + "<p>If you do not wish to create this transaction, please ignore this email.</p>"
+//                            + "<hr>"
+//                            + "<p style='font-size: 12px; color: #777;'>Best regards,<br>FinMate Team</p>"
+//                            + "</div>",
+//                    user.getName(),
+//                    categoryName,
+//                    key.amount(),
+//                    categoryType,
+//                    confirmSingleUrl,
+//                    confirmRecurringUrl
+//            );
+//
+//            emailService.sendCustomEmail(user.getEmail(), subject, content, true);
+//
+//        } catch (MessagingException e) {
+//            log.error("Failed to send reminder email to {}: {}", user.getEmail(), e.getMessage());
+//        }
+//    }
 
 
     @Transactional

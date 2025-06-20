@@ -2,6 +2,7 @@ package org.codewith3h.finmateapplication.mapper;
 
 
 import org.codewith3h.finmateapplication.EntityResolver;
+import org.codewith3h.finmateapplication.dto.response.SubscriptionResponse;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.enums.DurationType;
@@ -12,7 +13,9 @@ import org.mapstruct.*;
 
 import java.time.Instant;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SubscriptionMapper {
 
     @Mapping(target = "user.id", source = "userId")
@@ -49,4 +52,12 @@ public interface SubscriptionMapper {
 
         subscription.setEndDate(purchaseDate.plusSeconds((durationDays * 24L * 60 * 60) * premiumPackage.getDurationValue()));
     }
+
+//    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "user.name", target = "userName")
+    @Mapping(source = "premiumPackage.name", target = "packageName")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "amount", target = "amount")
+    SubscriptionResponse toResponseDto(Subscription entity);
+
 }

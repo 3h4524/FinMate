@@ -49,5 +49,11 @@ public interface PremiumPackageMapper {
                 .collect(Collectors.toList());
     }
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "features", expression = "java(mapFeatureCodes(premiumPackageCreationDto.getFeatures(), featureRepository))")
+    void updateEntityFromDto(PremiumPackageCreationDto premiumPackageCreationDto, @MappingTarget PremiumPackage entity, @Context FeatureRepository featureRepository);
+
 
 }

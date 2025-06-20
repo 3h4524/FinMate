@@ -1,7 +1,10 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
@@ -13,15 +16,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/premium-package")
-@Validated
 @RequiredArgsConstructor
+@Slf4j
+@Validated
 public class PremiumPackageController {
 
     private final PremiumPackageService premiumPackageService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<PremiumPackageResponse>> createPremiumPackage(
-            @RequestBody PremiumPackageCreationDto request
+            @Valid @RequestBody PremiumPackageCreationDto request
     ){
         PremiumPackageResponse premiumPackageResponse = premiumPackageService.createPremiumPackage(request);
         ApiResponse<PremiumPackageResponse> apiResponse = new ApiResponse<>();
@@ -31,16 +35,52 @@ public class PremiumPackageController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<PremiumPackageResponse>>> getListPremiumPackage(
-            @RequestParam(name = "page", defaultValue = "0") @Min(0) int page,
-            @RequestParam(name = "size", defaultValue = "10") @Min(1) int size,
-            @RequestParam(name = "sortBy", defaultValue = "price") String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = "DESC") String sortDirection) {
-        System.out.println("getListPremiumPackage");
-        Page<PremiumPackageResponse> responses = premiumPackageService.getListPremiumPackage(page, size, sortBy, sortDirection);
-        ApiResponse<Page<PremiumPackageResponse>> apiResponse = new  ApiResponse<>();
-        apiResponse.setMessage("List premium packages fetched successfully");
-        apiResponse.setResult(responses);
+    public ResponseEntity<ApiResponse<Page<PremiumPackageResponse>>> getPremiumPackage(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "5") @Min(1) int size,
+            @RequestParam(defaultValue = "price") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection)
+    {
+        log.info("Getting premium package");
+        Page<PremiumPackageResponse> packageResponses = premiumPackageService
+                .getPremiumPackages(page, size, sortBy, sortDirection);
+
+        ApiResponse<Page<PremiumPackageResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("premium package list retrieved successfully");
+        apiResponse.setResult(packageResponses);
+        return  ResponseEntity.ok(apiResponse);
+    }
+
+    @PutMapping("/{packageId}")
+    public ResponseEntity<ApiResponse<PremiumPackageResponse>> updatePremiumPackage(
+            @PathVariable @Positive Integer packageId,
+            @Valid @RequestBody PremiumPackageCreationDto request
+    ) {
+        log.info("Updating premium package");
+        PremiumPackageResponse packageResponse = premiumPackageService.updatePremiumPackage(packageId, request);
+
+        ApiResponse<PremiumPackageResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("premium package updated successfully");
+        apiResponse.setResult(packageResponse);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
+    @DeleteMapping("/{packageId}")
+    public ResponseEntity<Void> deletePremiumPackage(@PathVariable @Positive Integer packageId) {
+        log.info("deleting premium package");
+        premiumPackageService.deletePremiumPackage(packageId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{packageId}")
+    public ResponseEntity<ApiResponse<PremiumPackageResponse>> getPremiumPackage(
+            @PathVariable @Positive Integer packageId
+    )  {
+        PremiumPackageResponse packageResponse = premiumPackageService.getPremiumPackageDetail(packageId);
+        ApiResponse<PremiumPackageResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("premium package retrieved successfully");
+        apiResponse.setResult(packageResponse);
         return ResponseEntity.ok(apiResponse);
     }
 

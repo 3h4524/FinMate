@@ -7,11 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< HEAD
-import java.time.LocalDateTime;
 import java.util.List;
-=======
->>>>>>> origin/authentication
 import java.util.Optional;
 
 @Repository
@@ -25,9 +21,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Transactional
     @Query("UPDATE User u SET u.lastLoginAt = CURRENT_TIMESTAMP WHERE u.id = ?1")
     void updateLastLoginAt(Integer userId);
-<<<<<<< HEAD
 
     List<User> findAllByIsPremium(boolean check);
-=======
->>>>>>> origin/authentication
 }
