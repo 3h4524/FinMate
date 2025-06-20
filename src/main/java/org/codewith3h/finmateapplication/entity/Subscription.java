@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -47,5 +48,9 @@ public class Subscription {
     @ColumnDefault("'PENDING'")
     @Column(name = "status", length = 20)
     private String status;
+
+    @ColumnDefault("getdate()")
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
 }

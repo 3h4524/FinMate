@@ -53,7 +53,7 @@ public interface SubscriptionMapper {
         subscription.setEndDate(purchaseDate.plusSeconds((durationDays * 24L * 60 * 60) * premiumPackage.getDurationValue()));
     }
 
-//    @Mapping(source = "createdAt", target = "createdAt")
+    @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "user.name", target = "userName")
     @Mapping(source = "premiumPackage.name", target = "packageName")
     @Mapping(source = "status", target = "status")

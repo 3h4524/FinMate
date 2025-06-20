@@ -27,6 +27,9 @@ public class SubscriptionService {
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
         List<Subscription> subscriptions = subscriptionRepository.findByPremiumPackage(premiumPackage);
+
+        System.out.println(subscriptions.size());
+
         BigDecimal revenue = subscriptions.stream()
                 .map(sub -> BigDecimal.valueOf(sub.getAmount()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -39,7 +42,7 @@ public class SubscriptionService {
 
 
     public RevenueAndSubscribers getTotalRevenueAndSubscriber() {
-        List<Subscription> subscriptions = subscriptionRepository.findAll();
+        List<Subscription> subscriptions = subscriptionRepository.findByStatus("ACTIVE");
         BigDecimal revenue = subscriptions.stream()
                 .map(re -> BigDecimal.valueOf(re.getAmount()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -59,7 +62,7 @@ public class SubscriptionService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Subscription> subscriptions = subscriptionRepository.findAll(pageable);
+        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus("ACTIVE",pageable);
 
         return subscriptions.map(subscriptionMapper::toResponseDto);
     }
