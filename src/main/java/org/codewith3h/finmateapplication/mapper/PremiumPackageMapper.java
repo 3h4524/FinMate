@@ -36,7 +36,7 @@ public interface PremiumPackageMapper {
     @Mapping(target = "durationType", source = "durationType")
     @Mapping(target = "durationValue", source = "durationValue")
     @Mapping(target = "isActive", source = "isActive")
-    @Mapping(target = "features", expression = "java(premiumPackage.getFeatures().stream().map(feature -> feature.getCode()).collect(java.util.stream.Collectors.toList()))")
+    @Mapping(target = "features", expression = "java(premiumPackage.getFeatures().stream().map(feature -> feature.getName()).collect(java.util.stream.Collectors.toList()))")
     PremiumPackageResponse toResponseDto(PremiumPackage premiumPackage);
 
     default List<Feature> mapFeatureCodes(List<FeatureCode> featureCodes, @Context FeatureRepository featureRepository) {
@@ -48,6 +48,12 @@ public interface PremiumPackageMapper {
                         .orElseThrow(() -> new AppException(ErrorCode.FEATURE_NOT_FOUND)))
                 .collect(Collectors.toList());
     }
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "features", expression = "java(mapFeatureCodes(premiumPackageCreationDto.getFeatures(), featureRepository))")
+    void updateEntityFromDto(PremiumPackageCreationDto premiumPackageCreationDto, @MappingTarget PremiumPackage entity, @Context FeatureRepository featureRepository);
 
 
 }

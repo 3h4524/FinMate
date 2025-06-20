@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface FeatureRepository extends JpaRepository<Feature, Integer> {
     Optional<Feature> findByCode(String featureCode);
+
+    List<Feature> findByIsActiveTrue();
 }

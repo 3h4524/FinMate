@@ -210,9 +210,6 @@ public class TransactionService {
     @PreAuthorize("hasRole('USER')")
     public Page<TransactionResponse> getUserTransactions(Integer userId, int page, int size, String sortBy, String sortDirection) {
         log.info("Fetching transactions for user {} with pagination", userId);
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("UserName: {}", authentication.getName());
-        log.info("User role: {}", authentication.getAuthorities());
 
         Sort sort = sortDirection.equalsIgnoreCase("ASC")
                 ? Sort.by(sortBy).ascending()
