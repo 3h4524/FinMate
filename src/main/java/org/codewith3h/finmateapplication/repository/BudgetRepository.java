@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface BudgetRepository extends JpaRepository<Budget, Integer> {
@@ -20,4 +22,6 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
             @Param("startDate") LocalDate startDate,
             @Param("categoryId") Integer categoryId
     );
+
+    List<Budget> findBudgetsByUser_Id(Integer userId);
 }

@@ -17,7 +17,6 @@ import java.time.LocalDate;
 @Table(name = "Budgets")
 @DynamicInsert
 @DynamicUpdate
-@ToString
 public class Budget {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

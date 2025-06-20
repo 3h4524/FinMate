@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.validation.Valid;
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
@@ -11,8 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -28,8 +27,9 @@ public class BudgetController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(
-            @RequestBody CreateBudgetRequest request) {
+    public ResponseEntity<ApiResponse<BudgetResponse>>
+    createBudget(
+            @Valid @RequestBody CreateBudgetRequest request) {
         BudgetResponse response = budgetService.createBudget(request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
@@ -39,22 +39,22 @@ public class BudgetController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<BudgetResponse>> updateBudget(
             @PathVariable("id") Integer budgetId,
-            @RequestBody UpdateBudgetRequest request) {
+            @Valid @RequestBody UpdateBudgetRequest request) {
         BudgetResponse response = budgetService.updateBudget(budgetId, request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BudgetResponse>> getBudgetById(@PathVariable("id") Integer budgetId) {
-
+    public ResponseEntity<ApiResponse<BudgetResponse>> getBudgetById(
+            @PathVariable("id") Integer budgetId) {
         BudgetResponse response = budgetService.getBudgetById(budgetId);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
         apiResponse.setMessage("Success");
         apiResponse.setCode(1000);
-
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -66,6 +66,7 @@ public class BudgetController {
         apiResponse.setMessage("Budget deleted successfully.");
         return ResponseEntity.ok(apiResponse);
     }
+
 
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<Page<BudgetResponse>>> getBudgets(
@@ -79,7 +80,6 @@ public class BudgetController {
         apiResponse.setResult(response);
         apiResponse.setCode(1000);
         apiResponse.setMessage("Success");
-        System.out.println("response: " + response.getContent().size());
         return ResponseEntity.ok(apiResponse);
     }
 

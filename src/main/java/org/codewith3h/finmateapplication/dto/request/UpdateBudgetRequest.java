@@ -24,7 +24,5 @@ public class UpdateBudgetRequest {
 
     private LocalDate startDate;
 
-    private LocalDate endDate;
-
     private Integer notificationThreshold;
 }
