@@ -9,10 +9,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+<<<<<<< HEAD
 import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+=======
+import java.time.LocalDate;
+>>>>>>> origin/authentication
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +26,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     Optional<Transaction> findByIdAndUserId(Integer transactionId, Integer userId);
 
+<<<<<<< HEAD
     Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+=======
+    Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+>>>>>>> origin/authentication
 
     Page<Transaction> findByUserIdAndCategoryId(Integer userId, Integer categoryId, Pageable pageable);
 
@@ -34,8 +42,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     Long countByUserId(Integer userId);
 
+<<<<<<< HEAD
     List<Transaction> findAll(Specification<Transaction> spec);
 
+=======
+>>>>>>> origin/authentication
     Page<Transaction> findAll(Specification<Transaction> spec, Pageable pageable);
 
     @Query("SELECT YEAR(t.transactionDate), MONTH(t.transactionDate), SUM(t.amount) " +
@@ -62,6 +73,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+<<<<<<< HEAD
 
     Optional<Transaction> findOne(Specification<Transaction> spec);
 
@@ -84,4 +96,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
                 @Param("categoryId") Integer categoryId,
                 @Param("userCategoryId") Integer userCategoryId
                 );
+=======
+>>>>>>> origin/authentication
 }

@@ -39,6 +39,7 @@ public enum ErrorCode {
     BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
     UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN);
 
+
     private int code;
     private String message;
     private HttpStatusCode statusCode;
@@ -49,3 +50,4 @@ public enum ErrorCode {
         this.statusCode = statusCode;
     }
 }
+

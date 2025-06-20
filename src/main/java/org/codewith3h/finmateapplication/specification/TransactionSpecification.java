@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+<<<<<<< HEAD
 import java.time.LocalDateTime;
+=======
+>>>>>>> origin/authentication
 
 
 public class TransactionSpecification {
@@ -53,7 +56,11 @@ public class TransactionSpecification {
     public static Specification<Transaction> hasDateBetween(LocalDate startDate, LocalDate endDate) {
         return (root, query, criteriaBuilder) -> {
             if (startDate == null && endDate == null) {
+<<<<<<< HEAD
                 return criteriaBuilder.conjunction();
+=======
+                return null;
+>>>>>>> origin/authentication
             } else if (startDate == null) {
                 return criteriaBuilder.lessThanOrEqualTo(root.get("transactionDate"), endDate);
             } else if (endDate == null) {
@@ -108,6 +115,7 @@ public class TransactionSpecification {
         spec.and(hasAmountBetween(minAmount, maxAmount));
         return spec;
     }
+<<<<<<< HEAD
 
     public static Specification<Transaction> hasTransactionDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return (root, query, criteriaBuilder) -> {
@@ -123,4 +131,6 @@ public class TransactionSpecification {
             return criteriaBuilder.conjunction();
         };
     }
+=======
+>>>>>>> origin/authentication
 }

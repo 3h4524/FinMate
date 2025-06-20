@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.entity.RecurringTransaction;
+<<<<<<< HEAD
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.entity.User;
+=======
+>>>>>>> origin/authentication
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.RecurringTransactionMapper;
 import org.codewith3h.finmateapplication.repository.RecurringTransactionRepository;
+<<<<<<< HEAD
 import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.codewith3h.finmateapplication.service.EmailService;
@@ -28,6 +32,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+=======
+import org.codewith3h.finmateapplication.service.RecurringTransactionService;
+import org.codewith3h.finmateapplication.service.TransactionService;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Locale;
+>>>>>>> origin/authentication
 
 @Component
 @RequiredArgsConstructor
@@ -36,11 +50,16 @@ public class RecurringTransactionScheduler {
     private final RecurringTransactionMapper recurringTransactionMapper;
     private final TransactionService transactionService;
     private final RecurringTransactionRepository  recurringTransactionRepository;
+<<<<<<< HEAD
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final EmailService emailService;
 
     //Hàm tạo transaction dựa trên recurring transaction
+=======
+    private final RecurringTransactionService recurringTransactionService;
+
+>>>>>>> origin/authentication
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleRecurringTransaction() {
         LocalDate today = LocalDate.now();
@@ -55,7 +74,11 @@ public class RecurringTransactionScheduler {
 
                 request.setIsRecurring(true);
                 request.setTransactionDate(today);
+<<<<<<< HEAD
                     transactionService.createTransaction(request);
+=======
+                transactionService.createTransaction(request);
+>>>>>>> origin/authentication
 
                 LocalDate newNextDate = calculateNextDate(today, recurringTransaction.getFrequency());
                 recurringTransaction.setNextDate(newNextDate);
@@ -78,6 +101,7 @@ public class RecurringTransactionScheduler {
             default -> throw new AppException(ErrorCode.INVALID_FREQUENCY_EXCEPTION);
         };
     }
+<<<<<<< HEAD
 
 //    // Hàm scan những transaction nào lặp lại trong vòng 1 tuần
 //    @Scheduled(cron = "0 * * * * ?")
@@ -139,4 +163,6 @@ public class RecurringTransactionScheduler {
 //    }
     public record TransactionKey(Integer categoryId, Integer userCategoryId, BigDecimal amount){}
 
+=======
+>>>>>>> origin/authentication
 }
