@@ -41,6 +41,7 @@
         @Mapping(source = "userCategory.id", target = "userCategoryId")
         @Mapping(source = "category.name", target = "categoryName")
         @Mapping(source = "userCategory.name", target = "userCategoryName")
+        @Mapping(target = "icon", expression = "java(entity.getCategory() != null ? entity.getCategory().getIcon() : entity.getUserCategory().getIcon())")
         @Mapping(target = "type", expression = "java(resolveType(entity.getCategory(), entity.getUserCategory()))")
         TransactionResponse toResponseDto(Transaction entity);
 
