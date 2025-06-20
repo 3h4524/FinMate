@@ -2,7 +2,7 @@ package org.codewith3h.finmateapplication.mapper;
 
 
 import org.codewith3h.finmateapplication.EntityResolver;
-import org.codewith3h.finmateapplication.dto.request.PremiumPaymentRequest;
+import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.enums.DurationType;
 import org.codewith3h.finmateapplication.exception.AppException;
@@ -17,16 +17,27 @@ public interface SubscriptionMapper {
 
     @Mapping(target = "user.id", source = "userId")
     @Mapping(target = "premiumPackage.id", source = "packageId")
-    Subscription toSubscription(PremiumPaymentRequest premiumPaymentRequest, @Context PremiumPackageRepository premiumPackageRepository, @Context EntityResolver entityResolver);
+    @Mapping(target = "amount", source = "price")
+    Subscription toSubscription(Integer userId, Integer packageId, int price, @Context PremiumPackageRepository premiumPackageRepository, @Context EntityResolver entityResolver);
+
+
+    @AfterMapping
+    default void resolveRelations(@MappingTarget Subscription subscription,
+                                  Integer userId, Integer packageId,
+                                  @Context EntityResolver entityResolver) {
+        subscription.setPremiumPackage(entityResolver.resolverPremiumPackage(packageId));
+        subscription.setUser(entityResolver.resolverUser(userId));
+
+    }
 
     @AfterMapping
     default void calculateEndDate(@MappingTarget Subscription subscription, @Context PremiumPackageRepository premiumPackageRepository) {
         Instant purchaseDate = subscription.getStartDate() != null
                 ? subscription.getStartDate()
                 : Instant.now();
-        Integer packageId = subscription.getPremiumPackage().getId();
+        PremiumPackage premiumPackage = subscription.getPremiumPackage();
 
-        DurationType durationType = premiumPackageRepository.findPremiumPackageById(packageId).getDurationType();
+        DurationType durationType = premiumPackage.getDurationType();
         int durationDays;
         if (durationType == DurationType.MONTH) {
             durationDays = 30;
@@ -36,15 +47,6 @@ public interface SubscriptionMapper {
             throw new AppException(ErrorCode.DURATION_DATE_NOT_FOUND);
         }
 
-        subscription.setEndDate(purchaseDate.plusSeconds(durationDays * 24L * 60 * 60));
-    }
-
-    @AfterMapping
-    default void resolveRelations(@MappingTarget Subscription subscription,
-                                  PremiumPaymentRequest premiumPaymentRequest,
-                                  @Context EntityResolver entityResolver) {
-        subscription.setPremiumPackage(entityResolver.resolverPremiumPackage(premiumPaymentRequest.getPackageId()));
-        subscription.setUser(entityResolver.resolverUser(premiumPaymentRequest.getUserId()));
-
+        subscription.setEndDate(purchaseDate.plusSeconds((durationDays * 24L * 60 * 60) * premiumPackage.getDurationValue()));
     }
 }

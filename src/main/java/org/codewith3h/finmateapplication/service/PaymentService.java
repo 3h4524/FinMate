@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.EntityResolver;
-import org.codewith3h.finmateapplication.dto.request.PremiumPaymentRequest;
 import org.codewith3h.finmateapplication.dto.response.PaymentResponse;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
@@ -15,8 +14,8 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.codewith3h.finmateapplication.repository.SubcriptionRepository;
-import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.payos.PayOS;
 import vn.payos.type.CheckoutResponseData;
@@ -40,16 +39,15 @@ public class PaymentService {
     PremiumPackageRepository premiumPackageRepository;
     EntityResolver entityResolver;
     PayOS payOS;
-    private final UserRepository userRepository;
 
+    public String createPaymentLink(Integer packageId) {
 
-    public String createPaymentLink(PremiumPaymentRequest request) {
+        int userId = (int) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-
-        PremiumPackage premiumPackage = premiumPackageRepository.findPremiumPackageById(request.getPackageId());
+        PremiumPackage premiumPackage = premiumPackageRepository.findPremiumPackageById(packageId);
 
         log.info("User [{}] is initiating payment for package [{}], price: [{}]",
-                request.getUserId(), request.getPackageId(), premiumPackage.getPrice());
+                userId, packageId, premiumPackage.getPrice());
 
         String packageName = premiumPackage.getName();
 
@@ -59,7 +57,7 @@ public class PaymentService {
 
         if (discount != null) {
             price = BigDecimal.valueOf(premiumPackage.getPrice())
-                    .multiply(discount)
+                    .multiply(BigDecimal.valueOf(1).subtract(discount))
                     .multiply(BigDecimal.valueOf(premiumPackage.getDurationValue()))
                     .setScale(0, RoundingMode.HALF_UP)
                     .intValue();
@@ -67,10 +65,7 @@ public class PaymentService {
             price = premiumPackage.getPrice() * premiumPackage.getDurationValue(); // Không giảm giá
         }
 
-
-        request.setAmount(price);
-
-        Subscription subscription = subscriptionMapper.toSubscription(request, premiumPackageRepository, entityResolver);
+        Subscription subscription = subscriptionMapper.toSubscription(userId, packageId, price, premiumPackageRepository, entityResolver);
 
         subcriptionRepository.save(subscription);
 
@@ -114,6 +109,7 @@ public class PaymentService {
 
 
     }
+
 
     public boolean handlePaymentReturn(PaymentResponse response) {
         try {

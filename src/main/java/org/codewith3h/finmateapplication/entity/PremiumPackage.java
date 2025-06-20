@@ -3,6 +3,7 @@ package org.codewith3h.finmateapplication.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.codewith3h.finmateapplication.enums.DurationType;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 @Entity
 @Table(name = "PremiumPackages")
 public class PremiumPackage {
