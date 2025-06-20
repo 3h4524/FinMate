@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.validation.Valid;
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
@@ -26,11 +27,9 @@ public class BudgetController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(
-            @RequestHeader(name = "userId") Integer userId,
-            @RequestBody CreateBudgetRequest request) {
-
-        request.setUserId(userId);
+    public ResponseEntity<ApiResponse<BudgetResponse>>
+    createBudget(
+            @Valid @RequestBody CreateBudgetRequest request) {
         BudgetResponse response = budgetService.createBudget(request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
@@ -39,55 +38,58 @@ public class BudgetController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<BudgetResponse>> updateBudget(
-            @RequestHeader(name = "userId") Integer userId,
             @PathVariable("id") Integer budgetId,
-            @RequestBody UpdateBudgetRequest request) {
-
-        request.setUserId(userId);
+            @Valid @RequestBody UpdateBudgetRequest request) {
         BudgetResponse response = budgetService.updateBudget(budgetId, request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<BudgetResponse>> getBudgetById(
+            @PathVariable("id") Integer budgetId) {
+        BudgetResponse response = budgetService.getBudgetById(budgetId);
+        ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(response);
+        apiResponse.setMessage("Success");
+        apiResponse.setCode(1000);
         return ResponseEntity.ok(apiResponse);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteBudget(
-            @RequestHeader(name = "userId") Integer userId,
             @PathVariable("id") Integer budgetId) {
-
-        budgetService.deleteBudget(budgetId, userId);
+        budgetService.deleteBudget(budgetId);
         ApiResponse<String> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Budget deleted successfully.");
         return ResponseEntity.ok(apiResponse);
     }
 
+
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<Page<BudgetResponse>>> getBudgets(
-            @RequestHeader(name = "userId") Integer userId,
             @RequestParam(name = "periodType", required = false) String periodType,
             @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-
-        System.out.println("Fetch tới get List budgets");
-
         Pageable pageable = PageRequest.of(page, size);
-        Page<BudgetResponse> response = budgetService.getBudgets(userId, periodType, startDate, pageable);
+        Page<BudgetResponse> response = budgetService.getBudgets(periodType, startDate, pageable);
         ApiResponse<Page<BudgetResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+        apiResponse.setCode(1000);
+        apiResponse.setMessage("Success");
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/analysis")
     public ResponseEntity<ApiResponse<Page<BudgetAnalysisResponse>>> getBudgetAnalysis(
-            @RequestHeader(name = "userId") Integer userId,
-            @RequestParam(name = "periodType", required = false) String periodType,
-            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(name = "period", required = false) String periodType,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
-
         Pageable pageable = PageRequest.of(page, size);
-        Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(userId, periodType, startDate, pageable);
+        Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(periodType, null, pageable);
         ApiResponse<Page<BudgetAnalysisResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
         return ResponseEntity.ok(apiResponse);

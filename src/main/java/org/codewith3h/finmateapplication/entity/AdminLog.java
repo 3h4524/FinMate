@@ -38,10 +38,6 @@ public class AdminLog {
     @Column(name = "details")
     private String details;
 
-    @Nationalized
-    @Column(name = "ip_address", length = 50)
-    private String ipAddress;
-
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
     private Instant createdAt;

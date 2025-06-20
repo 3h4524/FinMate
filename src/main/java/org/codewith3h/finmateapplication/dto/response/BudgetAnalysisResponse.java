@@ -8,9 +8,9 @@ import java.math.BigDecimal;
 public class BudgetAnalysisResponse {
     private Integer budgetId;
     private String categoryName;
+    private String userCategoryName;
     private BigDecimal plannedAmount;
     private BigDecimal actualSpending;
-    private BigDecimal variance;
     private String periodType;
     private String status;
 }

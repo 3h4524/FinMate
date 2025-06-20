@@ -36,8 +36,8 @@ public enum ErrorCode {
     PREMIUM_PACKAGE_NOT_FOUND(1027, "Premium package not found", HttpStatus.NOT_FOUND),
     CANNOT_CREATE_PAYMENT_EXCEPTION(1028, "Cannot create payment transaction", HttpStatus.BAD_REQUEST),
     DURATION_DATE_NOT_FOUND(1029, "Duration date not found", HttpStatus.NOT_FOUND),
-    ;
-
+    BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
+    UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN);
 
     private int code;
     private String message;
@@ -48,5 +48,4 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
-
 }

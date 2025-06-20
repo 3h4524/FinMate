@@ -13,7 +13,6 @@ public class CreateBudgetRequest {
     @NotNull(message = "USER_ID_IS_REQUIRED")
     private Integer userId;
 
-    @NotNull(message = "CATEGORY_ID_IS_REQUIRED")
     private Integer categoryId;
 
     private Integer userCategoryId;
@@ -27,9 +26,6 @@ public class CreateBudgetRequest {
 
     @NotNull(message = "START_DATE_IS_REQUIRED")
     private LocalDate startDate;
-
-    @NotNull(message = "END_DATE_IS_REQUIRED")
-    private LocalDate endDate;
 
     @NotNull(message = "NOTIFICATION_THRESHOLD_IS_REQUIRED")
     private Integer notificationThreshold;
