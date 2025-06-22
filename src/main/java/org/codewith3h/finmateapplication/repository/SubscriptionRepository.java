@@ -16,4 +16,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Inte
     Page<Subscription> findSubscriptionsByStatus(String status, Pageable pageable);
 
     List<Subscription> findByStatus(String status);
+
+    List<Subscription> findSubscriptionsByUser_Id(Integer userId);
+
+    List<Subscription> findSubscriptionsByUser_IdAndStatus(Integer userId, String status);
 }

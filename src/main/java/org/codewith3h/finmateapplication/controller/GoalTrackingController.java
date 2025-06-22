@@ -9,8 +9,6 @@ import org.codewith3h.finmateapplication.dto.response.GoalProgressResponse;
 import org.codewith3h.finmateapplication.service.GoalProgressService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,27 +35,20 @@ public class GoalTrackingController {
             @RequestParam(name = "status", required = false, defaultValue = "CANCELLED") String status,
             @RequestParam(name = "page", defaultValue = "0", required = false) @Min(0) int page,
             @RequestParam(name = "size", defaultValue = "100", required = false) @Min(1) int size) {
-        System.out.println("getGoalProgresses");
-
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.err.println("user: " + authentication.getName());
-        System.err.println("role: " + authentication.getAuthorities());
-
 
         Page<GoalProgressResponse> goalProgressResponseList = goalProgressService.getAllGoalProgressesUniqueByDate(userId, status, page, size);
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(goalProgressResponseList);
         apiResponse.setCode(1000);
-        System.out.println("return getGoalProgresses");
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/list_progress/{goal_id}")
     public ResponseEntity<ApiResponse<Page<GoalProgressResponse>>> getGoalProgress(
-            @PathVariable(name = "goal_id") Integer goal_id,
+            @PathVariable(name = "goal_id") Integer goalId,
             @RequestParam(name = "page", defaultValue = "0", required = false) @Min(0) int page,
             @RequestParam(name = "size", defaultValue = "100", required = false) @Min(1) int size) {
-        Page<GoalProgressResponse> list = goalProgressService.getListGoalProgressByGoalId(goal_id, page, size);
+        Page<GoalProgressResponse> list = goalProgressService.getListGoalProgressByGoalId(goalId, page, size);
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("List of goals progresses");
         apiResponse.setResult(list);
