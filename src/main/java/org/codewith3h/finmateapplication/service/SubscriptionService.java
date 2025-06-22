@@ -67,4 +67,7 @@ public class SubscriptionService {
         return subscriptions.map(subscriptionMapper::toResponseDto);
     }
 
+    public List<Subscription> getSubscriptionsPurchasedForUserId(int userId) {
+        return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, "ACTIVE");
+    }
 }

@@ -6,6 +6,7 @@ import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.dto.response.RevenueAndSubscribers;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
+import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.PremiumPackageMapper;
@@ -15,9 +16,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,7 +30,7 @@ public class PremiumPackageService {
     private final PremiumPackageRepository premiumPackageRepository;
     private final PremiumPackageMapper premiumPackageMapper;
     private final FeatureRepository featureRepository;
-    private final SubscriptionService  subscriptionService;
+    private final SubscriptionService subscriptionService;
 
     public PremiumPackageResponse createPremiumPackage(PremiumPackageCreationDto request) {
 
@@ -40,7 +42,7 @@ public class PremiumPackageService {
         return premiumPackageMapper.toResponseDto(premiumPackage);
     }
 
-    public PremiumPackageResponse getPremiumPackageDetail(Integer id){
+    public PremiumPackageResponse getPremiumPackageDetail(Integer id) {
 
         log.info("Fetching premium package's information");
         PremiumPackage premiumPackage = premiumPackageRepository.findById(id)
@@ -49,7 +51,7 @@ public class PremiumPackageService {
         return premiumPackageMapper.toResponseDto(premiumPackage);
     }
 
-    public Page<PremiumPackageResponse> getPremiumPackages(int page, int size, String sortBy, String sortDirection ){
+    public Page<PremiumPackageResponse> getPremiumPackages(int page, int size, String sortBy, String sortDirection) {
         log.info("Fetching premium packages");
         Sort sort = sortDirection.equalsIgnoreCase("ASC")
                 ? Sort.by(sortBy).ascending()
@@ -79,7 +81,7 @@ public class PremiumPackageService {
 
         premiumPackageRepository.save(premiumPackage);
         log.info("Premium package updated successfully.");
-        return  premiumPackageMapper.toResponseDto(premiumPackage);
+        return premiumPackageMapper.toResponseDto(premiumPackage);
     }
 
     public void deletePremiumPackage(Integer id) {
@@ -89,6 +91,28 @@ public class PremiumPackageService {
 
         premiumPackageRepository.delete(premiumPackage);
         log.info("Premium package deleted successfully.");
+    }
+
+
+    public List<PremiumPackageResponse> getPremiumPackagesPurchased() {
+        int userId = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+
+        log.info("Fetching premium packages purchased for user " + userId);
+
+
+        List<Subscription> subscriptions = subscriptionService.getSubscriptionsPurchasedForUserId(userId);
+
+        List<PremiumPackage> premiumPackagePurchasedList = new ArrayList<>();
+
+        subscriptions.forEach(subscription -> {
+            if (subscription.getPremiumPackage() != null) {
+                premiumPackagePurchasedList.add(subscription.getPremiumPackage());
+            }
+        });
+
+        return premiumPackagePurchasedList.stream()
+                .map(premiumPackageMapper::toResponseDto)
+                .toList();
     }
 
 }
