@@ -4,7 +4,9 @@ import org.codewith3h.finmateapplication.EntityResolver;
 import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.dto.response.RecurringTransactionResponse;
+import org.codewith3h.finmateapplication.entity.Category;
 import org.codewith3h.finmateapplication.entity.RecurringTransaction;
+import org.codewith3h.finmateapplication.entity.UserCategory;
 import org.mapstruct.*;
 
 import java.time.Instant;
@@ -43,26 +45,34 @@ public interface RecurringTransactionMapper {
     RecurringTransaction toEntity(RecurringTransactionRequest dto, @Context EntityResolver entityResolver);
 
     @Mapping(source = "id" , target = "recurringId")
-    @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "category.id", target = "categoryId")
     @Mapping(source = "category.name", target = "categoryName")
     @Mapping(source = "userCategory.id", target = "userCategoryId")
+    @Mapping(target = "type", expression = "java(resolveType(entity.getCategory(), entity.getUserCategory()))")
     @Mapping(source = "userCategory.name", target = "userCategoryName")
+    @Mapping(target = "icon", expression = "java(entity.getCategory() != null ? entity.getCategory().getIcon() : entity.getUserCategory().getIcon())")
     RecurringTransactionResponse toResponseDto(RecurringTransaction entity);
 
     List<RecurringTransactionResponse> toResponseDtoList(List<RecurringTransaction> entities);
 
-    @Mapping(source = "frequency", target = "recurringPattern")
-    @Mapping(source = "startDate", target = "transactionDate")
-    TransactionCreationRequest mapRecurringTransactionRequestToTransactionRequestDto(RecurringTransactionRequest dto);
+    @Named("resolveType")
+    default String resolveType(Category category, UserCategory userCategory) {
+        if (category != null && category.getType() != null) {
+            return category.getType();
+        }
+        return userCategory != null ? userCategory.getType() : null;
+    }
+
 
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "category.id", target = "categoryId")
     @Mapping(source = "userCategory.id", target = "userCategoryId")
-    @Mapping(source = "frequency", target = "recurringPattern")
     @Mapping(source = "amount", target = "amount")
     @Mapping(source = "note", target = "note")
     TransactionCreationRequest mapRecurringTransactionToTransactionRequestDto(RecurringTransaction entity);
 
-
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntityFromDto(RecurringTransactionRequest dto, @MappingTarget RecurringTransaction entity, @Context EntityResolver entityResolver);
 }

@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.repository;
 
+import org.codewith3h.finmateapplication.entity.RecurringTransaction;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,15 +21,15 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     Page<Transaction> findByUserId(Integer userId, Pageable pageable);
 
+    List<Transaction> findByUserId(Integer userId);
+
     Optional<Transaction> findByIdAndUserId(Integer transactionId, Integer userId);
 
-    Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
 
     Page<Transaction> findByUserIdAndCategoryId(Integer userId, Integer categoryId, Pageable pageable);
 
     Page<Transaction> findByUserIdAndUserCategoryId(Integer userId, Integer userCategoryId, Pageable pageable);
-
-    Page<Transaction> findByUserIdAndIsRecurring(Integer userId, boolean isRecurring, Pageable pageable);
 
     void deleteByUserId(Integer userId);
 
@@ -84,4 +85,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
                 @Param("categoryId") Integer categoryId,
                 @Param("userCategoryId") Integer userCategoryId
                 );
+
+    boolean existsByRecurringTransactionsAndTransactionDate(RecurringTransaction recurringTransaction, LocalDate transactionDate);
 }

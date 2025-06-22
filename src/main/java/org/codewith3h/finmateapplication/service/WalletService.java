@@ -85,4 +85,36 @@ public class WalletService {
                 .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
         return walletMapper.walletToWalletResponse(wallet);
     }
+
+    public void updateBalanceForCreateNewTransaction(Transaction  transaction){
+        Wallet wallet = walletRepository.findByUserId(transaction.getUser().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
+
+        String transactionType = transaction.getCategory() != null
+                ? transaction.getCategory().getType()
+                : transaction.getUserCategory().getType();
+
+        BigDecimal newBalance = transactionType.equalsIgnoreCase("INCOME")
+                ? wallet.getBalance().add(transaction.getAmount())
+                : wallet.getBalance().subtract(transaction.getAmount());
+
+        wallet.setBalance(newBalance);
+        walletRepository.save(wallet);
+    }
+
+    public void updateBalanceForDeleteTransaction(Transaction transaction){
+        Wallet wallet = walletRepository.findByUserId(transaction.getUser().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
+
+        String transactionType = transaction.getCategory() != null
+                ? transaction.getCategory().getType()
+                : transaction.getUserCategory().getType();
+
+        BigDecimal newBalance = transactionType.equalsIgnoreCase("INCOME")
+                ? wallet.getBalance().subtract(transaction.getAmount())
+                : wallet.getBalance().add(transaction.getAmount());
+
+        wallet.setBalance(newBalance);
+        walletRepository.save(wallet);
+    }
 }

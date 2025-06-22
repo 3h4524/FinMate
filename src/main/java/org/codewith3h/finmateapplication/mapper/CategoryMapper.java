@@ -16,5 +16,6 @@ public interface CategoryMapper {
     @Mapping(source = "id", target = "categoryId")
     @Mapping(source = "name", target = "categoryName")
     @Mapping(source = "type", target = "type")
+    @Mapping(source = "isSystem", target = "isSystem")
     CategoryResponse toCategoryResponse(Category category);
 }

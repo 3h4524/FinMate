@@ -1,6 +1,7 @@
 package org.codewith3h.finmateapplication.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -37,8 +38,14 @@ public class TransactionUpdateRequest {
     @Size(max = 255, message = "Image URL cannot exceed 255 characters")
     private String imageUrl;
 
+    @JsonProperty("isRecurring")
     private boolean isRecurring;
 
     @Size(max = 50, message = "Recurring pattern cannot exceed 50 characters")
     private String recurringPattern;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
 }
+
+

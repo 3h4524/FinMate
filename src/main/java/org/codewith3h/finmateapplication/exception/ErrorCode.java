@@ -34,6 +34,7 @@ public enum ErrorCode {
     PREMIUM_REQUIRED(1025, "This feature requires premium to active", HttpStatus.BAD_REQUEST),
     FEATURE_NOT_FOUND(1026, "Feature not found with feature code", HttpStatus.NOT_FOUND),
     PREMIUM_PACKAGE_NOT_FOUND(1027, "Premium package not found with feature code", HttpStatus.NOT_FOUND),
+    RECURRING_TRANSACTION_NOT_FOUND(1028, "Recurring transaction not found", HttpStatus.NOT_FOUND)
     ;
 
 

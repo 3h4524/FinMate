@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CategoryResponse {
-    private Integer categoryId;
-    private String categoryName;
-    private String icon;
-    private String type;
-    private Boolean isSystem =  false;
+public class TransactionStatisticResponse {
+    private BigDecimal totalIncome;
+    private BigDecimal totalExpense;
 }

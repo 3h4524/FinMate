@@ -4,10 +4,12 @@ import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionSearchRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
+import org.codewith3h.finmateapplication.dto.response.TransactionStatisticResponse;
 import org.codewith3h.finmateapplication.entity.*;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
@@ -49,7 +51,7 @@ public class TransactionService {
     private final WalletRepository walletRepository;
     private final TransactionReminderRepository transactionReminderRepository;
     private final EmailService emailService;
-
+    private final WalletService walletService;
 
     //create transaction
     @Transactional
@@ -63,37 +65,15 @@ public class TransactionService {
         User user = userRepository.findById(transactionCreationRequest.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        Wallet wallet = walletRepository.findByUserId(transactionCreationRequest.getUserId())
-                        .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
-
         Category category = null;
         UserCategory userCategory = null;
-        String transactionType = null;
 
         if(transactionCreationRequest.getCategoryId() != null){
              category = categoryRepository.findById(transactionCreationRequest.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
-             transactionType = category.getType();
-        } else if (transactionCreationRequest.getUserCategoryId() != null){
+        } else {
             userCategory = userCategoryRepository.findById(transactionCreationRequest.getUserCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
-            transactionType = userCategory.getType();
-        } else {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION);
-        }
-
-        BigDecimal amount = transactionCreationRequest.getAmount().setScale(2, RoundingMode.HALF_UP);
-        BigDecimal currentBalance = wallet.getBalance();
-        BigDecimal newBalance = "INCOME".equalsIgnoreCase(transactionType)
-                ? currentBalance.add(amount)
-                : currentBalance.subtract(amount);
-
-        log.info("Current balance is: {}, new balance: {}, amount: {}, type: {}", currentBalance, newBalance, amount, transactionType);
-
-        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-            log.error("Negative balance not allowed for userId: {}. Current balance: {}," +
-                    "transaction amount: {}, type: {}", transactionCreationRequest.getUserId(), newBalance ,amount, transactionType);
-            throw new AppException(ErrorCode.NEGATIVE_BALANCE_NOT_ALLOWED);
         }
 
         Transaction transaction = transactionMapper.toEntity(transactionCreationRequest);
@@ -101,10 +81,9 @@ public class TransactionService {
         transaction.setCategory(category);
         transaction.setUserCategory(userCategory);
 
-        wallet.setBalance(newBalance);
-        walletRepository.save(wallet);
-
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        walletService.updateBalanceForCreateNewTransaction(transaction);
 
         log.info("Transaction created with ID: {}", savedTransaction.getId());
         return transactionMapper.toResponseDto(savedTransaction);
@@ -130,29 +109,8 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
 
-        Wallet wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.NO_WALLET_FOR_USER_EXCEPTION));
+        walletService.updateBalanceForDeleteTransaction(transaction);
 
-        String transactionType = transaction.getCategory() != null
-                ? transaction.getCategory().getType()
-                : transaction.getUserCategory().getType();
-
-        BigDecimal amount = transaction.getAmount().setScale(2, RoundingMode.HALF_UP);
-
-        BigDecimal currentBalance = wallet.getBalance();
-
-        currentBalance = "INCOME".equalsIgnoreCase(transactionType)
-                ? currentBalance.subtract(amount)
-                : currentBalance.add(amount);
-
-        if(currentBalance.compareTo(BigDecimal.ZERO) < 0) {
-            log.error("Negative balance not allowed for userId: {}. Current balance: {}," +
-                    "transaction amount: {}, type: {}", userId, wallet.getBalance() ,amount, transactionType);
-            throw new AppException(ErrorCode.NEGATIVE_BALANCE_NOT_ALLOWED);
-        }
-
-        wallet.setBalance(currentBalance);
-        walletRepository.save(wallet);
         transactionRepository.delete(transaction);
         log.info("Transaction deleted with ID: {}. New Balance", transactionId);
     }
@@ -160,9 +118,8 @@ public class TransactionService {
     @Transactional
     @PreAuthorize("hasRole('USER')")
     public TransactionResponse updateTransaction(Integer transactionId, Integer userId, TransactionUpdateRequest transactionUpdateRequest) {
-
         log.info("Updating transaction {} for user {}", transactionId, userId);
-
+        log.info("DTO: {}", transactionUpdateRequest);
         Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
 
@@ -182,6 +139,7 @@ public class TransactionService {
 
         transactionMapper.updateEntityFromDto(transactionUpdateRequest, transaction, categoryRepository);
 
+
         String newType = transaction.getCategory() != null
                 ? transaction.getCategory().getType()
                 : transaction.getUserCategory().getType();
@@ -190,12 +148,6 @@ public class TransactionService {
         balance = ("INCOME".equalsIgnoreCase(newType))
                 ? balance.add(newAmount)
                 : balance.subtract(newAmount);
-
-        if(balance.compareTo(BigDecimal.ZERO) < 0) {
-            log.error("Negative balance not allowed for userId: {}. Current balance: {}, Transaction amount: {}, Type: {}",
-                    userId, balance, newAmount, newType);
-            throw new AppException(ErrorCode.NEGATIVE_BALANCE_NOT_ALLOWED);
-        }
 
         wallet.setBalance(balance);
         walletRepository.save(wallet);
@@ -240,21 +192,13 @@ public class TransactionService {
             spec = spec.and(TransactionSpecification.hasUserCategoryId(transactionSearchRequest.getUserCategoryId()));
         }
 
-        if (transactionSearchRequest.getMinAmount() != null && transactionSearchRequest.getMaxAmount() != null) {
+        if (transactionSearchRequest.getMinAmount() != null || transactionSearchRequest.getMaxAmount() != null) {
             spec = spec.and(TransactionSpecification.hasAmountBetween(transactionSearchRequest.getMinAmount(), transactionSearchRequest.getMaxAmount()));
-        } else if (transactionSearchRequest.getMinAmount() != null) {
-            spec = spec.and(TransactionSpecification.hasMinAmount(transactionSearchRequest.getMinAmount()));
-        } else if (transactionSearchRequest.getMaxAmount() != null) {
-            spec = spec.and(TransactionSpecification.hasMaxAmount(transactionSearchRequest.getMaxAmount()));
         }
 
 
-        if (transactionSearchRequest.getStartDate() != null && transactionSearchRequest.getEndDate() != null) {
+        if (transactionSearchRequest.getStartDate() != null || transactionSearchRequest.getEndDate() != null) {
             spec = spec.and(TransactionSpecification.hasDateBetween(transactionSearchRequest.getStartDate(), transactionSearchRequest.getEndDate()));
-        } else if (transactionSearchRequest.getStartDate() != null) {
-            spec = spec.and(TransactionSpecification.hasTransactionDateAfter(transactionSearchRequest.getStartDate()));
-        } else if (transactionSearchRequest.getEndDate() != null) {
-            spec = spec.and(TransactionSpecification.hasTransactionDateBefore(transactionSearchRequest.getEndDate()));
         }
 
 
@@ -392,4 +336,32 @@ public class TransactionService {
         log.info("Single transaction created from reminder for user {}", reminder.getUser().getId());
         return response;
     }
+
+    public TransactionStatisticResponse getStatisticForUser(Integer userId){
+        log.info("Fetching statistic for user {}", userId);
+
+        List<Transaction> allTransaction = transactionRepository.findByUserId(userId);
+
+        BigDecimal totalIncome = BigDecimal.ZERO;
+        BigDecimal totalExpense = BigDecimal.ZERO;
+
+        for (Transaction transaction : allTransaction) {
+            String type = transaction.getCategory() != null
+                    ? transaction.getCategory().getType()
+                    : transaction.getUserCategory().getType();
+
+            if ("INCOME".equalsIgnoreCase(type)) {
+                totalIncome = totalIncome.add(transaction.getAmount());
+            } else {
+                totalExpense = totalExpense.add(transaction.getAmount());
+            }
+        }
+
+        return TransactionStatisticResponse.builder()
+                .totalExpense(totalExpense)
+                .totalIncome(totalIncome)
+                .build();
+    }
+
+
 }

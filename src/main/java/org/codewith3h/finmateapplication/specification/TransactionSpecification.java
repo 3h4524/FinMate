@@ -1,5 +1,8 @@
 package org.codewith3h.finmateapplication.specification;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import org.codewith3h.finmateapplication.entity.RecurringTransaction;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -57,7 +60,7 @@ public class TransactionSpecification {
             } else if (startDate == null) {
                 return criteriaBuilder.lessThanOrEqualTo(root.get("transactionDate"), endDate);
             } else if (endDate == null) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("transacctionDate"), startDate);
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("transactionDate"), startDate);
             } else {
                 return criteriaBuilder.between(root.get("transactionDate"), startDate, endDate);
             }
@@ -66,22 +69,34 @@ public class TransactionSpecification {
 
     public static Specification<Transaction> hasTransactionDateAfter(LocalDate date) {
         return (root, query, criteriaBuilder) ->
-                date == null ? null : criteriaBuilder.greaterThan(root.get("transactionDate"), date);
+                date == null ? null : criteriaBuilder.greaterThanOrEqualTo(root.get("transactionDate"), date);
     }
 
     public static Specification<Transaction> hasTransactionDateBefore(LocalDate date) {
         return (root, query, criteriaBuilder) ->
-                date == null ? null : criteriaBuilder.greaterThan(root.get("transactionDate"), date);
+                date == null ? null : criteriaBuilder.lessThanOrEqualTo(root.get("transactionDate"), date);
     }
 
     public static Specification<Transaction> isRecurring(Boolean isRecurring) {
-        return (root, query, criteriaBuilder) ->
-                isRecurring == null ? null : criteriaBuilder.equal(root.get("recurring"), isRecurring);
+        return (root, query, criteriaBuilder) ->{
+            if(isRecurring == null) {
+                return criteriaBuilder.conjunction();
+            }
+            if(isRecurring){
+                return criteriaBuilder.isNotNull(root.get("recurringTransactions"));
+            } else {
+                return criteriaBuilder.isNull(root.get("recurringTransactions"));
+            }
+        };
     }
 
     public static Specification<Transaction> hasRecurringPattern(String recurringPattern) {
-        return (root, query, criteriaBuilder) ->
-                recurringPattern == null ? null : criteriaBuilder.equal(root.get("recurringPattern"), recurringPattern);
+        return (root, query, criteriaBuilder) -> {
+            if(recurringPattern == null) return criteriaBuilder.conjunction();
+
+            Join<Transaction, RecurringTransaction> recurringJoin = root.join("recurringTransaction", JoinType.INNER);
+            return criteriaBuilder.equal(recurringJoin.get("frequency"), recurringPattern);
+        };
     }
 
     public static Specification<Transaction> hasUserAndDateRange(Integer userId, LocalDate startDate, LocalDate endDate) {

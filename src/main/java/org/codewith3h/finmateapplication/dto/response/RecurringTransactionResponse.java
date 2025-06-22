@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
 @Builder
 public class RecurringTransactionResponse {
     private Integer recurringId;
-    private Integer userId;
     private Integer categoryId;
     private Integer userCategoryId;
     private String categoryName;
     private String userCategoryName;
+    private String type;
     private BigDecimal amount;
     private String note;
     private String  frequency;
@@ -28,6 +28,5 @@ public class RecurringTransactionResponse {
     private LocalDate endDate;
     private LocalDate nextDate;
     private Boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String icon;
 }
