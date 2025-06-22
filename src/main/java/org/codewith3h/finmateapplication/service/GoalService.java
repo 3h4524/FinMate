@@ -30,7 +30,6 @@ import java.util.Set;
 @Service
 @Data
 @Slf4j
-@PreAuthorize("hasRole('ROLE_USER')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoalService {
     GoalRepository goalRepository;
@@ -40,7 +39,7 @@ public class GoalService {
     GoalContributionRepository goalContributionRepository;
     GoalContributionMapper goalContributionMapper;
 
-
+    @PreAuthorize("hasRole('ROLE_USER')")
     public GoalResponse createFinancialGoal(CreateGoalRequest request) {
         log.info("Creating Financial Goal for userId: {} , goal name: {}, target: {}, deadline: {}",
                 request.getUserId(), request.getName(), request.getTargetAmount(), request.getDeadline());
@@ -63,6 +62,7 @@ public class GoalService {
         return goalMapper.toGoalResponse(goalCreated);
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     public void cancelFinancialGoal(Integer goalId) {
 
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
@@ -77,6 +77,7 @@ public class GoalService {
 
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     public GoalResponse updateGoal(@Valid GoalUpdateRequest request, Integer goalId) {
         log.info("Updating Financial Goal for goalId: {}, name: {}", goalId, request.getName());
 
@@ -117,6 +118,7 @@ public class GoalService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     public GoalResponse getGoal(Integer goalId) {
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
         return goalMapper.toGoalResponse(goal);
