@@ -10,11 +10,9 @@ import org.codewith3h.finmateapplication.service.BudgetService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/budget")
@@ -27,8 +25,7 @@ public class BudgetController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BudgetResponse>>
-    createBudget(
+    public ResponseEntity<ApiResponse<BudgetResponse>> createBudget(
             @Valid @RequestBody CreateBudgetRequest request) {
         BudgetResponse response = budgetService.createBudget(request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
@@ -43,18 +40,6 @@ public class BudgetController {
         BudgetResponse response = budgetService.updateBudget(budgetId, request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
-
-        return ResponseEntity.ok(apiResponse);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BudgetResponse>> getBudgetById(
-            @PathVariable("id") Integer budgetId) {
-        BudgetResponse response = budgetService.getBudgetById(budgetId);
-        ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(response);
-        apiResponse.setMessage("Success");
-        apiResponse.setCode(1000);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -67,15 +52,13 @@ public class BudgetController {
         return ResponseEntity.ok(apiResponse);
     }
 
-
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<Page<BudgetResponse>>> getBudgets(
             @RequestParam(name = "periodType", required = false) String periodType,
-            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<BudgetResponse> response = budgetService.getBudgets(periodType, startDate, pageable);
+        Page<BudgetResponse> response = budgetService.getBudgets(periodType, pageable);
         ApiResponse<Page<BudgetResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
         apiResponse.setCode(1000);
@@ -89,7 +72,7 @@ public class BudgetController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(periodType, null, pageable);
+        Page<BudgetAnalysisResponse> response = budgetService.getBudgetAnalysis(periodType, pageable);
         ApiResponse<Page<BudgetAnalysisResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
         return ResponseEntity.ok(apiResponse);

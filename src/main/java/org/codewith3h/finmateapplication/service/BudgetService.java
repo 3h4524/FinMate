@@ -40,11 +40,6 @@ public class BudgetService {
     BudgetMapper budgetMapper;
     EntityResolver entityResolver;
 
-    public BudgetResponse getBudgetById(Integer budgetId) {
-        Budget budget = budgetRepository.findById(budgetId).orElseThrow(() -> new AppException(ErrorCode.BUDGET_NOT_FOUND));
-        return budgetMapper.toBudgetResponse(budget, transactionRepository);
-    }
-
     public BudgetResponse createBudget(CreateBudgetRequest request) {
         Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         LocalDate today = LocalDate.now();
@@ -92,7 +87,7 @@ public class BudgetService {
         budgetRepository.delete(budget);
     }
 
-    public Page<BudgetResponse> getBudgets(String periodType, LocalDate startDate, Pageable pageable) {
+    public Page<BudgetResponse> getBudgets(String periodType, Pageable pageable) {
         Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Budget> budgets = budgetRepository.findBudgetsByUser_Id(currentUserId);
 
@@ -110,7 +105,7 @@ public class BudgetService {
         return new PageImpl<>(responseList, pageable, filteredBudgets.size());
     }
 
-    public Page<BudgetAnalysisResponse> getBudgetAnalysis(String periodType, LocalDate startDate, Pageable pageable) {
+    public Page<BudgetAnalysisResponse> getBudgetAnalysis(String periodType, Pageable pageable) {
         Integer currentUserId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<BudgetResponse> budgets = budgetRepository.findBudgetsByUser_Id(currentUserId)
@@ -123,7 +118,6 @@ public class BudgetService {
 
         List<BudgetResponse> filteredBudgets = budgets.stream()
                 .filter(budget -> periodType == null || budget.getPeriodType().equalsIgnoreCase(periodType))
-                .filter(budget -> startDate == null || budget.getStartDate().equals(startDate))
                 .collect(Collectors.toList());
 
         Page<BudgetResponse> filteredPage = new PageImpl<>(filteredBudgets, pageable, filteredBudgets.size());
