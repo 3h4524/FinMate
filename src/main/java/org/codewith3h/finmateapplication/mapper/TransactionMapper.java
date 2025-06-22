@@ -4,6 +4,7 @@
     import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
     import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
     import org.codewith3h.finmateapplication.entity.Category;
+    import org.codewith3h.finmateapplication.entity.RecurringTransaction;
     import org.codewith3h.finmateapplication.entity.Transaction;
     import org.codewith3h.finmateapplication.entity.UserCategory;
     import org.codewith3h.finmateapplication.exception.AppException;
@@ -41,8 +42,10 @@
         @Mapping(source = "userCategory.id", target = "userCategoryId")
         @Mapping(source = "category.name", target = "categoryName")
         @Mapping(source = "userCategory.name", target = "userCategoryName")
-        @Mapping(target = "icon", expression = "java(entity.getCategory() != null ? entity.getCategory().getIcon() : entity.getUserCategory().getIcon())")
         @Mapping(target = "type", expression = "java(resolveType(entity.getCategory(), entity.getUserCategory()))")
+        @Mapping(target = "isRecurring", expression = "java(entity.getRecurringTransactions() != null)")
+        @Mapping(source = "recurringTransactions", target = "recurringPattern", qualifiedByName = "getRecurringPattern")
+        @Mapping(target = "icon", expression = "java(entity.getCategory() != null ? entity.getCategory().getIcon() : entity.getUserCategory().getIcon())")
         TransactionResponse toResponseDto(Transaction entity);
 
         @Named("resolveType")
@@ -52,6 +55,12 @@
             }
             return userCategory != null ? userCategory.getType() : null;
         }
+
+        @Named("getRecurringPattern")
+        default String getRecurringPattern(RecurringTransaction recurring) {
+            return recurring != null ? recurring.getFrequency() : null;
+        }
+
 
         List<TransactionResponse> toResponseDtoList (List<Transaction> entities);
 

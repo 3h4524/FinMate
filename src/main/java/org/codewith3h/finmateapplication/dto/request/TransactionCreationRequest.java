@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -36,9 +35,6 @@ public class TransactionCreationRequest {
     private String location;
     @Size(max = 255, message = "Image URL cannot exceed 255 characters")
     private String imageUrl;
-    private Boolean isRecurring;
-    @Size(max = 50, message ="Recurring pattern cannot exceed 50 characters")
-    private String recurringPattern;
     @AssertTrue(message = "Exactly one of categoryId or userCategoryId must be provided")
     public boolean isCategoryValid() {
         return (categoryId == null) != (userCategoryId == null);

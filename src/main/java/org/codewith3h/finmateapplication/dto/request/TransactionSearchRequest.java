@@ -25,7 +25,6 @@ public class TransactionSearchRequest {
     private String location;
     private Boolean isRecurring;
     private String note;
-
     private Integer page = 0;
     private Integer size = 10;
     private String sortBy = "TransactionDate";

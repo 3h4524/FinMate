@@ -37,8 +37,8 @@ public enum ErrorCode {
     CANNOT_CREATE_PAYMENT_EXCEPTION(1028, "Cannot create payment transaction", HttpStatus.BAD_REQUEST),
     DURATION_DATE_NOT_FOUND(1029, "Duration date not found", HttpStatus.NOT_FOUND),
     BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
-    UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN);
-
+    UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN),
+    RECURRING_TRANSACTION_NOT_FOUND(1032, "Recurring transaction not found", HttpStatus.NOT_FOUND);
 
     private int code;
     private String message;

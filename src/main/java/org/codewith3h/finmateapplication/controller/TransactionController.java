@@ -12,6 +12,7 @@ import org.codewith3h.finmateapplication.dto.request.TransactionSearchRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.TransactionResponse;
+import org.codewith3h.finmateapplication.dto.response.TransactionStatisticResponse;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.service.TransactionService;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,19 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final RestClient.Builder builder;
 
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<TransactionStatisticResponse>> getStatistic(
+            @RequestParam Integer userId
+    ){
+        log.info("Getting transaction statistic for user {}", userId);
+        TransactionStatisticResponse transactionStatisticResponse = transactionService.getStatisticForUser(userId);
+
+        ApiResponse<TransactionStatisticResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Transaction statistic fetched successfully!");
+        apiResponse.setResult(transactionStatisticResponse);
+        return ResponseEntity.ok(apiResponse);
+    }
+
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<ApiResponse<TransactionResponse>> createTransaction(
@@ -57,6 +71,8 @@ public class TransactionController {
             @RequestParam @Positive Integer userId,
             @Valid @RequestBody TransactionUpdateRequest requestDto
     ) {
+        log.info("is recurring: {}", requestDto.isRecurring());
+
         log.info("Updating transaction {} for user: {}", transactionId, userId);
         TransactionResponse transactionResponse = transactionService.updateTransaction(transactionId,  userId, requestDto);
         ApiResponse<TransactionResponse> apiResponse = new ApiResponse<>();
@@ -72,6 +88,7 @@ public class TransactionController {
             @RequestParam @Positive Integer userId) {
         log.info("Fetching transaction {} for user {}", transactionId, userId);
         TransactionResponse transactionResponse = transactionService.getTransaction(transactionId, userId);
+        log.info("DTO: {}", transactionResponse);
         ApiResponse<TransactionResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Transaction fetched successfully");
         apiResponse.setResult(transactionResponse);

@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.repository;
 
+import org.codewith3h.finmateapplication.entity.RecurringTransaction;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,21 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     Page<Transaction> findByUserId(Integer userId, Pageable pageable);
 
+    List<Transaction> findByUserId(Integer userId);
+
     Optional<Transaction> findByIdAndUserId(Integer transactionId, Integer userId);
+
+    Page<Transaction> findByUserIdAndTransactionDateBetween(Integer userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
+
+    Page<Transaction> findByUserIdAndCategoryId(Integer userId, Integer categoryId, Pageable pageable);
+
+    Page<Transaction> findByUserIdAndUserCategoryId(Integer userId, Integer userCategoryId, Pageable pageable);
+
+    void deleteByUserId(Integer userId);
+
+    Long countByUserId(Integer userId);
+
+    List<Transaction> findAll(Specification<Transaction> spec);
 
     Page<Transaction> findAll(Specification<Transaction> spec, Pageable pageable);
 
@@ -48,4 +63,27 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             @Param("endDate") LocalDate endDate
     );
 
+    Optional<Transaction> findOne(Specification<Transaction> spec);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(t) > 0 THEN TRUE ELSE FALSE END
+        FROM Transaction t
+        WHERE t.user.id = :userId
+          AND t.amount = :amount
+          AND t.createdAt BETWEEN :from AND :to
+          AND (
+               (:categoryId IS NOT NULL AND t.category.id = :categoryId)
+            OR (:userCategoryId IS NOT NULL AND t.userCategory.id = :userCategoryId)
+          )
+    """)
+    boolean existsByUserIdAndAmountAndCreatedAtBetweenAndCategoryOrUserCategory(
+                @Param("userId") Integer userId,
+                @Param("amount") BigDecimal amount,
+                @Param("from") LocalDateTime from,
+                @Param("to") LocalDateTime to,
+                @Param("categoryId") Integer categoryId,
+                @Param("userCategoryId") Integer userCategoryId
+                );
+
+    boolean existsByRecurringTransactionsAndTransactionDate(RecurringTransaction recurringTransaction, LocalDate transactionDate);
 }

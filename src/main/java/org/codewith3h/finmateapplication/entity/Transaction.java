@@ -6,7 +6,6 @@ import lombok.*;
 import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -58,13 +57,9 @@ public class Transaction {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @ColumnDefault("0")
-    @Column(name = "is_recurring")
-    private Boolean isRecurring;
-
-    @Nationalized
-    @Column(name = "recurring_pattern", length = 50)
-    private String recurringPattern;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurring_id")
+    private RecurringTransaction recurringTransactions;
 
     @ColumnDefault("getdate()")
     @CreationTimestamp
