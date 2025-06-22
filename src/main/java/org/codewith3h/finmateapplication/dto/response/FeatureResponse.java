@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeatureResponse {
-
     private String featureCode;
     private String featureName;
 }
+
