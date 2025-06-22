@@ -12,6 +12,9 @@ import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
 import org.codewith3h.finmateapplication.dto.response.UserDto;
 import org.codewith3h.finmateapplication.entity.User;
+import org.codewith3h.finmateapplication.exception.AppException;
+import org.codewith3h.finmateapplication.exception.ErrorCode;
+import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.codewith3h.finmateapplication.service.AuthenticationService;
 import org.codewith3h.finmateapplication.service.EmailService;
 import org.codewith3h.finmateapplication.util.JwtUtil;
@@ -43,6 +46,7 @@ public class AuthController {
     private final RestTemplate restTemplate;
     private final AuthenticationService authenticationService;
     private final EmailService emailService;
+    private final UserRepository userRepository;
 
     @Value("${google.oauth2.client-id}")
     private String googleClientId;
@@ -162,9 +166,26 @@ public class AuthController {
 
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<String>> logout(@RequestHeader("Authorization") String authorization) {
         try {
-            String token = request.getHeader("Authorization");
+
+
+            String token = authorization.substring(7);
+
+            System.err.println(token);
+
+            String role = jwtUtil.extractRole(token);
+
+            System.err.println(role);
+
+            if(role.equalsIgnoreCase("ADMIN")) {
+                Integer userId = jwtUtil.extractId(token);
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                user.setVerified(false);
+                userRepository.save(user);
+            }
+
             if (token != null && token.startsWith("Bearer ")) {
                 token = token.substring(7);
                 // Invalidate the token by adding it to a blacklist or                                                                                                                                                                                                                                           marking it as expired

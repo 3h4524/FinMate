@@ -166,7 +166,7 @@ public class EmailService {
             logger.info("OTP is incorrect, verification code is {}.", code);
             throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE_EXCEPTION);
         } else if (verification.getVerified()){
-            throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED_EXCEPTION);
+            throw new AppException(ErrorCode.TOKEN_EXPIRED);
         } else if (verification.getExpiryTime().isBefore(LocalDateTime.now())) {
             logger.info("Time to verify is expiry, expiry time: {}", verification.getExpiryTime());
         }

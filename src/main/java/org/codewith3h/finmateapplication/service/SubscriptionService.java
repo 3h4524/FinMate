@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -26,7 +27,8 @@ public class SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
-        List<Subscription> subscriptions = subscriptionRepository.findByPremiumPackage(premiumPackage);
+        List<String> statuses = Arrays.asList("ACTIVE", "EXPIRED");
+        List<Subscription> subscriptions = subscriptionRepository.findByPremiumPackageAndStatusIn(premiumPackage, statuses);
 
         System.out.println(subscriptions.size());
 
