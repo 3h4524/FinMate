@@ -17,6 +17,7 @@ import org.codewith3h.finmateapplication.repository.SubcriptionRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.payos.PayOS;
 import vn.payos.type.CheckoutResponseData;
 import vn.payos.type.ItemData;
@@ -40,6 +41,8 @@ public class PaymentService {
     EntityResolver entityResolver;
     PayOS payOS;
 
+
+    @Transactional
     public String createPaymentLink(Integer packageId) {
 
         int userId = (int) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -57,13 +60,13 @@ public class PaymentService {
 
         if (discount != null) {
             price = BigDecimal.valueOf(premiumPackage.getPrice())
-                    .multiply(BigDecimal.valueOf(1).subtract(discount))
-                    .multiply(BigDecimal.valueOf(premiumPackage.getDurationValue()))
+                    .multiply(BigDecimal.valueOf(1).subtract(discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)))
                     .setScale(0, RoundingMode.HALF_UP)
                     .intValue();
         } else {
-            price = premiumPackage.getPrice() * premiumPackage.getDurationValue(); // Không giảm giá
+            price = premiumPackage.getPrice(); // Không giảm giá
         }
+
 
         Subscription subscription = subscriptionMapper.toSubscription(userId, packageId, price, premiumPackageRepository, entityResolver);
 

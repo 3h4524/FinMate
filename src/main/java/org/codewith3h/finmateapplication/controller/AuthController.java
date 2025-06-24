@@ -81,8 +81,6 @@ public class AuthController {
                             .build());
         }
 
-
-
         log.info("Verifying Google token");
             // Verify token with Google
             String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;

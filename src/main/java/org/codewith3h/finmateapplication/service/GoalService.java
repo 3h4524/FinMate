@@ -1,6 +1,7 @@
 package org.codewith3h.finmateapplication.service;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -11,6 +12,7 @@ import org.codewith3h.finmateapplication.dto.request.GoalUpdateRequest;
 import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalProgress;
+import org.codewith3h.finmateapplication.enums.FeatureCode;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.GoalContributionMapper;
@@ -21,6 +23,7 @@ import org.codewith3h.finmateapplication.repository.GoalProgressRepository;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,15 +41,24 @@ public class GoalService {
     GoalProgressMapper goalProgressMapper;
     GoalContributionRepository goalContributionRepository;
     GoalContributionMapper goalContributionMapper;
+    FeatureService featureService;
 
     @PreAuthorize("hasRole('ROLE_USER')")
+    @Transactional
     public GoalResponse createFinancialGoal(CreateGoalRequest request) {
+
+        boolean hasUnlimited = featureService.userHasFeature(request.getUserId(), FeatureCode.UNLIMITED_GOAL.name());
+
+        if (totalGoalByUserId(request.getUserId()) >= 3 && !hasUnlimited) {
+            throw new AppException(ErrorCode.EXCEED_FREE_CREATE_GOAL);
+        }
+
         log.info("Creating Financial Goal for userId: {} , goal name: {}, target: {}, deadline: {}",
                 request.getUserId(), request.getName(), request.getTargetAmount(), request.getDeadline());
 
         Goal goalCreated = goalRepository.save(goalMapper.toGoal(request));
         GoalProgress goalProgress = goalProgressRepository.save(goalProgressMapper.toGoalProgress(goalCreated));
-        System.out.println("goalCreated: " + goalCreated);
+        log.info("goalCreated: {}", goalCreated);
         log.info("Creating Goal Progress for goalId: {}, progress date: {}",
                 goalCreated.getId(), goalProgress.getProgressDate());
 
@@ -60,6 +72,12 @@ public class GoalService {
         updateStatusAfterContributeOrChange(goalCreated);
         log.info("Create goal finished: {}", goalCreated);
         return goalMapper.toGoalResponse(goalCreated);
+    }
+
+    private int totalGoalByUserId(Integer userId) {
+
+        return goalRepository.countGoalsByUser_Id(userId);
+
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")

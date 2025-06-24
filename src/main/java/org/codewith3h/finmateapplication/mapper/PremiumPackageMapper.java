@@ -4,14 +4,12 @@ import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.entity.Feature;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
-import org.codewith3h.finmateapplication.enums.DurationType;
 import org.codewith3h.finmateapplication.enums.FeatureCode;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.mapstruct.*;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

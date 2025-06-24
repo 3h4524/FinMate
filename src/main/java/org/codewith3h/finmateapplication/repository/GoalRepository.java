@@ -17,4 +17,6 @@ public interface GoalRepository extends JpaRepository<Goal,Integer> {
     Page<Goal> findGoalByStatusAndDeadlineBefore(String status, LocalDate deadlineBefore, Pageable pageable);
 
     Page<Goal> findGoalByStatusAndNotificationEnabled(String status, Boolean notificationEnabled, Pageable pageable);
+
+    Integer countGoalsByUser_Id(Integer userId);
 }
