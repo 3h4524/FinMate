@@ -2,7 +2,7 @@ package org.codewith3h.finmateapplication.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.codewith3h.finmateapplication.dto.request.UserManagementRequest;
+import org.codewith3h.finmateapplication.dto.request.UpdateUserRequest;
 import org.codewith3h.finmateapplication.dto.response.UserManagementResponse;
 import org.codewith3h.finmateapplication.service.UserManagementService;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ public class UserManagementController {
     @PutMapping("/{id}")
     public ResponseEntity<UserManagementResponse> updateUser(
             @PathVariable Integer id,
-            @Valid @RequestBody UserManagementRequest userRequest) {
+            @Valid @RequestBody UpdateUserRequest userRequest) {
         return ResponseEntity.ok(userManagementService.updateUser(id, userRequest));
     }
 

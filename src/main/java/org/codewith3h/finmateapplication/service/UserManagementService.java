@@ -1,9 +1,10 @@
 package org.codewith3h.finmateapplication.service;
 
 import lombok.RequiredArgsConstructor;
-import org.codewith3h.finmateapplication.dto.request.UserManagementRequest;
+import org.codewith3h.finmateapplication.dto.request.UpdateUserRequest;
 import org.codewith3h.finmateapplication.dto.response.UserManagementResponse;
 import org.codewith3h.finmateapplication.entity.User;
+import org.codewith3h.finmateapplication.mapper.UserManagementMapper;
 import org.codewith3h.finmateapplication.repository.UserManagementRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,30 +23,27 @@ import java.util.List;
 public class UserManagementService {
 
     private final UserManagementRepository userRepository;
+    private final UserManagementMapper userManagementMapper;
 
     public Page<UserManagementResponse> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
-                .map(this::convertToResponse);
+                .map(userManagementMapper::toResponse);
     }
 
     public UserManagementResponse getUserById(Integer id) {
         return userRepository.findById(id)
-                .map(this::convertToResponse)
+                .map(userManagementMapper::toResponse)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Transactional
-    public UserManagementResponse updateUser(Integer id, UserManagementRequest userRequest) {
+    public UserManagementResponse updateUser(Integer id, UpdateUserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setName(userRequest.getName());
-        user.setEmail(userRequest.getEmail());
-        user.setIsPremium(userRequest.getIsPremium());
-        user.setRole(userRequest.getRole());
-        user.setVerified(userRequest.getVerified());
+        userManagementMapper.updateEntityFromRequest(userRequest, user);
 
-        return convertToResponse(userRepository.save(user));
+        return userManagementMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional
@@ -80,21 +78,6 @@ public class UserManagementService {
         };
 
         return userRepository.findAll(spec, pageable)
-                .map(this::convertToResponse);
-    }
-
-    private UserManagementResponse convertToResponse(User user) {
-        return UserManagementResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .isPremium(user.getIsPremium())
-                .role(user.getRole())
-                .lastLoginAt(user.getLastLoginAt())
-                .createdAt(user.getCreatedAt())
-                .verified(user.getVerified())
-                .isNewUser(user.getIsNewUser())
-                .isDelete(user.getIsDelete())
-                .build();
+                .map(userManagementMapper::toResponse);
     }
 } 

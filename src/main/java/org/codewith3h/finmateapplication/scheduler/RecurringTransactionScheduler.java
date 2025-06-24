@@ -47,7 +47,7 @@ public class RecurringTransactionScheduler {
 
     //Hàm tạo transaction dựa trên recurring transaction
     @Transactional
-    @Scheduled(cron = "0 */2 * * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleRecurringTransaction() {
         LocalDate today = LocalDate.now();
         log.info("Processing recurring transactions for date: {}", today);

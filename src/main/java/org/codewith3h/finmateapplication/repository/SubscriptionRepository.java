@@ -24,4 +24,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Inte
 
 
     List<Subscription> findByPremiumPackageAndStatusIn(PremiumPackage premiumPackage, List<String> statuses);
+
 }

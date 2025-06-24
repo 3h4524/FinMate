@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.response.RevenueAndSubscribers;
 import org.codewith3h.finmateapplication.dto.response.SubscriptionResponse;
+import org.codewith3h.finmateapplication.entity.Feature;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
@@ -25,6 +26,7 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionMapper subscriptionMapper;
+    private final FeatureService featureService;
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
         List<String> statuses = Arrays.asList("ACTIVE", "EXPIRED");
@@ -72,4 +74,5 @@ public class SubscriptionService {
     public List<Subscription> getSubscriptionsPurchasedForUserId(int userId) {
         return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, "ACTIVE");
     }
+
 }

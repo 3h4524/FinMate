@@ -24,5 +24,4 @@ public class PremiumPackageFeature {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "feature_id", nullable = false)
     private Feature feature;
-
 }
