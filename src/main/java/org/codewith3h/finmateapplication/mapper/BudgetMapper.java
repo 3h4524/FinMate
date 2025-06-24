@@ -31,12 +31,14 @@ public interface BudgetMapper {
     }
 
     default LocalDate calculateEndDate(LocalDate startDate, String periodType) {
-        if (periodType.equalsIgnoreCase("WEEKLY")) {
-            return startDate.plusDays(7);
-        }else if (periodType.equalsIgnoreCase("MONTHLY")) {
-            return startDate.plusMonths(1);
+        if (startDate == null || periodType == null) {
+            throw new IllegalArgumentException("Start date and period type must not be null");
         }
-        return startDate;
+        return switch (periodType.toUpperCase()) {
+            case "WEEKLY" -> startDate.plusDays(6);
+            case "MONTHLY" -> startDate.plusMonths(1).minusDays(1);
+            default -> throw new IllegalArgumentException("Invalid period type: " + periodType);
+        };
     }
 
     @Mapping(target = "endDate", expression = "java(calculateEndDate(request.getStartDate(), request.getPeriodType()))")
@@ -53,7 +55,6 @@ public interface BudgetMapper {
     @AfterMapping
     default void enhanceBudgetResponse(@MappingTarget BudgetResponse response, Budget budget) {
         response.setPercentageUsed(calculatePercentageUsed(budget.getAmount(), response.getCurrentSpending()));
-        response.setStatus(determineStatus(response.getPercentageUsed(), budget.getNotificationThreshold()));
     }
 
 
@@ -63,6 +64,7 @@ public interface BudgetMapper {
     @Mapping(target = "budgetId", source = "id")
     @Mapping(target = "plannedAmount", source = "amount")
     @Mapping(target = "actualSpending", source = "currentSpending")
+    @Mapping(target = "notificationThreshold", source = "notificationThreshold")
     BudgetAnalysisResponse budgetResponseToAnalysisResponse(BudgetResponse budgetResponse);
 
     default BigDecimal calculateCurrentSpending(Budget budget, @Context TransactionRepository transactionRepository) {
@@ -73,15 +75,10 @@ public interface BudgetMapper {
                 budget.getEndDate() != null ? budget.getEndDate() : LocalDate.now()
         );
 
-        transactions.forEach(transaction -> {
-            System.out.println("TransactionId: " + transaction.getId() + " Amount: " + transaction.getAmount());
-        });
-        var a = transactions.stream()
+        return transactions.stream()
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
-        System.out.println("Spending: " + a);
-        return a;
     }
 
     default BigDecimal calculatePercentageUsed(BigDecimal budgetAmount, BigDecimal currentSpending) {
@@ -93,13 +90,4 @@ public interface BudgetMapper {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    default String determineStatus(BigDecimal percentageUsed, Integer notificationThreshold) {
-        if (percentageUsed == null || notificationThreshold == null) {
-            return "UNKNOWN";
-        }
-        if (percentageUsed.compareTo(BigDecimal.valueOf(notificationThreshold)) >= 0) {
-            return "OVER_THRESHOLD";
-        }
-        return "WITHIN_LIMIT";
-    }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/logs")
@@ -31,15 +32,45 @@ public class AdminLogController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String entityType,
-            @RequestParam(required = false) Integer adminId) {
+            @RequestParam(required = false) Integer adminId,
+            @RequestParam(required = false) String keyword) {
 
         Pageable pageable = PageRequest.of(page, size);
         LocalDate start = startDate != null ? LocalDate.parse(startDate) : null;
         LocalDate end = endDate != null ? LocalDate.parse(endDate) : null;
-        Page<AdminLogResponse> logs = adminLogService.getAdminLogsByFilter(start, end, entityType, adminId, pageable);
+        Page<AdminLogResponse> logs = adminLogService.getAdminLogsByFilter(start, end, entityType, adminId, keyword, pageable);
         ApiResponse<Page<AdminLogResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(logs);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<AdminLogResponse>> getLogById(@PathVariable Integer id) {
+        AdminLogResponse log = adminLogService.getLogById(id);
+        ApiResponse<AdminLogResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(log);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getLogStats(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        Map<String, Object> stats = adminLogService.getLogStats(
+                startDate != null ? LocalDate.parse(startDate) : null,
+                endDate != null ? LocalDate.parse(endDate) : null);
+        ApiResponse<Map<String, Object>> response = new ApiResponse<>();
+        response.setResult(stats);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<String>> deleteLog(@PathVariable Integer id) {
+        adminLogService.deleteLog(id);
+        ApiResponse<String> response = new ApiResponse<>();
+        response.setResult("Log deleted successfully");
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/export")

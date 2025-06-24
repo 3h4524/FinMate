@@ -38,8 +38,8 @@ public enum ErrorCode {
     DURATION_DATE_NOT_FOUND(1029, "Duration date not found", HttpStatus.NOT_FOUND),
     BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
     UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN),
-    RECURRING_TRANSACTION_NOT_FOUND(1032, "Recurring transaction not found", HttpStatus.NOT_FOUND);
-
+    RECURRING_TRANSACTION_NOT_FOUND(1032, "Recurring transaction not found", HttpStatus.NOT_FOUND),
+    BUDGET_LIMIT_EXCEEDED(1033, "Bạn đã đạt giới hạn 3 ngân sách cho người dùng thường.", HttpStatus.BAD_REQUEST);
     private int code;
     private String message;
     private HttpStatusCode statusCode;

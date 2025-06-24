@@ -21,5 +21,4 @@ public class BudgetResponse {
     private Integer notificationThreshold;
     private BigDecimal currentSpending;
     private BigDecimal percentageUsed;
-    private String status;
 }

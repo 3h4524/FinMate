@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="FinMate@localhost" uuid="a35e2cc3-c1eb-4010-b4ae-6ae8a58e22d6">
+    <data-source source="LOCAL" name="FinMate@localhost" uuid="62cf2959-090d-47ea-8c3c-b5c09c2c266b">
       <driver-ref>sqlserver.ms</driver-ref>
       <synchronize>true</synchronize>
+      <imported>true</imported>
+      <remarks>$PROJECT_DIR$/src/main/resources/application.properties</remarks>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
-      <jdbc-url>jdbc:sqlserver://localhost:1433;database=FinMate</jdbc-url>
+      <jdbc-url>jdbc:sqlserver://localhost:1433;databaseName=FinMate;encrypt=true;trustServerCertificate=true</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />

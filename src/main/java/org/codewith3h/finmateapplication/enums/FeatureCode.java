@@ -10,11 +10,11 @@ public enum FeatureCode {
     UNLIMITED_BUDGET("Tạo ngân sách không giới hạn"),
     SMART_REMINDER("Nhắc nhở thông minh"),
     SYSTEM_ALERTS("Cảnh báo hệ thống");
-
     private final String displayName;
 
     FeatureCode(String displayName) {
         this.displayName = displayName;
     }
+
 
 }
