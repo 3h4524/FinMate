@@ -12,4 +12,6 @@ public interface FeatureRepository extends JpaRepository<Feature, Integer> {
     Optional<Feature> findByCode(String featureCode);
 
     List<Feature> findByIsActiveTrue();
+
+    Feature findByIsActiveTrueAndCode(String code);
 }

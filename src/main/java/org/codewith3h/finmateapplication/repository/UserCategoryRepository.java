@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface UserCategoryRepository extends JpaRepository<UserCategory, Integer> {
     List<UserCategory> findByUserId(Integer userId);
+
+    Integer countByUserId(Integer userId);
 }
