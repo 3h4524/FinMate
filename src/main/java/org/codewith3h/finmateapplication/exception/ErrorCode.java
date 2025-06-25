@@ -39,7 +39,8 @@ public enum ErrorCode {
     BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
     UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN),
     RECURRING_TRANSACTION_NOT_FOUND(1032, "Recurring transaction not found", HttpStatus.NOT_FOUND),
-    EXCEED_FREE_CREATE_CUSTOM_CATEGORY(1033, "The number of custom categories has been exceeded", HttpStatus.BAD_REQUEST);
+    EXCEED_FREE_CREATE_CUSTOM_CATEGORY(1033, "The number of custom categories has been exceeded", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL_FORMAT(4003, "Invalid email format", HttpStatus.BAD_REQUEST);
 
     private int code;
     private String message;

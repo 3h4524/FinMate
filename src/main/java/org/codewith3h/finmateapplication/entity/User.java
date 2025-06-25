@@ -93,4 +93,8 @@ public class User {
 
     @Column(name = "isDelete")
     private Boolean isDelete;
+
+    @ColumnDefault("0")
+    @Column(name = "is_2fa_enabled")
+    private Boolean is2FAEnabled;
 }
