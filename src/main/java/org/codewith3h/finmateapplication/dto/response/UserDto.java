@@ -13,4 +13,6 @@ public class UserDto {
     private boolean isPremium;
     private String token;
     private boolean verified;
+    private Boolean is2FAEnabled;
+    private java.time.LocalDateTime lastLoginAt;
 }

@@ -178,6 +178,44 @@ public class EmailService {
         return true;
     }
 
+    @Async
+    @Transactional
+    public void sendOtpForChangeEmail(String toEmail, User user) throws MessagingException {
+        // Không check email đã tồn tại, chỉ gửi OTP về email mới cho user hiện tại
+        String verificationCode = generateOTP();
+        EmailVerification verification = new EmailVerification();
+        verification.setUser(user);
+        verification.setEmail(toEmail);
+        verification.setVerificationCode(verificationCode);
+        verification.setExpiryTime(LocalDateTime.now().plusMinutes(verificationExpiryMinutes));
+        verification.setVerified(false);
+        verification.setCreatedAt(LocalDateTime.now());
+        emailVerificationRepository.save(verification);
+        // Create email content
+        String subject = "Verify Your New Email";
+        String content = String.format(
+                "Hello!\n\n" +
+                        "You requested to change your email for FinMate.\n\n" +
+                        "Please use the following verification code (OTP) to confirm your new email:\n\n" +
+                        "  %s  \n\n" +
+                        "This code will expire in %d minutes.\n\n" +
+                        "If you did not request this, please ignore this email.\n\n" +
+                        "---\n" +
+                        "This is an automated email, please do not reply.\n\n" +
+                        "Best regards,\n" +
+                        "FinMate Team",
+                verificationCode,
+                verificationExpiryMinutes
+        );
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, false);
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(content);
+        mailSender.send(message);
+        logger.info("Change email OTP sent to: {}", toEmail);
+    }
 
     private String generateOTP() {
         Random random = new Random();

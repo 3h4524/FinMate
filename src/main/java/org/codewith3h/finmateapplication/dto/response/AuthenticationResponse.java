@@ -14,4 +14,5 @@ public class AuthenticationResponse {
     private Boolean isDelete;
     private Integer userId;
     private Boolean premium;
+    private Boolean is2FAEnabled;
 }
