@@ -13,7 +13,7 @@ import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
-import org.codewith3h.finmateapplication.repository.SubcriptionRepository;
+import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +36,7 @@ import java.util.Date;
 @PreAuthorize("hasRole('ROLE_USER')")
 public class PaymentService {
 
-    SubcriptionRepository subcriptionRepository;
+    SubscriptionRepository subscriptionRepository;
     SubscriptionMapper subscriptionMapper;
     PremiumPackageRepository premiumPackageRepository;
     EntityResolver entityResolver;
@@ -72,7 +72,7 @@ public class PaymentService {
 
         Subscription subscription = subscriptionMapper.toSubscription(userId, packageId, price, premiumPackageRepository, entityResolver);
 
-        subcriptionRepository.save(subscription);
+        subscriptionRepository.save(subscription);
 
         // description maximum 25 characters
         String description = "Purchasing " + packageName;
@@ -124,7 +124,7 @@ public class PaymentService {
             String status = order.getStatus();
 
             log.info("Processing payment return for orderId: {}, status: {}", order.getOrderCode(), status);
-            Subscription subscription = subcriptionRepository.findSubscriptionById(subscriptionId);
+            Subscription subscription = subscriptionRepository.findSubscriptionById(subscriptionId);
 
             if (status.equals("PAID")) {
                 // xu ly success
@@ -136,7 +136,7 @@ public class PaymentService {
                     userRepository.save(user);
                 }
 
-                subcriptionRepository.save(subscription);
+                subscriptionRepository.save(subscription);
 
                 log.info("User premium package [{}] is active for user [{}]. ExpiryDate: [{}]",
                         subscription.getPremiumPackage().getName(),
@@ -149,7 +149,7 @@ public class PaymentService {
                 log.info("Payment is still pending for user [{}]", subscription.getUser().getName());
             }
             subscription.setStatus(status);
-            subcriptionRepository.save(subscription);
+            subscriptionRepository.save(subscription);
             return false;
         } catch (Exception e) {
             log.error(e.getMessage());

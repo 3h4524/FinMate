@@ -8,7 +8,7 @@ import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
-import org.codewith3h.finmateapplication.repository.SubcriptionRepository;
+import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +30,7 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PremiumSubscriptionExpiryScheduler {
 
-    SubcriptionRepository subcriptionRepository;
+    SubscriptionRepository subscriptionRepository;
     UserRepository userRepository;
 
     @Transactional
@@ -50,7 +50,7 @@ public class PremiumSubscriptionExpiryScheduler {
             Page<Subscription> page;
 
             do {
-                page = subcriptionRepository.findSubscriptionsByStatusAndEndDateBefore(
+                page = subscriptionRepository.findSubscriptionsByStatusAndEndDateBefore(
                         "ACTIVE", startOfDayInstant, pageable);
                 List<Subscription> subscriptions = page.getContent();
                 updateExpiredSubscriptions(subscriptions);
@@ -65,7 +65,7 @@ public class PremiumSubscriptionExpiryScheduler {
 
     private void updateExpiredSubscriptions(List<Subscription> subscriptions) {
         subscriptions.forEach(subscription -> subscription.setStatus("EXPIRED"));
-        subcriptionRepository.saveAll(subscriptions);
+        subscriptionRepository.saveAll(subscriptions);
         log.info("Updated {} subscriptions to EXPIRED", subscriptions.size());
     }
 
@@ -74,7 +74,7 @@ public class PremiumSubscriptionExpiryScheduler {
                 .map(Subscription::getUser)
                 .filter(Objects::nonNull)
                 .distinct()
-                .filter(user -> !subcriptionRepository.existsByUserIdAndStatus(user.getId(), "ACTIVE"))
+                .filter(user -> !subscriptionRepository.existsByUserIdAndStatus(user.getId(), "ACTIVE"))
                 .peek(user -> user.setIsPremium(false))
                 .toList();
 
