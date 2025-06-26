@@ -12,6 +12,9 @@ import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.mapstruct.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -38,6 +41,7 @@ public interface SubscriptionMapper {
         Instant purchaseDate = subscription.getStartDate() != null
                 ? subscription.getStartDate()
                 : Instant.now();
+
         PremiumPackage premiumPackage = subscription.getPremiumPackage();
 
         DurationType durationType = premiumPackage.getDurationType();
@@ -50,7 +54,18 @@ public interface SubscriptionMapper {
             throw new AppException(ErrorCode.DURATION_DATE_NOT_FOUND);
         }
 
-        subscription.setEndDate(purchaseDate.plusSeconds((durationDays * 24L * 60 * 60) * premiumPackage.getDurationValue()));
+        long totalDays = (long) durationDays * premiumPackage.getDurationValue();
+
+        LocalDateTime startDateTime = purchaseDate.atZone(ZoneId.of("UTC")).toLocalDateTime();
+
+        LocalDateTime endDateTime = startDateTime.plusDays(totalDays)
+                .withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999_999_999);
+
+        Instant endDate = endDateTime.toInstant(ZoneOffset.UTC);
+        subscription.setEndDate(endDate);
     }
 
     @Mapping(source = "createdAt", target = "createdAt")

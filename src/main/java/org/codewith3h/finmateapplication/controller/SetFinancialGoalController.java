@@ -10,7 +10,6 @@ import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.GoalResponse;
 import org.codewith3h.finmateapplication.service.GoalService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +22,6 @@ public class SetFinancialGoalController {
     @PostMapping
     public ResponseEntity<ApiResponse<GoalResponse>> createGoal(@RequestBody @Valid CreateGoalRequest request) {
         GoalResponse goal = goalService.createFinancialGoal(request);
-        System.out.println(goal.toString());
         ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Congratulations you have successfully created a new goal!");
         apiResponse.setCode(1000);
@@ -33,7 +31,6 @@ public class SetFinancialGoalController {
 
     @PatchMapping("/cancel/{goalId}")
     public ResponseEntity<Void> cancelGoal(@PathVariable(name = "goalId") Integer goalId) {
-        System.out.println("patch cancel goalId: " + goalId);
         goalService.cancelFinancialGoal(goalId);
         return ResponseEntity.noContent().build();
     }

@@ -14,6 +14,7 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.codewith3h.finmateapplication.repository.SubcriptionRepository;
+import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class PaymentService {
     PremiumPackageRepository premiumPackageRepository;
     EntityResolver entityResolver;
     PayOS payOS;
+    private final UserRepository userRepository;
 
 
     @Transactional
@@ -74,11 +76,10 @@ public class PaymentService {
 
         // description maximum 25 characters
         String description = "Purchasing " + packageName;
-        System.out.println("Description: " + description);
+        log.info("Description: " + description);
         String returnUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
         String cancelUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
 
-        System.err.println("Vao tao link");
         // Generate order code (Do trung` duoc.) (ID + 6 chu so lay tu time)
         String currentTimeString = String.valueOf(new Date().getTime());
         long orderCode = Long.parseLong(subscription.getId() + currentTimeString.substring(currentTimeString.length() - 6));
@@ -88,6 +89,7 @@ public class PaymentService {
                 .quantity(1)
                 .price(price)
                 .build();
+
 
         PaymentData paymentData = PaymentData.builder()
                 .orderCode(orderCode)
@@ -102,11 +104,11 @@ public class PaymentService {
         try {
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
             String checkoutUrl = data.getCheckoutUrl();
-            System.err.println("link: " + checkoutUrl);
+            log.info("link: {}", checkoutUrl);
             return checkoutUrl;
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            log.error(e.getMessage());
             throw new AppException(ErrorCode.CANNOT_CREATE_PAYMENT_EXCEPTION);
         }
 
@@ -126,10 +128,14 @@ public class PaymentService {
 
             if (status.equals("PAID")) {
                 // xu ly success
-                User user = subscription.getUser();
-
                 subscription.setStatus("ACTIVE");
-                user.setIsPremium(true);
+
+                User user = subscription.getUser();
+                if (Boolean.FALSE.equals(user.getIsPremium())) {
+                    user.setIsPremium(true);
+                    userRepository.save(user);
+                }
+
                 subcriptionRepository.save(subscription);
 
                 log.info("User premium package [{}] is active for user [{}]. ExpiryDate: [{}]",
@@ -146,7 +152,7 @@ public class PaymentService {
             subcriptionRepository.save(subscription);
             return false;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            log.error(e.getMessage());
             throw new AppException(ErrorCode.CANNOT_CREATE_PAYMENT_EXCEPTION);
         }
     }
