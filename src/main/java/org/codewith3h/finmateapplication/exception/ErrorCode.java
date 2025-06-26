@@ -39,7 +39,9 @@ public enum ErrorCode {
     BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
     UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN),
     RECURRING_TRANSACTION_NOT_FOUND(1032, "Recurring transaction not found", HttpStatus.NOT_FOUND),
-    BUDGET_LIMIT_EXCEEDED(1033, "Bạn đã đạt giới hạn 3 ngân sách cho người dùng thường.", HttpStatus.BAD_REQUEST);
+    BUDGET_LIMIT_EXCEEDED(1033, "You have reached the 3 budget limit for regular users.", HttpStatus.BAD_REQUEST),
+    ADMIN_LOG_NOT_FOUND(1034, "Admin log not found", HttpStatus.NOT_FOUND);
+
     private int code;
     private String message;
     private HttpStatusCode statusCode;

@@ -72,7 +72,6 @@ public class BudgetService {
                 throw new AppException(ErrorCode.BUDGET_LIMIT_EXCEEDED);
             }
         }
-
         Budget budget = budgetMapper.toBudget(request, entityResolver);
         log.info("Saving new budget for userId: {}, budgetId: {}", currentUserId, budget.getId());
         budget = budgetRepository.save(budget);

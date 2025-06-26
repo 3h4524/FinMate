@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
+@DynamicInsert
 @Table(name = "AdminLogs")
 public class AdminLog {
     @Id
@@ -23,7 +25,7 @@ public class AdminLog {
     private User admin;
 
     @Nationalized
-    @Column(name = "\"action\"", nullable = false)
+    @Column(name = "action", nullable = false)
     private String action;
 
     @Nationalized
@@ -38,7 +40,6 @@ public class AdminLog {
     @Column(name = "details")
     private String details;
 
-    @ColumnDefault("getdate()")
     @Column(name = "created_at")
     private Instant createdAt;
 
