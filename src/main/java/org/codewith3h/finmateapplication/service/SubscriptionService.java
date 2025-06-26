@@ -27,13 +27,10 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionMapper subscriptionMapper;
-    private final FeatureService featureService;
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
         List<String> statuses = Arrays.asList(Status.ACTIVE.getStatusString(), Status.EXPIRED.getStatusString());
         List<Subscription> subscriptions = subscriptionRepository.findByPremiumPackageAndStatusIn(premiumPackage, statuses);
-
-        System.out.println(subscriptions.size());
 
         BigDecimal revenue = subscriptions.stream()
                 .map(sub -> BigDecimal.valueOf(sub.getAmount()))

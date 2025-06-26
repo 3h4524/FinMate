@@ -25,57 +25,69 @@ import java.time.temporal.ChronoUnit;
 public class GoalProgressNotificationScheduler {
 
     GoalRepository goalRepository;
-//    NotificationService notificationService;
+    // NotificationService notificationService;
 
-    // Chạy mỗi 4 ngày lúc 00:00
+    // Runs every 4 days at 00:00
     @Scheduled(cron = "0 0 0 */4 * ?")
     public void goalContributionReminderScheduler() {
         log.info("Starting goal contribution notification check");
-        LocalDate today = LocalDate.now();
-
         Pageable pageable = PageRequest.of(0, 100);
-        Page<Goal> goalPage;
         int totalProcessed = 0;
 
+        Page<Goal> goalPage;
         do {
-            goalPage = goalRepository.findGoalByStatusAndNotificationEnabled(Status.IN_PROGRESS.getStatusString(), true, pageable);
-
-            for (Goal goal : goalPage.getContent()) {
-                log.info("Checking goal {} for user {}", goal.getId(), goal.getUser().getId());
-
-                if (goal.getTargetAmount() == null || goal.getCurrentAmount() == null) {
-                    log.warn("Goal {} has null targetAmount or currentAmount", goal.getId());
-                    continue;
-                }
-
-                long daysEstimate = ChronoUnit.DAYS.between(goal.getStartDate(), goal.getDeadline()) + 1;
-                if (daysEstimate <= 0) {
-                    log.warn("Goal {} has invalid date range (startDate: {}, deadline: {})",
-                            goal.getId(), goal.getStartDate(), goal.getDeadline());
-                    continue;
-                }
-
-                BigDecimal averageAmountPerDay = goal.getTargetAmount()
-                        .divide(BigDecimal.valueOf(daysEstimate), 2, RoundingMode.HALF_UP);
-
-                long daysPassed = ChronoUnit.DAYS.between(goal.getStartDate(), today) + 1;
-                if (daysPassed < 0) {
-                    log.warn("Goal {} has startDate after today: {}", goal.getId(), goal.getStartDate());
-                    continue;
-                }
-
-                BigDecimal expectedAmountSoFar = averageAmountPerDay.multiply(BigDecimal.valueOf(daysPassed));
-
-                if (goal.getCurrentAmount().compareTo(expectedAmountSoFar) < 0) {
-                    String message = "Your goals are behind schedule, expect: " + expectedAmountSoFar + ", actual: " + goal.getCurrentAmount();
-//                    notificationService.sendNotification(goal.getUser().getId(), message);
-                }
-            }
-
-            totalProcessed += goalPage.getNumberOfElements();
+            goalPage = goalRepository.findGoalByStatusAndNotificationEnabled(
+                    Status.IN_PROGRESS.getStatusString(), true, pageable);
+            totalProcessed += processGoals(goalPage);
             pageable = pageable.next();
         } while (goalPage.hasNext());
 
         log.info("Finished checking goal contributions, total {} goals processed.", totalProcessed);
+    }
+
+    private int processGoals(Page<Goal> goalPage) {
+        int processed = 0;
+        LocalDate today = LocalDate.now();
+
+        for (Goal goal : goalPage.getContent()) {
+            log.info("Checking goal {} for user {}", goal.getId(), goal.getUser().getId());
+            if (!isValidGoal(goal, today)) {
+                continue;
+            }
+
+            BigDecimal expectedAmountSoFar = calculateExpectedAmount(goal, today);
+            if (expectedAmountSoFar != null && goal.getCurrentAmount().compareTo(expectedAmountSoFar) < 0) {
+                String message = String.format("Your goal is behind schedule, expected: %s, actual: %s",
+                        expectedAmountSoFar, goal.getCurrentAmount());
+                // notificationService.sendNotification(goal.getUser().getId(), message);
+            }
+            processed++;
+        }
+        return processed;
+    }
+
+    private boolean isValidGoal(Goal goal, LocalDate today) {
+        if (goal.getTargetAmount() == null || goal.getCurrentAmount() == null) {
+            log.warn("Goal {} has null targetAmount or currentAmount", goal.getId());
+            return false;
+        }
+        if (ChronoUnit.DAYS.between(goal.getStartDate(), goal.getDeadline()) <= 0) {
+            log.warn("Goal {} has invalid date range (startDate: {}, deadline: {})",
+                    goal.getId(), goal.getStartDate(), goal.getDeadline());
+            return false;
+        }
+        if (ChronoUnit.DAYS.between(goal.getStartDate(), today) < 0) {
+            log.warn("Goal {} has startDate after today: {}", goal.getId(), goal.getStartDate());
+            return false;
+        }
+        return true;
+    }
+
+    private BigDecimal calculateExpectedAmount(Goal goal, LocalDate today) {
+        long daysEstimate = ChronoUnit.DAYS.between(goal.getStartDate(), goal.getDeadline()) + 1;
+        long daysPassed = ChronoUnit.DAYS.between(goal.getStartDate(), today) + 1;
+        return goal.getTargetAmount()
+                .divide(BigDecimal.valueOf(daysEstimate), 2, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(daysPassed));
     }
 }

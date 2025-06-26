@@ -75,7 +75,6 @@ public class JwtUtil {
         if (!signedJWT.verify(new MACVerifier(secret.getBytes()))) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-        ;
         return signedJWT;
     }
 

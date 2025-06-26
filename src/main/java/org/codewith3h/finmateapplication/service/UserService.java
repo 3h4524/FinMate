@@ -1,24 +1,15 @@
 package org.codewith3h.finmateapplication.service;
 
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
 
 import org.codewith3h.finmateapplication.dto.request.RegisterRequest;
-import org.codewith3h.finmateapplication.dto.response.ApiResponse;
-import org.codewith3h.finmateapplication.dto.response.UserDto;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.UserMapper;
 import org.codewith3h.finmateapplication.repository.UserRepository;
-import org.codewith3h.finmateapplication.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.codewith3h.finmateapplication.entity.Feature;
 import org.codewith3h.finmateapplication.enums.DurationType;
-import org.codewith3h.finmateapplication.enums.FeatureCode;
 
 import java.math.BigDecimal;
 import java.util.List;

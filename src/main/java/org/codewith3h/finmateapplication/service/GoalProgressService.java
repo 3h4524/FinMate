@@ -40,8 +40,6 @@ public class GoalProgressService {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
 
-        System.err.println("test go progress goal id " + goalId);
-
         trackingGoalStatusAndUpdateIfNeeded(goal);
 
         LocalDate today = LocalDate.now();
@@ -118,7 +116,6 @@ public class GoalProgressService {
                 .map(goalProgressMapper::toGoalProgressResponse)
                 .toList();
 
-        System.out.println("returning " + responses.size() + " progress responses");
         return new PageImpl<>(responses, PageRequest.of(page, size), progressPage.getTotalElements());
     }
 
@@ -137,7 +134,6 @@ public class GoalProgressService {
     private void updateTodayGoalProgressList(Integer userId) {
         List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, Status.IN_PROGRESS.getStatusString());
         for (Goal goal : userGoals) {
-            System.out.println("Goal id " + goal.getId() + " status " + goal.getStatus());
             ensureTodayProgressForGoal(goal);
         }
     }

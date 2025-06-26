@@ -44,7 +44,7 @@ public interface PremiumPackageMapper {
         return featureCodes.stream()
                 .map(code -> featureRepository.findByCode(code.name())
                         .orElseThrow(() -> new AppException(ErrorCode.FEATURE_NOT_FOUND)))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Mapping(target = "id", ignore = true)
