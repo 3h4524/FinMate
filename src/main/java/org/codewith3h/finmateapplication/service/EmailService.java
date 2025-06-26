@@ -5,15 +5,22 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
 import org.codewith3h.finmateapplication.entity.EmailVerification;
+import org.codewith3h.finmateapplication.entity.Transaction;
+import org.codewith3h.finmateapplication.entity.TransactionReminder;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.repository.EmailVerificationRepository;
+import org.codewith3h.finmateapplication.repository.TransactionReminderRepository;
+import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
+import org.codewith3h.finmateapplication.scheduler.RecurringTransactionScheduler;
+import org.codewith3h.finmateapplication.specification.TransactionSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -176,6 +183,20 @@ public class EmailService {
 
         logger.info("Verification record marked as verified for email {}. User status update should happen in AuthController.", email);
         return true;
+    }
+
+    @Async
+    @Transactional
+    public void sendCustomEmail(String toEmail, String subject, String content, Boolean isHTML) throws MessagingException {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(content, isHTML);
+        mailSender.send(message);
+        logger.info("Email sent successfully to: {}", toEmail);
     }
 
 

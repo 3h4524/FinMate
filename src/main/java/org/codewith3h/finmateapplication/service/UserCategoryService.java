@@ -7,6 +7,7 @@ import org.codewith3h.finmateapplication.dto.response.CategoryResponse;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.entity.UserCategory;
 import org.codewith3h.finmateapplication.enums.FeatureCode;
+import org.codewith3h.finmateapplication.enums.LimitCount;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.UserCategoryMapper;
@@ -46,7 +47,8 @@ public class UserCategoryService {
             boolean hasUnlimited = featureService
                     .userHasFeature(user.getId(), FeatureCode.UNLIMITED_CUSTOM_CATEGORY.name());
 
-            if(totalUserCategoryByUserId(request.getUserId()) > 3 && !hasUnlimited){
+            if(totalUserCategoryByUserId(request.getUserId()) >= LimitCount.CUSTOM_USER_CATEGORY.getCount()
+                    && !hasUnlimited){
                 throw new AppException(ErrorCode.EXCEED_FREE_CREATE_CUSTOM_CATEGORY);
             }
 
@@ -61,6 +63,8 @@ public class UserCategoryService {
     @PreAuthorize("hasRole('USER')")
     public Integer totalUserCategoryByUserId(Integer userId){
         log.info("Counting user category for user {}", userId);
-        return userCategoryRepository.countByUserId(userId);
+        Integer count = userCategoryRepository.countByUserId(userId);
+        log.info("count: {}", count);
+        return count;
     }
 }

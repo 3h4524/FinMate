@@ -9,7 +9,8 @@ public enum FeatureCode {
     UNLIMITED_CUSTOM_CATEGORY("Tạo danh mục tùy chỉnh không giới hạn"),
     UNLIMITED_BUDGET("Tạo ngân sách không giới hạn"),
     SMART_REMINDER("Nhắc nhở thông minh"),
-    SYSTEM_ALERTS("Cảnh báo hệ thống");
+    SYSTEM_ALERTS("Cảnh báo hệ thống"),
+    UNLIMITED_RECURRING_TRANSACTION("Thiết lập giao dịch lặp lại không giới hạn");
 
     private final String displayName;
 

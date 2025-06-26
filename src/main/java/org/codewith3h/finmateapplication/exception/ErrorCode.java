@@ -39,7 +39,9 @@ public enum ErrorCode {
     BUDGET_NOT_FOUND(1030, "Budget not found", HttpStatus.NOT_FOUND),
     UNAUTHORIZED(1031, "Unauthorized access", HttpStatus.FORBIDDEN),
     RECURRING_TRANSACTION_NOT_FOUND(1032, "Recurring transaction not found", HttpStatus.NOT_FOUND),
-    EXCEED_FREE_CREATE_CUSTOM_CATEGORY(1033, "The number of custom categories has been exceeded", HttpStatus.BAD_REQUEST);
+    EXCEED_FREE_CREATE_CUSTOM_CATEGORY(1033, "The number of custom categories has been exceeded", HttpStatus.BAD_REQUEST),
+    EXCEED_CREATE_RECURRING_CATEGORY(1034, "The number of  recurring categories has been exceeded", HttpStatus.BAD_REQUEST),
+    COUPON_NOT_FOUND(1035, "Coupon not found", HttpStatus.NOT_FOUND);
 
     private int code;
     private String message;

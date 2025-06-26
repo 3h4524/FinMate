@@ -35,4 +35,5 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
             @Param("userId") Integer userId,
             @Param("limit") int limit);
 
+    int countByUserId(Integer userId);
 }
