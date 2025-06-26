@@ -3,7 +3,6 @@ package org.codewith3h.finmateapplication.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
 import org.codewith3h.finmateapplication.entity.EmailVerification;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
@@ -12,7 +11,6 @@ import org.codewith3h.finmateapplication.repository.EmailVerificationRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -59,7 +57,7 @@ public class EmailService {
         User user = userRepository.findByEmail(toEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
 
-        if(user.getVerified()){
+        if(Boolean.TRUE.equals(user.getVerified())){
             throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED_EXCEPTION);
         }
 
@@ -114,7 +112,7 @@ public class EmailService {
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
         
         String token = createPasswordResetToken(user);
-        
+
         try {
             logger.info("Attempting to send password reset email to: {}", toEmail);
 
@@ -165,7 +163,7 @@ public class EmailService {
         if(!verification.getVerificationCode().equals(code)) {
             logger.info("OTP is incorrect, verification code is {}.", code);
             throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE_EXCEPTION);
-        } else if (verification.getVerified()){
+        } else if (Boolean.TRUE.equals(verification.getVerified())){
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         } else if (verification.getExpiryTime().isBefore(LocalDateTime.now())) {
             logger.info("Time to verify is expiry, expiry time: {}", verification.getExpiryTime());
@@ -176,6 +174,20 @@ public class EmailService {
 
         logger.info("Verification record marked as verified for email {}. User status update should happen in AuthController.", email);
         return true;
+    }
+
+    @Async
+    @Transactional
+    public void sendCustomEmail(String toEmail, String subject, String content, Boolean isHTML) throws MessagingException {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(content, isHTML);
+        mailSender.send(message);
+        logger.info("Email sent successfully to: {}", toEmail);
     }
 
 

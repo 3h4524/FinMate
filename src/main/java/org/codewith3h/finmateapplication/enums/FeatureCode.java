@@ -1,6 +1,5 @@
 package org.codewith3h.finmateapplication.enums;
 
-import lombok.Data;
 import lombok.Getter;
 
 @Getter
@@ -10,7 +9,9 @@ public enum FeatureCode {
     UNLIMITED_BUDGET("Tạo ngân sách không giới hạn"),
     SMART_REMINDER("Nhắc nhở thông minh"),
     UNLIMITED_GOAL("Tạo mục tiêu tài chính không giới hạn"),
-    SYSTEM_ALERTS("Cảnh báo hệ thống");
+    SYSTEM_ALERTS("Cảnh báo hệ thống"),
+    UNLIMITED_RECURRING_TRANSACTION("Thiết lập giao dịch lặp lại không giới hạn"),
+    ;
 
     private final String displayName;
 

@@ -9,13 +9,17 @@ import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.RecurringTransactionResponse;
+import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.repository.RecurringTransactionRepository;
 import org.codewith3h.finmateapplication.service.RecurringTransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -40,15 +44,16 @@ public class RecurringTransactionController {
         return ResponseEntity.ok(apiResponse);
     }
 
-
-    @PostMapping("/confirm-recurring")
-    public ResponseEntity<ApiResponse<RecurringTransactionResponse>> confirmRecurringTransactionReminder(
-            @RequestParam String token) {
-        RecurringTransactionResponse response = recurringTransactionService.confirmRecurringTransactionReminder(token);
-        ApiResponse<RecurringTransactionResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("Recurring transaction confirmed");
-        apiResponse.setResult(response);
-        return ResponseEntity.ok(apiResponse);
+    @RequestMapping(value = "/confirm-reminder", method = {RequestMethod.POST, RequestMethod.GET})
+    public RedirectView confirmReminder(@RequestParam String token) {
+        log.info("in");
+        try {
+            recurringTransactionService.confirmRecurringTransactionReminder(token);
+            return new RedirectView("http://127.0.0.1:5500/pages/reminder-confirmed.html?status=success");
+        } catch (AppException ex) {
+            String errorMessage = URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
+            return new RedirectView("https://127.0.0.1:5500/pages/reminder-confirmed.html?status=error&message=" + errorMessage);
+        }
     }
 
     @PutMapping("/{transactionId}")

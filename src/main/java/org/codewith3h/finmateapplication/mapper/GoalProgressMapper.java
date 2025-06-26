@@ -3,6 +3,7 @@ package org.codewith3h.finmateapplication.mapper;
 import org.codewith3h.finmateapplication.dto.response.GoalProgressResponse;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalProgress;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -41,7 +42,7 @@ public interface GoalProgressMapper {
     GoalProgressResponse toGoalProgressResponse(GoalProgress goalProgress);
 
     default String calculateTimeRemaining(LocalDate deadline, String status) {
-        if ("COMPLETED".equals(status)) {
+        if (Status.COMPLETED.getStatusString().equals(status)) {
             return "Finished";
         }
 

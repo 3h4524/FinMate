@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 public class FeatureResponse {
     private String featureCode;
     private String featureName;
+    private String featureDescription;
+    boolean isActive;
 }
 

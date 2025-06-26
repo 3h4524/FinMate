@@ -6,12 +6,14 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Nationalized;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "Features")
+@DynamicInsert
 public class Feature {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

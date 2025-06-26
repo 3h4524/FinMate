@@ -9,6 +9,7 @@ import org.codewith3h.finmateapplication.dto.response.PaymentResponse;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.entity.User;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
@@ -128,7 +129,7 @@ public class PaymentService {
 
             if (status.equals("PAID")) {
                 // xu ly success
-                subscription.setStatus("ACTIVE");
+                subscription.setStatus(Status.ACTIVE.getStatusString());
 
                 User user = subscription.getUser();
                 if (Boolean.FALSE.equals(user.getIsPremium())) {
@@ -143,7 +144,7 @@ public class PaymentService {
                         subscription.getUser().getName(),
                         subscription.getEndDate());
                 return true;
-            } else if (status.equals("CANCELLED")) {
+            } else if (status.equals(Status.CANCELLED.getStatusString())) {
                 log.info("Payment Cancelled by user [{}]", subscription.getUser().getName());
             } else {
                 log.info("Payment is still pending for user [{}]", subscription.getUser().getName());

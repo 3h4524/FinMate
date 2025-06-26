@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.response.GoalProgressResponse;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.GoalProgress;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.GoalProgressMapper;
@@ -74,7 +75,7 @@ public class GoalProgressService {
         LocalDate today = LocalDate.now();
 
         String status = goal.getStatus();
-        if ("COMPLETED".equals(status) || "CANCEL".equals(status) || "FAILED".equals(status)) {
+        if (Status.COMPLETED.getStatusString().equals(status) || "CANCEL".equals(status) || Status.FAILED.getStatusString().equals(status)) {
             return;
         }
 
@@ -82,15 +83,15 @@ public class GoalProgressService {
         boolean goalReached = goal.getCurrentAmount().compareTo(goal.getTargetAmount()) >= 0;
 
         if (goalReached && !deadlinePassed) {
-            goal.setStatus("COMPLETED");
+            goal.setStatus(Status.COMPLETED.getStatusString());
             log.info("Goal id {} marked as COMPLETED: currentAmount={} reached targetAmount={}, deadline not passed",
                     goal.getId(), goal.getCurrentAmount(), goal.getTargetAmount());
         } else if (deadlinePassed && !goalReached) {
-            goal.setStatus("FAILED");
+            goal.setStatus(Status.FAILED.getStatusString());
             log.info("Goal id {} marked as FAILED: deadline passed, currentAmount={} less than targetAmount={}",
                     goal.getId(), goal.getCurrentAmount(), goal.getTargetAmount());
         } else if (deadlinePassed) {
-            goal.setStatus("FAILED");
+            goal.setStatus(Status.FAILED.getStatusString());
             log.info("Goal id {} marked as FAILED: deadline passed, but goalReached=true, currentAmount={}, targetAmount={}",
                     goal.getId(), goal.getCurrentAmount(), goal.getTargetAmount());
         } else {
@@ -134,7 +135,7 @@ public class GoalProgressService {
 
 
     private void updateTodayGoalProgressList(Integer userId) {
-        List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, "IN_PROGRESS");
+        List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, Status.IN_PROGRESS.getStatusString());
         for (Goal goal : userGoals) {
             System.out.println("Goal id " + goal.getId() + " status " + goal.getStatus());
             ensureTodayProgressForGoal(goal);

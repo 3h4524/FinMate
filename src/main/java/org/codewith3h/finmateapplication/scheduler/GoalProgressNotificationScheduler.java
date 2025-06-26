@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.entity.Goal;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +38,7 @@ public class GoalProgressNotificationScheduler {
         int totalProcessed = 0;
 
         do {
-            goalPage = goalRepository.findGoalByStatusAndNotificationEnabled("IN_PROGRESS", true, pageable);
+            goalPage = goalRepository.findGoalByStatusAndNotificationEnabled(Status.IN_PROGRESS.getStatusString(), true, pageable);
 
             for (Goal goal : goalPage.getContent()) {
                 log.info("Checking goal {} for user {}", goal.getId(), goal.getUser().getId());

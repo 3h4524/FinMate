@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.entity.Goal;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.repository.GoalRepository;
 import org.codewith3h.finmateapplication.service.GoalService;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,7 @@ public class GoalCheckOverdueScheduler {
         Page<Goal> goalPage;
         int totalProcessed = 0;
         do {
-            goalPage = goalRepository.findGoalByStatusAndDeadlineBefore("IN_PROGRESS", today, pageable);
+            goalPage = goalRepository.findGoalByStatusAndDeadlineBefore(Status.IN_PROGRESS.getStatusString(), today, pageable);
 
             for (Goal goal : goalPage.getContent()) {
                 log.info("Checking overdue goal {}", goal.getId());

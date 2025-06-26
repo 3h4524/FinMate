@@ -7,6 +7,7 @@ import org.codewith3h.finmateapplication.dto.response.SubscriptionResponse;
 import org.codewith3h.finmateapplication.entity.Feature;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
 import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
 import org.springframework.data.domain.Page;
@@ -29,7 +30,7 @@ public class SubscriptionService {
     private final FeatureService featureService;
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
-        List<String> statuses = Arrays.asList("ACTIVE", "EXPIRED");
+        List<String> statuses = Arrays.asList(Status.ACTIVE.getStatusString(), Status.EXPIRED.getStatusString());
         List<Subscription> subscriptions = subscriptionRepository.findByPremiumPackageAndStatusIn(premiumPackage, statuses);
 
         System.out.println(subscriptions.size());
@@ -46,7 +47,7 @@ public class SubscriptionService {
 
 
     public RevenueAndSubscribers getTotalRevenueAndSubscriber() {
-        List<Subscription> subscriptions = subscriptionRepository.findByStatus("ACTIVE");
+        List<Subscription> subscriptions = subscriptionRepository.findByStatus(Status.ACTIVE.getStatusString());
         BigDecimal revenue = subscriptions.stream()
                 .map(re -> BigDecimal.valueOf(re.getAmount()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -66,13 +67,13 @@ public class SubscriptionService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus("ACTIVE",pageable);
+        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus(Status.ACTIVE.getStatusString(),pageable);
 
         return subscriptions.map(subscriptionMapper::toResponseDto);
     }
 
     public List<Subscription> getSubscriptionsPurchasedForUserId(int userId) {
-        return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, "ACTIVE");
+        return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.getStatusString());
     }
 
 }

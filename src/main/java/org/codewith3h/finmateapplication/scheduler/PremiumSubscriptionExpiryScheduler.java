@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.entity.User;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
@@ -51,7 +52,7 @@ public class PremiumSubscriptionExpiryScheduler {
 
             do {
                 page = subscriptionRepository.findSubscriptionsByStatusAndEndDateBefore(
-                        "ACTIVE", startOfDayInstant, pageable);
+                        Status.ACTIVE.getStatusString(), startOfDayInstant, pageable);
                 List<Subscription> subscriptions = page.getContent();
                 updateExpiredSubscriptions(subscriptions);
                 updateNonPremiumUsers(subscriptions);
@@ -64,7 +65,7 @@ public class PremiumSubscriptionExpiryScheduler {
     }
 
     private void updateExpiredSubscriptions(List<Subscription> subscriptions) {
-        subscriptions.forEach(subscription -> subscription.setStatus("EXPIRED"));
+        subscriptions.forEach(subscription -> subscription.setStatus(Status.EXPIRED.getStatusString()));
         subscriptionRepository.saveAll(subscriptions);
         log.info("Updated {} subscriptions to EXPIRED", subscriptions.size());
     }
@@ -74,7 +75,7 @@ public class PremiumSubscriptionExpiryScheduler {
                 .map(Subscription::getUser)
                 .filter(Objects::nonNull)
                 .distinct()
-                .filter(user -> !subscriptionRepository.existsByUserIdAndStatus(user.getId(), "ACTIVE"))
+                .filter(user -> !subscriptionRepository.existsByUserIdAndStatus(user.getId(), Status.ACTIVE.getStatusString()))
                 .peek(user -> user.setIsPremium(false))
                 .toList();
 
