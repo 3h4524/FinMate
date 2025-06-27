@@ -11,6 +11,8 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -65,4 +67,11 @@ public class Coupon {
         this.updatedAt = LocalDateTime.now();
     }
 
+    @ManyToMany
+    @JoinTable(
+            name = "CouponUsers",
+            joinColumns = @JoinColumn(name = "coupon_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> users = new HashSet<>();
 }

@@ -44,6 +44,11 @@ public enum ErrorCode {
     COUPON_NOT_FOUND(1035, "Coupon not found", HttpStatus.NOT_FOUND),
     EXCEED_FREE_CREATE_GOAL(1036, "The number of financial goals has been exceeded", HttpStatus.BAD_REQUEST),
     CAN_NOT_PROCESS_EXPIRED_SUBSCRIPTION(1037, "Failed to process expired subscriptions", HttpStatus.BAD_REQUEST),
+    EXPIRED_COUPON(1038, "Coupon has expired", HttpStatus.BAD_REQUEST),
+    UNAVAILABLE_COUPON(1039, "Coupon temporarily unavailable", HttpStatus.BAD_REQUEST),
+    EXCEED_MAX_USAGE_COUPON(1040, "Coupon usage limit exceeded", HttpStatus.BAD_REQUEST),
+    PACKAGE_ID_IS_REQUIRED(1041, "Package id is required", HttpStatus.BAD_REQUEST),
+    YOU_ALREADY_USED_THIS_COUPON(1042, "You have already used this coupon code", HttpStatus.BAD_REQUEST),
     ;
 
     private int code;

@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.EntityResolver;
+import org.codewith3h.finmateapplication.dto.request.PaymentRequest;
 import org.codewith3h.finmateapplication.dto.response.PaymentResponse;
+import org.codewith3h.finmateapplication.entity.Coupon;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
 import org.codewith3h.finmateapplication.entity.User;
@@ -13,6 +15,7 @@ import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.SubscriptionMapper;
+import org.codewith3h.finmateapplication.repository.CouponRepository;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
@@ -29,6 +32,7 @@ import vn.payos.type.PaymentLinkData;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import java.util.Objects;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -42,36 +46,28 @@ public class PaymentService {
     PremiumPackageRepository premiumPackageRepository;
     EntityResolver entityResolver;
     PayOS payOS;
-    private final UserRepository userRepository;
+    UserRepository userRepository;
+    CouponRepository couponRepository;
 
+    static BigDecimal HUNDRED = BigDecimal.valueOf(100);
 
     @Transactional
-    public String createPaymentLink(Integer packageId) {
+    public String createPaymentLink(PaymentRequest request) {
 
         int userId = (int) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        PremiumPackage premiumPackage = premiumPackageRepository.findPremiumPackageById(packageId);
-
-        log.info("User [{}] is initiating payment for package [{}], price: [{}]",
-                userId, packageId, premiumPackage.getPrice());
+        PremiumPackage premiumPackage = premiumPackageRepository.findPremiumPackageById(request.getPackageId());
 
         String packageName = premiumPackage.getName();
 
-        // giam gia xong lay int gan nhat
-        int price;
-        BigDecimal discount = premiumPackage.getDiscountPercentage();
+        Coupon coupon = couponRepository.findByCode(request.getCode()).orElse(null);
 
-        if (discount != null) {
-            price = BigDecimal.valueOf(premiumPackage.getPrice())
-                    .multiply(BigDecimal.valueOf(1).subtract(discount.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)))
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .intValue();
-        } else {
-            price = premiumPackage.getPrice(); // Không giảm giá
-        }
+        int price = calculateFinalPrice(coupon, premiumPackage);
 
+        log.info("User [{}] is initiating payment for package [{}], coupon code: [{}], price: [{}]",
+                userId, request.getPackageId(), request.getCode(), price);
 
-        Subscription subscription = subscriptionMapper.toSubscription(userId, packageId, price, premiumPackageRepository, entityResolver);
+        Subscription subscription = subscriptionMapper.toSubscription(userId, request.getPackageId(), price, premiumPackageRepository, entityResolver);
 
         subscriptionRepository.save(subscription);
 
@@ -80,6 +76,10 @@ public class PaymentService {
         log.info("Description: " + description);
         String returnUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
         String cancelUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
+
+        if (coupon != null) {
+            returnUrl += "?couponId=" + coupon.getId();
+        }
 
         // Generate order code (Do trung` duoc.) (ID + 6 chu so lay tu time)
         String currentTimeString = String.valueOf(new Date().getTime());
@@ -116,6 +116,29 @@ public class PaymentService {
 
     }
 
+    private int calculateFinalPrice(Coupon coupon, PremiumPackage premiumPackage) {
+
+        BigDecimal price;
+        BigDecimal packageDiscount = premiumPackage.getDiscountPercentage();
+
+        if (packageDiscount != null) {
+            price = BigDecimal.valueOf(premiumPackage.getPrice())
+                    .multiply(BigDecimal.valueOf(1)
+                            .subtract(packageDiscount.divide(HUNDRED, 4, RoundingMode.HALF_UP)));
+        } else {
+            price = BigDecimal.valueOf(premiumPackage.getPrice());
+        }
+
+        if (!Objects.isNull(coupon)) {
+            BigDecimal couponDiscount = coupon.getDiscountPercentage();
+
+            price = price.multiply(BigDecimal.valueOf(1).subtract(
+                    couponDiscount.divide(HUNDRED, 4, RoundingMode.HALF_UP)));
+        }
+
+        return price.setScale(0, RoundingMode.HALF_UP).intValue();
+    }
+
 
     public boolean handlePaymentReturn(PaymentResponse response) {
         try {
@@ -138,6 +161,21 @@ public class PaymentService {
                 }
 
                 subscriptionRepository.save(subscription);
+
+                Integer couponId = response.getCouponId();
+
+                if (couponId != null) {
+                    Coupon coupon = couponRepository.findById(couponId)
+                            .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_FOUND));
+
+                    coupon.getUsers().add(user);
+                    coupon.setUsedCount(coupon.getUsedCount() + 1);
+
+
+                    log.info("Added user {} to coupon {}", user.getId(), coupon.getCode());
+
+                    couponRepository.save(coupon);
+                }
 
                 log.info("User premium package [{}] is active for user [{}]. ExpiryDate: [{}]",
                         subscription.getPremiumPackage().getName(),

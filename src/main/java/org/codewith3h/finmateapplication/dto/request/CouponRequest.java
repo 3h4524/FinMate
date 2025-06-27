@@ -16,8 +16,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class CouponRequest {
-    @NotNull(message = "code is required")
-    @Size(max = 50, message = "code cannot exceed 50 characters")
+    @NotNull(message = "Code is required")
+    @Size(max = 50, message = "Code cannot exceed 50 characters")
     private String code;
     @Size(max = 255, message = "Description cannot exceed 255 characters")
     private String description;
