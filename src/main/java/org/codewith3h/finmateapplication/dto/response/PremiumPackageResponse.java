@@ -1,10 +1,7 @@
 package org.codewith3h.finmateapplication.dto.response;
 
 import jakarta.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.codewith3h.finmateapplication.enums.DurationType;
 
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class PremiumPackageResponse {
     private Integer id;
     private String name;

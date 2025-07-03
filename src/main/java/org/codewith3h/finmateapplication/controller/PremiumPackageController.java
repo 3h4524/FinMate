@@ -9,6 +9,7 @@ import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.service.PremiumPackageService;
+import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -49,6 +50,7 @@ public class PremiumPackageController {
         ApiResponse<Page<PremiumPackageResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("premium package list retrieved successfully");
         apiResponse.setResult(packageResponses);
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -68,7 +70,6 @@ public class PremiumPackageController {
             @PathVariable @Positive Integer packageId,
             @Valid @RequestBody PremiumPackageCreationDto request
     ) {
-        log.info("Updating premium package");
         PremiumPackageResponse packageResponse = premiumPackageService.updatePremiumPackage(packageId, request);
 
         ApiResponse<PremiumPackageResponse> apiResponse = new ApiResponse<>();

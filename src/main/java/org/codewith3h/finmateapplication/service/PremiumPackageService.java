@@ -12,6 +12,7 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.PremiumPackageMapper;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,7 @@ public class PremiumPackageService {
     }
 
     public PremiumPackageResponse updatePremiumPackage(Integer id, PremiumPackageCreationDto request) {
-        log.info("Updating premium package.");
+        log.info("Updating premium package: {}", request);
 
         PremiumPackage premiumPackage = premiumPackageRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PREMIUM_PACKAGE_NOT_FOUND));
