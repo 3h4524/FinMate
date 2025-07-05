@@ -37,7 +37,7 @@ public class GoalProgressNotificationScheduler {
         Page<Goal> goalPage;
         do {
             goalPage = goalRepository.findGoalByStatusAndNotificationEnabled(
-                    Status.IN_PROGRESS.getStatusString(), true, pageable);
+                    Status.IN_PROGRESS.name(), true, pageable);
             totalProcessed += processGoals(goalPage);
             pageable = pageable.next();
         } while (goalPage.hasNext());
@@ -56,7 +56,7 @@ public class GoalProgressNotificationScheduler {
             }
 
             BigDecimal expectedAmountSoFar = calculateExpectedAmount(goal, today);
-            if (expectedAmountSoFar != null && goal.getCurrentAmount().compareTo(expectedAmountSoFar) < 0) {
+            if (goal.getCurrentAmount().compareTo(expectedAmountSoFar) < 0) {
                 String message = String.format("Your goal is behind schedule, expected: %s, actual: %s",
                         expectedAmountSoFar, goal.getCurrentAmount());
                 // notificationService.sendNotification(goal.getUser().getId(), message);

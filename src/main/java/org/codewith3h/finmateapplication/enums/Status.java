@@ -6,14 +6,13 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Status {
-    ACTIVE("ACTIVE"),
-    CANCELLED("CANCELLED"),
-    PENDING("PENDING"),
-    COMPLETED("COMPLETED"),
-    IN_PROGRESS("IN_PROGRESS"),
-    FAILED("FAILED"),
-    EXPIRED("EXPIRED"),
+    ACTIVE,
+    CANCELLED,
+    PENDING,
+    COMPLETED,
+    IN_PROGRESS,
+    FAILED,
+    EXPIRED,
     ;
 
-    private final String statusString;
 }

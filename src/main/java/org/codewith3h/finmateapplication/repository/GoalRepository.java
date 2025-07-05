@@ -18,5 +18,5 @@ public interface GoalRepository extends JpaRepository<Goal,Integer> {
 
     Page<Goal> findGoalByStatusAndNotificationEnabled(String status, Boolean notificationEnabled, Pageable pageable);
 
-    Integer countGoalsByUser_Id(Integer userId);
+    int countGoalsByUser_IdAndStatus(Integer userId, String status);
 }

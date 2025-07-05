@@ -42,7 +42,7 @@ public interface GoalProgressMapper {
     GoalProgressResponse toGoalProgressResponse(GoalProgress goalProgress);
 
     default String calculateTimeRemaining(LocalDate deadline, String status) {
-        if (Status.COMPLETED.getStatusString().equals(status)) {
+        if (Status.COMPLETED.name().equals(status)) {
             return "Finished";
         }
 

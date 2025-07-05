@@ -10,7 +10,7 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.mapstruct.*;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +39,7 @@ public interface PremiumPackageMapper {
 
     default List<Feature> mapFeatureCodes(List<FeatureCode> featureCodes, @Context FeatureRepository featureRepository) {
         if(featureCodes==null){
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return featureCodes.stream()
                 .map(code -> featureRepository.findByCode(code.name())

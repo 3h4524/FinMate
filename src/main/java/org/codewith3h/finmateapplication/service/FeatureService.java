@@ -13,16 +13,13 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.FeatureMapper;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -51,7 +48,7 @@ public class FeatureService {
 
     public boolean userHasFeature(int userId, String featureCode) {
         List<Subscription> subscriptions = subscriptionRepository
-                .findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.getStatusString());
+                .findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.name());
 
         return subscriptions.stream()
                 .flatMap(sub -> {

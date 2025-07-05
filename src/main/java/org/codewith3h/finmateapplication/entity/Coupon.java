@@ -63,7 +63,7 @@ public class Coupon {
     private LocalDateTime updatedAt;
 
     @PreUpdate
-    public void preUpdate(){
+    public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -71,7 +71,10 @@ public class Coupon {
     @JoinTable(
             name = "CouponUsers",
             joinColumns = @JoinColumn(name = "coupon_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(columnNames = {"coupon_id", "user_id"})
+            }
     )
     private Set<User> users = new HashSet<>();
 }

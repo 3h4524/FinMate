@@ -1,7 +1,6 @@
 package org.codewith3h.finmateapplication.service;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -51,7 +50,7 @@ public class GoalService {
 
         boolean hasUnlimited = featureService.userHasFeature(request.getUserId(), FeatureCode.UNLIMITED_GOAL.name());
 
-        if (totalGoalByUserId(request.getUserId()) >= LimitCount.FINANCIAL_GOAL.getCount() && !hasUnlimited) {
+        if (totalGoalInProgressByUserId(request.getUserId()) >= LimitCount.FINANCIAL_GOAL.getCount() && !hasUnlimited) {
             throw new AppException(ErrorCode.EXCEED_FREE_CREATE_GOAL);
         }
 
@@ -76,9 +75,10 @@ public class GoalService {
         return goalMapper.toGoalResponse(goalCreated);
     }
 
-    private int totalGoalByUserId(Integer userId) {
+    private int totalGoalInProgressByUserId(Integer userId) {
 
-        return goalRepository.countGoalsByUser_Id(userId);
+
+        return goalRepository.countGoalsByUser_IdAndStatus(userId, Status.IN_PROGRESS.name());
 
     }
 
@@ -89,7 +89,7 @@ public class GoalService {
 
         log.info("Cancelling Financial Goal for goalId: {}, name: {}", goalId, goal.getName());
 
-        goal.setStatus(Status.CANCELLED.getStatusString());
+        goal.setStatus(Status.CANCELLED.name());
 
         goalRepository.save(goal);
 
@@ -113,26 +113,26 @@ public class GoalService {
     public void updateStatusAfterContributeOrChange(Goal goal) {
         if (goal.getStatus() == null) {
             log.info("Goal status is null, set default status for goalId: {}, name: {}", goal.getId(), goal.getName());
-            goal.setStatus(Status.IN_PROGRESS.getStatusString());
+            goal.setStatus(Status.IN_PROGRESS.name());
         }
 
         LocalDate today = LocalDate.now();
         if (goal.getCurrentAmount().compareTo(goal.getTargetAmount()) >= 0 &&
                 !goal.getDeadline().isBefore(today) &&
-                !Set.of(Status.COMPLETED.getStatusString(), Status.CANCELLED.getStatusString(), Status.FAILED.getStatusString()).contains(goal.getStatus())) {
-            goal.setStatus(Status.COMPLETED.getStatusString());
+                !Set.of(Status.COMPLETED.name(), Status.CANCELLED.name(), Status.FAILED.name()).contains(goal.getStatus())) {
+            goal.setStatus(Status.COMPLETED.name());
             goalRepository.save(goal);
             log.info("Goal {} set to COMPLETED", goal.getId());
         } else if (goal.getDeadline().isBefore(today) &&
                 goal.getCurrentAmount().compareTo(goal.getTargetAmount()) < 0 &&
-                !Set.of(Status.COMPLETED.getStatusString(), Status.CANCELLED.getStatusString(), Status.FAILED.getStatusString()).contains(goal.getStatus())) {
-            goal.setStatus(Status.FAILED.getStatusString());
+                !Set.of(Status.COMPLETED.name(), Status.CANCELLED.name(), Status.FAILED.name()).contains(goal.getStatus())) {
+            goal.setStatus(Status.FAILED.name());
             goalRepository.save(goal);
             log.info("Goal {} set to FAILED", goal.getId());
         } else if (!goal.getDeadline().isBefore(today) &&
                 goal.getCurrentAmount().compareTo(goal.getTargetAmount()) < 0 &&
-                goal.getStatus().equals(Status.FAILED.getStatusString())) {
-            goal.setStatus(Status.IN_PROGRESS.getStatusString());
+                goal.getStatus().equals(Status.FAILED.name())) {
+            goal.setStatus(Status.IN_PROGRESS.name());
             goalRepository.save(goal);
             log.info("Goal {} set to IN_PROGRESS", goal.getId());
         }

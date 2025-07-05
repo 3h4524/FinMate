@@ -35,7 +35,7 @@ public class GoalCheckOverdueScheduler {
         Page<Goal> goalPage;
         int totalProcessed = 0;
         do {
-            goalPage = goalRepository.findGoalByStatusAndDeadlineBefore(Status.IN_PROGRESS.getStatusString(), today, pageable);
+            goalPage = goalRepository.findGoalByStatusAndDeadlineBefore(Status.IN_PROGRESS.name(), today, pageable);
 
             for (Goal goal : goalPage.getContent()) {
                 log.info("Checking overdue goal {}", goal.getId());

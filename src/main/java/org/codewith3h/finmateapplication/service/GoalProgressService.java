@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +72,7 @@ public class GoalProgressService {
         LocalDate today = LocalDate.now();
 
         String status = goal.getStatus();
-        if (Status.COMPLETED.getStatusString().equals(status) || "CANCEL".equals(status) || Status.FAILED.getStatusString().equals(status)) {
+        if (Status.COMPLETED.name().equals(status) || "CANCEL".equals(status) || Status.FAILED.name().equals(status)) {
             return;
         }
 
@@ -81,15 +80,15 @@ public class GoalProgressService {
         boolean goalReached = goal.getCurrentAmount().compareTo(goal.getTargetAmount()) >= 0;
 
         if (goalReached && !deadlinePassed) {
-            goal.setStatus(Status.COMPLETED.getStatusString());
+            goal.setStatus(Status.COMPLETED.name());
             log.info("Goal id {} marked as COMPLETED: currentAmount={} reached targetAmount={}, deadline not passed",
                     goal.getId(), goal.getCurrentAmount(), goal.getTargetAmount());
         } else if (deadlinePassed && !goalReached) {
-            goal.setStatus(Status.FAILED.getStatusString());
+            goal.setStatus(Status.FAILED.name());
             log.info("Goal id {} marked as FAILED: deadline passed, currentAmount={} less than targetAmount={}",
                     goal.getId(), goal.getCurrentAmount(), goal.getTargetAmount());
         } else if (deadlinePassed) {
-            goal.setStatus(Status.FAILED.getStatusString());
+            goal.setStatus(Status.FAILED.name());
             log.info("Goal id {} marked as FAILED: deadline passed, but goalReached=true, currentAmount={}, targetAmount={}",
                     goal.getId(), goal.getCurrentAmount(), goal.getTargetAmount());
         } else {
@@ -132,7 +131,7 @@ public class GoalProgressService {
 
 
     private void updateTodayGoalProgressList(Integer userId) {
-        List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, Status.IN_PROGRESS.getStatusString());
+        List<Goal> userGoals = goalRepository.findByUserIdAndStatusIs(userId, Status.IN_PROGRESS.name());
         for (Goal goal : userGoals) {
             ensureTodayProgressForGoal(goal);
         }

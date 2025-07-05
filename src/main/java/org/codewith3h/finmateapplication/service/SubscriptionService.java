@@ -29,7 +29,7 @@ public class SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
-        List<String> statuses = Arrays.asList(Status.ACTIVE.getStatusString(), Status.EXPIRED.getStatusString());
+        List<String> statuses = Arrays.asList(Status.ACTIVE.name(), Status.EXPIRED.name());
         List<Subscription> subscriptions = subscriptionRepository.findByPremiumPackageAndStatusIn(premiumPackage, statuses);
 
         BigDecimal revenue = subscriptions.stream()
@@ -44,7 +44,7 @@ public class SubscriptionService {
 
 
     public RevenueAndSubscribers getTotalRevenueAndSubscriber() {
-        List<Subscription> subscriptions = subscriptionRepository.findByStatus(Status.ACTIVE.getStatusString());
+        List<Subscription> subscriptions = subscriptionRepository.findByStatus(Status.ACTIVE.name());
         BigDecimal revenue = subscriptions.stream()
                 .map(re -> BigDecimal.valueOf(re.getAmount()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -64,13 +64,13 @@ public class SubscriptionService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus(Status.ACTIVE.getStatusString(),pageable);
+        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus(Status.ACTIVE.name(),pageable);
 
         return subscriptions.map(subscriptionMapper::toResponseDto);
     }
 
     public List<Subscription> getSubscriptionsPurchasedForUserId(int userId) {
-        return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.getStatusString());
+        return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.name());
     }
 
 }

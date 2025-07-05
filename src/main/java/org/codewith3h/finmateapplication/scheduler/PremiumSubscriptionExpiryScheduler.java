@@ -52,7 +52,7 @@ public class PremiumSubscriptionExpiryScheduler {
 
             do {
                 page = subscriptionRepository.findSubscriptionsByStatusAndEndDateBefore(
-                        Status.ACTIVE.getStatusString(), startOfDayInstant, pageable);
+                        Status.ACTIVE.name(), startOfDayInstant, pageable);
                 List<Subscription> subscriptions = page.getContent();
                 updateExpiredSubscriptions(subscriptions);
                 updateNonPremiumUsers(subscriptions);
@@ -65,7 +65,7 @@ public class PremiumSubscriptionExpiryScheduler {
     }
 
     private void updateExpiredSubscriptions(List<Subscription> subscriptions) {
-        subscriptions.forEach(subscription -> subscription.setStatus(Status.EXPIRED.getStatusString()));
+        subscriptions.forEach(subscription -> subscription.setStatus(Status.EXPIRED.name()));
         subscriptionRepository.saveAll(subscriptions);
         log.info("Updated {} subscriptions to EXPIRED", subscriptions.size());
     }
@@ -75,7 +75,7 @@ public class PremiumSubscriptionExpiryScheduler {
                 .map(Subscription::getUser)
                 .filter(Objects::nonNull)
                 .distinct()
-                .filter(user -> !subscriptionRepository.existsByUserIdAndStatus(user.getId(), Status.ACTIVE.getStatusString()))
+                .filter(user -> !subscriptionRepository.existsByUserIdAndStatus(user.getId(), Status.ACTIVE.name()))
                 .peek(user -> user.setIsPremium(false))
                 .toList();
 

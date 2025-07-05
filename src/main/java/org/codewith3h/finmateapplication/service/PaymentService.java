@@ -62,7 +62,7 @@ public class PaymentService {
 
         Coupon coupon = couponRepository.findByCode(request.getCode()).orElse(null);
 
-        int price = calculateFinalPrice(coupon, premiumPackage);
+        int price = calculateFinalPrice(coupon, request.getAmount());
 
         log.info("User [{}] is initiating payment for package [{}], coupon code: [{}], price: [{}]",
                 userId, request.getPackageId(), request.getCode(), price);
@@ -116,18 +116,9 @@ public class PaymentService {
 
     }
 
-    private int calculateFinalPrice(Coupon coupon, PremiumPackage premiumPackage) {
+    private int calculateFinalPrice(Coupon coupon, Integer paymentPrice) {
 
-        BigDecimal price;
-        BigDecimal packageDiscount = premiumPackage.getDiscountPercentage();
-
-        if (packageDiscount != null) {
-            price = BigDecimal.valueOf(premiumPackage.getPrice())
-                    .multiply(BigDecimal.valueOf(1)
-                            .subtract(packageDiscount.divide(HUNDRED, 4, RoundingMode.HALF_UP)));
-        } else {
-            price = BigDecimal.valueOf(premiumPackage.getPrice());
-        }
+        BigDecimal price = BigDecimal.valueOf(paymentPrice);
 
         if (!Objects.isNull(coupon)) {
             BigDecimal couponDiscount = coupon.getDiscountPercentage();
@@ -152,7 +143,7 @@ public class PaymentService {
 
             if (status.equals("PAID")) {
                 // xu ly success
-                subscription.setStatus(Status.ACTIVE.getStatusString());
+                subscription.setStatus(Status.ACTIVE.name());
 
                 User user = subscription.getUser();
                 if (Boolean.FALSE.equals(user.getIsPremium())) {
@@ -182,7 +173,7 @@ public class PaymentService {
                         subscription.getUser().getName(),
                         subscription.getEndDate());
                 return true;
-            } else if (status.equals(Status.CANCELLED.getStatusString())) {
+            } else if (status.equals(Status.CANCELLED.name())) {
                 log.info("Payment Cancelled by user [{}]", subscription.getUser().getName());
             } else {
                 log.info("Payment is still pending for user [{}]", subscription.getUser().getName());

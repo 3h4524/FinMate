@@ -8,11 +8,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CouponUsers",
+@Table(name = "PromotionalOfferPremiumPackage",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"coupon_id", "user_id"})
+                @UniqueConstraint(columnNames = {"offer_id", "package_id"})
         })
-public class CouponUser {
+public class PromotionalOfferPremiumPackage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -20,11 +20,12 @@ public class CouponUser {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "coupon_id", nullable = false)
-    private Coupon coupon;
+    @JoinColumn(name = "offer_id", nullable = false)
+    private PromotionalOffer offer;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "package_id", nullable = false)
+    private PremiumPackage packageField;
+
 }

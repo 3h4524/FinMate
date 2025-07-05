@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.dto.request;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -17,4 +18,8 @@ public class PaymentRequest {
 
     @Size(max = 50, message = "Code cannot exceed 50 characters")
     String code;
+
+    @NotNull
+    @Min(value = 1, message = "AMOUNT_MUST_BE_POSITIVE")
+    Integer amount;
 }
