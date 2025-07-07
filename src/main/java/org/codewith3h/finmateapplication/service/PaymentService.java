@@ -72,7 +72,9 @@ public class PaymentService {
         subscriptionRepository.save(subscription);
 
         // description maximum 25 characters
-        String description = "Purchasing " + packageName;
+        String truncatedPackageName = packageName.length() > 12 ? packageName.substring(0, 12) + "..." : packageName;
+        String description = "Purchasing " + truncatedPackageName;
+
         log.info("Description: " + description);
         String returnUrl = "http://127.0.0.1:5500/pages/user_premium/";
         String cancelUrl = "http://127.0.0.1:5500/pages/user_premium/";
