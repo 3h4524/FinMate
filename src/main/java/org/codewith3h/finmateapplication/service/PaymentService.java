@@ -74,8 +74,8 @@ public class PaymentService {
         // description maximum 25 characters
         String description = "Purchasing " + packageName;
         log.info("Description: " + description);
-        String returnUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
-        String cancelUrl = "http://127.0.0.1:5500/pages/confirmationPayment.html";
+        String returnUrl = "http://127.0.0.1:5500/pages/user_premium/";
+        String cancelUrl = "http://127.0.0.1:5500/pages/user_premium/";
 
         if (coupon != null) {
             returnUrl += "?couponId=" + coupon.getId();
