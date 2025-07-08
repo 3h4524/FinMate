@@ -22,4 +22,5 @@ public class GoalResponse {
     LocalDate deadline;
     String status;
     Boolean notificationEnabled;
+    Integer priority;
 }

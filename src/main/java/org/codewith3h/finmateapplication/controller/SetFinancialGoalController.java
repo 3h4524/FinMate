@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -53,6 +55,17 @@ public class SetFinancialGoalController {
         ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Goal found.");
         apiResponse.setResult(goal);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<List<GoalResponse>>> getAllGoals(
+            @PathVariable Integer userId
+    ){
+        List<GoalResponse> goals = goalService.getGoalsForUser(userId);
+        ApiResponse<List<GoalResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("All goals found.");
+        apiResponse.setResult(goals);
         return ResponseEntity.ok(apiResponse);
     }
 }

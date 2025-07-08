@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -125,8 +126,13 @@ public class GoalService {
         return goalMapper.toGoalResponse(goal);
     }
 
-    public List<Goal> getAllGoals(){
+    public List<GoalResponse> getGoalsForUser(Integer userId){
+        log.info("Getting goals for user: {}", userId);
+        return goalRepository.findByUserIdAndStatusIs(userId, "IN_PROGRESS").stream().map(goalMapper :: toGoalResponse).collect(Collectors.toList());
+    }
+
+    public List<GoalResponse> getAllGoals(){
         log.info("Fetching all goals");
-        return goalRepository.findAll();
+        return goalRepository.findAll().stream().map(goalMapper :: toGoalResponse).collect(Collectors.toList());
     }
 }

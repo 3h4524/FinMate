@@ -146,4 +146,16 @@ public class TransactionController {
         response.setResult(transactionResponse);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/getAllTransaction/{userId}")
+    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getUserTransactions(
+            @PathVariable Integer userId
+    ){
+        log.info("Fetching all transaction for user {}", userId);
+        List<TransactionResponse> transactions = transactionService.getAllTransactions();
+        ApiResponse<List<TransactionResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("All transactions fetched successfully");
+        apiResponse.setResult(transactions);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
