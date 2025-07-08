@@ -27,6 +27,7 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionMapper subscriptionMapper;
+    private final FeatureService featureService;
 
     public RevenueAndSubscribers getRevenueAndSubscriptionForPremiumPackage(PremiumPackage premiumPackage) {
         List<String> statuses = Arrays.asList(Status.ACTIVE.name(), Status.EXPIRED.name());

@@ -3,6 +3,7 @@ package org.codewith3h.finmateapplication.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
 import org.codewith3h.finmateapplication.entity.EmailVerification;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
@@ -11,6 +12,7 @@ import org.codewith3h.finmateapplication.repository.EmailVerificationRepository;
 import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -57,7 +59,7 @@ public class EmailService {
         User user = userRepository.findByEmail(toEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
 
-        if(Boolean.TRUE.equals(user.getVerified())){
+        if(user.getVerified()){
             throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED_EXCEPTION);
         }
 
@@ -112,7 +114,7 @@ public class EmailService {
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
         
         String token = createPasswordResetToken(user);
-
+        
         try {
             logger.info("Attempting to send password reset email to: {}", toEmail);
 
@@ -163,7 +165,7 @@ public class EmailService {
         if(!verification.getVerificationCode().equals(code)) {
             logger.info("OTP is incorrect, verification code is {}.", code);
             throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE_EXCEPTION);
-        } else if (Boolean.TRUE.equals(verification.getVerified())){
+        } else if (verification.getVerified()){
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         } else if (verification.getExpiryTime().isBefore(LocalDateTime.now())) {
             logger.info("Time to verify is expiry, expiry time: {}", verification.getExpiryTime());
@@ -178,18 +180,42 @@ public class EmailService {
 
     @Async
     @Transactional
-    public void sendCustomEmail(String toEmail, String subject, String content, Boolean isHTML) throws MessagingException {
-
+    public void sendOtpForChangeEmail(String toEmail, User user) throws MessagingException {
+        // Không check email đã tồn tại, chỉ gửi OTP về email mới cho user hiện tại
+        String verificationCode = generateOTP();
+        EmailVerification verification = new EmailVerification();
+        verification.setUser(user);
+        verification.setEmail(toEmail);
+        verification.setVerificationCode(verificationCode);
+        verification.setExpiryTime(LocalDateTime.now().plusMinutes(verificationExpiryMinutes));
+        verification.setVerified(false);
+        verification.setCreatedAt(LocalDateTime.now());
+        emailVerificationRepository.save(verification);
+        // Create email content
+        String subject = "Verify Your New Email";
+        String content = String.format(
+                "Hello!\n\n" +
+                        "You requested to change your email for FinMate.\n\n" +
+                        "Please use the following verification code (OTP) to confirm your new email:\n\n" +
+                        "  %s  \n\n" +
+                        "This code will expire in %d minutes.\n\n" +
+                        "If you did not request this, please ignore this email.\n\n" +
+                        "---\n" +
+                        "This is an automated email, please do not reply.\n\n" +
+                        "Best regards,\n" +
+                        "FinMate Team",
+                verificationCode,
+                verificationExpiryMinutes
+        );
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, false);
         helper.setFrom(fromEmail);
         helper.setTo(toEmail);
         helper.setSubject(subject);
-        helper.setText(content, isHTML);
+        helper.setText(content);
         mailSender.send(message);
-        logger.info("Email sent successfully to: {}", toEmail);
+        logger.info("Change email OTP sent to: {}", toEmail);
     }
-
 
     private String generateOTP() {
         Random random = new Random();

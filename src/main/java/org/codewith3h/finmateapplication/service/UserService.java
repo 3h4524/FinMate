@@ -49,4 +49,16 @@ public class UserService {
         return user.getResendLockoutUntil() != null &&
                 user.getResendLockoutUntil().isAfter(LocalDateTime.now());
     }
+
+    public void changePassword(Integer userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
+    }
 }

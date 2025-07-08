@@ -76,6 +76,7 @@ public class AuthenticationService {
                     .isDelete(user.getIsDelete())
                     .userId(user.getId())
                     .premium(user.getIsPremium())
+                    .is2FAEnabled(user.getIs2FAEnabled())
                     .build();
     }
 
@@ -125,6 +126,7 @@ public class AuthenticationService {
                 .isDelete(user.getIsDelete())
                 .userId(user.getId())
                 .premium(user.getIsPremium())
+                .is2FAEnabled(user.getIs2FAEnabled())
                 .build();
 
         log.info("Google login successful for user: {}", user.getEmail());
@@ -165,9 +167,19 @@ public class AuthenticationService {
         user.setVerificationCodeExpiry(null);
         userRepository.save(user);
 
+        // Generate token after verification
+        String token = jwtUtil.generateToken(user);
+
         return AuthenticationResponse.builder()
+                .token(token)
                 .isVerified(true)
+                .name(user.getName())
+                .role(user.getRole())
+                .email(user.getEmail())
                 .isDelete(user.getIsDelete())
+                .userId(user.getId())
+                .premium(user.getIsPremium())
+                .is2FAEnabled(user.getIs2FAEnabled())
                 .build();
     }
 

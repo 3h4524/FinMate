@@ -49,6 +49,7 @@ public enum ErrorCode {
     EXCEED_MAX_USAGE_COUPON(1040, "Coupon usage limit exceeded", HttpStatus.BAD_REQUEST),
     PACKAGE_ID_IS_REQUIRED(1041, "Package id is required", HttpStatus.BAD_REQUEST),
     YOU_ALREADY_USED_THIS_COUPON(1042, "You have already used this coupon code", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL_FORMAT(1043, "Invalid email format", HttpStatus.BAD_REQUEST),
     ;
 
     private int code;
