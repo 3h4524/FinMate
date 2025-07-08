@@ -5,15 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FeatureResponse {
-    private Integer id;
-    private String featureCode;
-    private String featureName;
-    private String featureDescription;
-    boolean isActive;
+@Builder
+public class FeatureStatsResponse {
+    private int totalFeatures;
+    private int activeFeatures;
 }
-

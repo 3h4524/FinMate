@@ -362,5 +362,8 @@ public class TransactionService {
                 .build();
     }
 
-
+    public List<Transaction> getAllTransactions(){
+        log.info("Fetching all transactions");
+        return transactionRepository.findAll();
+    }
 }

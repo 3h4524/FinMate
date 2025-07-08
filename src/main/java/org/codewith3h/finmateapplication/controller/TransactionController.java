@@ -82,7 +82,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{transactionId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<ApiResponse<TransactionResponse>> getTransaction(
             @PathVariable @Positive Integer transactionId,
             @RequestParam @Positive Integer userId) {

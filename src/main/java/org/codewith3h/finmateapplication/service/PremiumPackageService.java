@@ -3,6 +3,7 @@ package org.codewith3h.finmateapplication.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
+import org.codewith3h.finmateapplication.dto.response.PremiumPackageFetchResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.dto.response.RevenueAndSubscribers;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -114,6 +116,16 @@ public class PremiumPackageService {
         return premiumPackagePurchasedList.stream()
                 .map(premiumPackageMapper::toResponseDto)
                 .toList();
+    }
+
+    public List<PremiumPackageFetchResponse> getAllPremiumPackages() {
+        log.info("Fetching all premium packages.");
+
+        List<PremiumPackage> premiumPackages = premiumPackageRepository.findAll();
+        log.info("Premium packages fetched successfully.");
+        return premiumPackages.stream()
+                .map(premiumPackageMapper :: toFetchResponseDto)
+                .collect(Collectors.toList());
     }
 
 }

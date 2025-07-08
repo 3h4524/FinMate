@@ -1,7 +1,6 @@
 package org.codewith3h.finmateapplication.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.codewith3h.finmateapplication.dto.request.RegisterRequest;
 import org.codewith3h.finmateapplication.dto.request.UpdateUserRequest;
 import org.codewith3h.finmateapplication.dto.request.ChangePasswordRequest;
 import org.codewith3h.finmateapplication.dto.request.EmailRequest;

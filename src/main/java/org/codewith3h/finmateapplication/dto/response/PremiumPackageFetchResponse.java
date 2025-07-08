@@ -5,15 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FeatureResponse {
+@Builder
+public class PremiumPackageFetchResponse {
     private Integer id;
-    private String featureCode;
-    private String featureName;
-    private String featureDescription;
-    boolean isActive;
+    private String name;
 }
-

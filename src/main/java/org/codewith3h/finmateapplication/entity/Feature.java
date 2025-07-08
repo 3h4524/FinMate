@@ -40,5 +40,4 @@ public class Feature {
     @ColumnDefault("1")
     @Column(name = "is_active")
     private Boolean isActive;
-
 }

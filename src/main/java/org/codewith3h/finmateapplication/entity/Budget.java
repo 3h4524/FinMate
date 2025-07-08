@@ -2,8 +2,7 @@ package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
@@ -15,6 +14,9 @@ import java.time.LocalDate;
 @Table(name = "Budgets")
 @DynamicInsert
 @DynamicUpdate
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Budget {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

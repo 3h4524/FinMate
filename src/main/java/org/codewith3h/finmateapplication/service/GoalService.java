@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 
@@ -142,5 +143,10 @@ public class GoalService {
     public GoalResponse getGoal(Integer goalId) {
         Goal goal = goalRepository.findById(goalId).orElseThrow(() -> new AppException(ErrorCode.NO_GOAL_FOUND));
         return goalMapper.toGoalResponse(goal);
+    }
+
+    public List<Goal> getAllGoals(){
+        log.info("Fetching all goals");
+        return goalRepository.findAll();
     }
 }

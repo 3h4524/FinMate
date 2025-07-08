@@ -6,8 +6,10 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.CouponRequest;
+import org.codewith3h.finmateapplication.dto.request.CouponSearchRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.CouponResponse;
+import org.codewith3h.finmateapplication.entity.Coupon;
 import org.codewith3h.finmateapplication.service.CouponService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Validated
 public class CouponController {
-    private final CouponService couponService;
+    private final CouponService  couponService;
 
     @GetMapping("/{couponId}")
     public ResponseEntity<ApiResponse<CouponResponse>> getCoupon(@PathVariable Integer couponId) {
@@ -91,6 +93,18 @@ public class CouponController {
         apiResponse.setMessage("Coupon code applied");
         apiResponse.setResult(result);
         log.info("Validated coupon code {}", code);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<Page<CouponResponse>>> searchCoupon(
+            @RequestBody CouponSearchRequest dto
+    ) {
+        log.info("Searching coupon {}", dto);
+        Page<CouponResponse> couponResponses =  couponService.searchCoupon(dto);
+        ApiResponse<Page<CouponResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Coupon searched successfully.");
+        apiResponse.setResult(couponResponses);
         return ResponseEntity.ok(apiResponse);
     }
 }

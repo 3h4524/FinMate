@@ -20,11 +20,17 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Transactional(readOnly = true)
     public List<CategoryResponse> getCategories() {
         List<Category> categories = categoryRepository.findAllByNameNot("Điều chỉnh số dư");
         return categories.stream().map(categoryMapper :: toCategoryResponse).toList();
+    }
+
+
+    public List<Category> getAllCategories(){
+        log.info("Fetching all categories");
+        return categoryRepository.findAll();
     }
 
 }

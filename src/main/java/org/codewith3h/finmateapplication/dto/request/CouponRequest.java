@@ -10,23 +10,25 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CouponRequest {
-    @NotNull(message = "Code is required")
-    @Size(max = 50, message = "Code cannot exceed 50 characters")
-    private String code;
-    @Size(max = 255, message = "Description cannot exceed 255 characters")
-    private String description;
-    @NotNull(message = "Discount percentage is required")
-    @DecimalMin(value = "0", inclusive = false, message = "Discount percentage must be greater than 0")
-    private BigDecimal discountPercentage;
-    @DecimalMin(value = "0", inclusive = false, message = "Max usage must be greater than 0")
-    private Integer maxUsage;
-    @NotNull(message = "Expiry Date is required")
-    private LocalDate expiryDate;
-    private Boolean isActive;
-}
+    public class CouponRequest {
+        @NotNull(message = "code is required")
+        @Size(max = 50, message = "code cannot exceed 50 characters")
+        private String code;
+        @Size(max = 255, message = "Description cannot exceed 255 characters")
+        private String description;
+        @NotNull(message = "Discount percentage is required")
+        @DecimalMin(value = "0", inclusive = false, message = "Discount percentage must be greater than 0")
+        private BigDecimal discountPercentage;
+        @DecimalMin(value = "0", inclusive = false, message = "Max usage must be greater than 0")
+        private Integer maxUsage;
+        @NotNull(message = "Expiry Date is required")
+        private LocalDate expiryDate;
+        private Boolean isActive;
+        private List<Integer> premiumId;
+    }

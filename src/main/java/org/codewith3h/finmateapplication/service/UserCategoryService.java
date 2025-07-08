@@ -31,7 +31,7 @@ public class UserCategoryService {
     private final UserRepository userRepository;
     private final FeatureService featureService;
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public List<CategoryResponse> getUserCategory(Integer userId){
         log.info("Fetching category for user: {}", userId);
         List<UserCategory> categories = userCategoryRepository.findByUserId(userId);
@@ -66,5 +66,10 @@ public class UserCategoryService {
         Integer count = userCategoryRepository.countByUserId(userId);
         log.info("count: {}", count);
         return count;
+    }
+
+    public List<UserCategory> getAllUserCategories(){
+        log.info("Fetching all user categories");
+        return userCategoryRepository.findAll();
     }
 }

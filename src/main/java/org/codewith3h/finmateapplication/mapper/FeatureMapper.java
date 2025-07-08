@@ -12,6 +12,7 @@ import org.mapstruct.*;
 )
 public interface FeatureMapper {
 
+    @Mapping(source = "id", target = "id")
     @Mapping(source = "code", target = "featureCode")
     @Mapping(source = "name", target = "featureName")
     @Mapping(source = "description", target = "featureDescription")
