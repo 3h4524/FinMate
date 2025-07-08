@@ -59,12 +59,12 @@ public class EmailService {
         User user = userRepository.findByEmail(toEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
 
-        if(user.getVerified()){
+        if (user.getVerified()) {
             throw new AppException(ErrorCode.EMAIL_ALREADY_VERIFIED_EXCEPTION);
         }
 
         if (userService.isInLockoutPeriod(user)) {
-                throw new AppException(ErrorCode.IN_RESENT_OTP_EXCEPTION);
+            throw new AppException(ErrorCode.IN_RESENT_OTP_EXCEPTION);
         }
 
         String verificationCode = generateOTP();
@@ -110,11 +110,11 @@ public class EmailService {
 
     @Async
     public void sendPasswordResetEmail(String toEmail) throws MessagingException {
-        User  user = userRepository.findByEmail(toEmail)
+        User user = userRepository.findByEmail(toEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
-        
+
         String token = createPasswordResetToken(user);
-        
+
         try {
             logger.info("Attempting to send password reset email to: {}", toEmail);
 
@@ -162,10 +162,10 @@ public class EmailService {
                 .findFirstByEmailOrderByCreatedAtDesc(email)
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION));
 
-        if(!verification.getVerificationCode().equals(code)) {
+        if (!verification.getVerificationCode().equals(code)) {
             logger.info("OTP is incorrect, verification code is {}.", code);
             throw new AppException(ErrorCode.INVALID_VERIFICATION_CODE_EXCEPTION);
-        } else if (verification.getVerified()){
+        } else if (verification.getVerified()) {
             throw new AppException(ErrorCode.TOKEN_EXPIRED);
         } else if (verification.getExpiryTime().isBefore(LocalDateTime.now())) {
             logger.info("Time to verify is expiry, expiry time: {}", verification.getExpiryTime());
@@ -234,5 +234,18 @@ public class EmailService {
         return token;
     }
 
+    @Async
+    @Transactional
+    public void sendCustomEmail(String toEmail, String subject, String content, Boolean isHTML) throws MessagingException {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(content, isHTML);
+        mailSender.send(message);
+        logger.info("Email sent successfully to: {}", toEmail);
+    }
 
 } 

@@ -1,10 +1,8 @@
 package org.codewith3h.finmateapplication.service;
 
 import jakarta.mail.MessagingException;
-import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionCreationRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionSearchRequest;
 import org.codewith3h.finmateapplication.dto.request.TransactionUpdateRequest;
@@ -22,11 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -366,4 +360,6 @@ public class TransactionService {
         log.info("Fetching all transactions");
         return transactionRepository.findAll();
     }
+
+
 }

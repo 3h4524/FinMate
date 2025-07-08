@@ -10,6 +10,7 @@ import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.FeatureResponse;
 import org.codewith3h.finmateapplication.dto.response.FeatureStatsResponse;
 import org.codewith3h.finmateapplication.entity.Feature;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.codewith3h.finmateapplication.service.FeatureService;
 import org.springframework.data.domain.Page;
@@ -96,7 +97,7 @@ public class FeatureController {
     ) {
         log.info("loads features ");
         Page<FeatureResponse> featureResponsePage = featureService
-                .getFeatureByStatus(page, size, sortBy, sortDirection);
+                .getFeatureByStatus(true, page, size, sortBy, sortDirection);
 
         ApiResponse<Page<FeatureResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Feature fetched successfully.");

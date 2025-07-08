@@ -16,16 +16,15 @@ import org.codewith3h.finmateapplication.mapper.FeatureMapper;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.codewith3h.finmateapplication.repository.SubscriptionRepository;
 import org.codewith3h.finmateapplication.specification.FeatureSpecification;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
