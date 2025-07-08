@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/goal")
-public class SetFinancialGoalController {
+public class GoalController {
     GoalService goalService;
 
     @PostMapping
