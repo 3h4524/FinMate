@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.CouponRequest;
+import org.codewith3h.finmateapplication.dto.request.CouponSearchRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.CouponResponse;
 import org.codewith3h.finmateapplication.entity.Coupon;
@@ -80,5 +81,17 @@ public class CouponController {
         log.info("Deleting coupon {}", couponId);
         couponService.deleteCoupon(couponId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<Page<CouponResponse>>> searchCoupon(
+            @RequestBody CouponSearchRequest dto
+    ) {
+        log.info("Searching coupon {}", dto);
+        Page<CouponResponse> couponResponses =  couponService.searchCoupon(dto);
+        ApiResponse<Page<CouponResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Coupon searched successfully.");
+        apiResponse.setResult(couponResponses);
+        return ResponseEntity.ok(apiResponse);
     }
 }

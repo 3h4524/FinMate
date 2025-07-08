@@ -1,6 +1,7 @@
 package org.codewith3h.finmateapplication.mapper;
 
 import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
+import org.codewith3h.finmateapplication.dto.response.PremiumPackageFetchResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.entity.Feature;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
@@ -55,5 +56,5 @@ public interface PremiumPackageMapper {
     @Mapping(target = "features", expression = "java(mapFeatureCodes(premiumPackageCreationDto.getFeatures(), featureRepository))")
     void updateEntityFromDto(PremiumPackageCreationDto premiumPackageCreationDto, @MappingTarget PremiumPackage entity, @Context FeatureRepository featureRepository);
 
-
+    PremiumPackageFetchResponse toFetchResponseDto(PremiumPackage entity);
 }

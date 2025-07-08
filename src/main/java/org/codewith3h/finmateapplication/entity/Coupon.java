@@ -12,6 +12,8 @@ import org.hibernate.annotations.Nationalized;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -60,6 +62,15 @@ public class Coupon {
     @ColumnDefault("getdate()")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @ManyToMany
+    @JoinTable(
+            name = "PremiumPackageCoupons",
+            joinColumns = @JoinColumn(name = "coupon_id"),
+            inverseJoinColumns = @JoinColumn(name = "package_id")
+    )
+    private List<PremiumPackage> premiumPackages = new ArrayList<>();
+
 
     @PreUpdate
     public void preUpdate(){

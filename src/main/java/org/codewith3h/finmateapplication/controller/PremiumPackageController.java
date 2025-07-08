@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
+import org.codewith3h.finmateapplication.dto.response.PremiumPackageFetchResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.service.PremiumPackageService;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,16 @@ public class PremiumPackageController {
         ApiResponse<PremiumPackageResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("premium package created successfully");
         apiResponse.setResult(premiumPackageResponse);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/fetchAll")
+    public ResponseEntity<ApiResponse<List<PremiumPackageFetchResponse>>> fetchAllPremiumPackages() {
+        log.info("Fetching all premium packages.");
+        List<PremiumPackageFetchResponse> packageResponses = premiumPackageService.getAllPremiumPackages();
+        ApiResponse<List<PremiumPackageFetchResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Premium packages fetched successfully.");
+        apiResponse.setResult(packageResponses);
         return ResponseEntity.ok(apiResponse);
     }
 

@@ -49,10 +49,10 @@ public class RecurringTransactionController {
         log.info("in");
         try {
             recurringTransactionService.confirmRecurringTransactionReminder(token);
-            return new RedirectView("http://127.0.0.1:5500/pages/reminder-confirmed.html?status=success");
+            return new RedirectView("http://127.0.0.1:5500/pages/reminder-confirmed/?status=success");
         } catch (AppException ex) {
             String errorMessage = URLEncoder.encode(ex.getMessage(), StandardCharsets.UTF_8);
-            return new RedirectView("https://127.0.0.1:5500/pages/reminder-confirmed.html?status=error&message=" + errorMessage);
+            return new RedirectView("https://127.0.0.1:5500/pages/reminder-confirmed/?status=error&message=" + errorMessage);
         }
     }
 

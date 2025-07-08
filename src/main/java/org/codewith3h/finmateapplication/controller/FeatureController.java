@@ -5,8 +5,10 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.FeatureRequestDto;
+import org.codewith3h.finmateapplication.dto.request.FeatureSearchRequest;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.FeatureResponse;
+import org.codewith3h.finmateapplication.dto.response.FeatureStatsResponse;
 import org.codewith3h.finmateapplication.entity.Feature;
 import org.codewith3h.finmateapplication.repository.FeatureRepository;
 import org.codewith3h.finmateapplication.service.FeatureService;
@@ -87,20 +89,43 @@ public class FeatureController {
 
     @GetMapping("/filter")
     public ResponseEntity<ApiResponse<Page<FeatureResponse>>> getFeatureByStatus(
-            @RequestParam boolean status,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size,
             @RequestParam(defaultValue = "code") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection
     ) {
-        log.info("Fetching feature with status is {}", status);
+        log.info("loads features ");
         Page<FeatureResponse> featureResponsePage = featureService
-                .getFeatureByStatus(status, page, size, sortBy, sortDirection);
+                .getFeatureByStatus(page, size, sortBy, sortDirection);
 
         ApiResponse<Page<FeatureResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Feature fetched successfully.");
         apiResponse.setResult(featureResponsePage);
         log.info("feature fetched successfully.");
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<Page<FeatureResponse>>> searchFeature(
+            @RequestBody FeatureSearchRequest dto
+    ) {
+        log.info("Searching for feature {}", dto);
+
+        Page<FeatureResponse> featureResponses = featureService.searchFeature(dto);
+        ApiResponse<Page<FeatureResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Feature fetched successfully");
+        apiResponse.setResult(featureResponses);
+        log.info(featureResponses.getContent().toString());
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<FeatureStatsResponse>> getFeatureStats(){
+        log.info("Getting feature stats");
+        FeatureStatsResponse featureStatsResponse = featureService.getFeatureStatistics();
+        ApiResponse<FeatureStatsResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Feature stats fetched successfully");
+        apiResponse.setResult(featureStatsResponse);
         return ResponseEntity.ok(apiResponse);
     }
 }

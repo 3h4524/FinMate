@@ -41,5 +41,4 @@ public class Category {
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
     private Instant createdAt;
-
 }

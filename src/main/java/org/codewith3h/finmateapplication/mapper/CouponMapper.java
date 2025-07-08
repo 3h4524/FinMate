@@ -2,8 +2,20 @@ package org.codewith3h.finmateapplication.mapper;
 
 import org.codewith3h.finmateapplication.dto.request.CouponRequest;
 import org.codewith3h.finmateapplication.dto.response.CouponResponse;
+import org.codewith3h.finmateapplication.dto.response.PremiumPackageFetchResponse;
 import org.codewith3h.finmateapplication.entity.Coupon;
+import org.codewith3h.finmateapplication.entity.Feature;
+import org.codewith3h.finmateapplication.entity.PremiumPackage;
+import org.codewith3h.finmateapplication.enums.FeatureCode;
+import org.codewith3h.finmateapplication.exception.AppException;
+import org.codewith3h.finmateapplication.exception.ErrorCode;
+import org.codewith3h.finmateapplication.repository.FeatureRepository;
+import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.mapstruct.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
@@ -15,12 +27,36 @@ public interface CouponMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    Coupon toEntity(CouponRequest dto);
+    @Mapping(target = "premiumPackages", expression = "java(mapPremiumId(dto.getPremiumId(), premiumPackageRepository))")
+    Coupon toEntity(CouponRequest dto, @Context PremiumPackageRepository  premiumPackageRepository);
 
+    default List<PremiumPackage> mapPremiumId(List<Integer> premiumId, @Context PremiumPackageRepository premiumPackageRepository) {
+        if(premiumId==null){
+            return Collections.emptyList();
+        }
+        return premiumId.stream()
+                .map(id -> premiumPackageRepository.findById(id)
+                        .orElseThrow(() -> new AppException(ErrorCode.PREMIUM_PACKAGE_NOT_FOUND)))
+                .collect(Collectors.toList());
+    }
+
+    @Mapping(target = "premiumPackages", expression = "java(mapPremiumPackageFetch(entity.getPremiumPackages()))")
     CouponResponse toResponseDto(Coupon entity);
+
+    default List<PremiumPackageFetchResponse> mapPremiumPackageFetch(List<PremiumPackage> premiumPackages) {
+        return premiumPackages.stream()
+                .map(premium -> PremiumPackageFetchResponse.builder()
+                        .id(premium.getId())
+                        .name(premium.getName())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    void updateEntityFromDto(CouponRequest dto, @MappingTarget Coupon entity);
+    @Mapping(target = "premiumPackages", expression = "java(mapPremiumId(dto.getPremiumId(), premiumPackageRepository))")
+    void updateEntityFromDto(CouponRequest dto, @MappingTarget Coupon entity, @Context PremiumPackageRepository premiumPackageRepository);
+
+
 }

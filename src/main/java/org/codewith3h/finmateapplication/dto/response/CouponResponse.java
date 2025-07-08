@@ -5,18 +5,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CouponResponse {
-    public String code;
-    public String description;
+    private Integer id;
+    private String code;
+    private String description;
     private BigDecimal discountPercentage;
     private Integer maxUsage;
     private Integer usedCount;
-    private LocalDateTime expiryDate;
+    private LocalDate expiryDate;
     private Boolean isActive;
     private LocalDateTime createdAt;
+    private List<PremiumPackageFetchResponse> premiumPackages;
 }
