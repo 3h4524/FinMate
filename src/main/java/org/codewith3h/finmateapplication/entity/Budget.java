@@ -37,7 +37,6 @@ public class Budget {
     @Column(name = "amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal amount;
 
-    @Nationalized
     @Column(name = "period_type", nullable = false, length = 20)
     private String periodType;
 

@@ -12,5 +12,5 @@ public class BudgetAnalysisResponse {
     private BigDecimal plannedAmount;
     private BigDecimal actualSpending;
     private String periodType;
-    private String status;
+    private Integer notificationThreshold;
 }

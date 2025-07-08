@@ -50,6 +50,8 @@ public enum ErrorCode {
     PACKAGE_ID_IS_REQUIRED(1041, "Package id is required", HttpStatus.BAD_REQUEST),
     YOU_ALREADY_USED_THIS_COUPON(1042, "You have already used this coupon code", HttpStatus.BAD_REQUEST),
     INVALID_EMAIL_FORMAT(1043, "Invalid email format", HttpStatus.BAD_REQUEST),
+    BUDGET_LIMIT_EXCEEDED(1044, "You have reached the 3 budget limit for regular users.", HttpStatus.BAD_REQUEST),
+    ADMIN_LOG_NOT_FOUND(1045, "Admin log not found", HttpStatus.NOT_FOUND),
     ;
 
     private int code;
