@@ -15,4 +15,8 @@ public class AuthenticationResponse {
     private Integer userId;
     private Boolean premium;
     private Boolean is2FAEnabled;
+
+    public boolean getIsVerified() {
+        return isVerified;
+    }
 }

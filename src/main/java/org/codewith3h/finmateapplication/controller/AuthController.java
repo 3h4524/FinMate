@@ -63,6 +63,14 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthenticationResponse>> login(@Valid @RequestBody LoginRequest loginRequest) throws JOSEException {
         log.info("Login attempt for email: {}", loginRequest.getEmail());
         AuthenticationResponse response = authenticationService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+        if (!response.getIsVerified()) {
+            // Trả về code riêng cho trường hợp chưa xác thực
+            return ResponseEntity.ok(ApiResponse.<AuthenticationResponse>builder()
+                    .code(1003)
+                    .message("Email not verified")
+                    .result(response)
+                    .build());
+        }
         return ResponseEntity.ok(ApiResponse.<AuthenticationResponse>builder()
                 .code(1000)
                 .message("Login successful")
