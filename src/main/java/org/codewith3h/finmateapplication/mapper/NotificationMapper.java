@@ -1,6 +1,5 @@
 package org.codewith3h.finmateapplication.mapper;
 
-import org.codewith3h.finmateapplication.dto.request.NotificationRequest;
 import org.codewith3h.finmateapplication.dto.response.NotificationResponse;
 import org.codewith3h.finmateapplication.entity.Notification;
 import org.mapstruct.Mapper;
@@ -15,9 +14,6 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface NotificationMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    public Notification toEntity(NotificationRequest dto);
-
+    @Mapping(target = "notificationId", source = "id")
     public NotificationResponse toDto(Notification entity);
 }

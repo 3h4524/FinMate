@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationResponse {
+    private Integer notificationId;
     private Integer userId;
     private String title;
     private String message;
