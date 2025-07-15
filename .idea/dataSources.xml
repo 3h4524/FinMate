@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="FinMate@localhost" uuid="787784e2-5d9f-4ce9-b02b-6660b76f147e">
+    <data-source source="LOCAL" name="FinMate@localhost" uuid="ad81b46a-c489-432c-91c2-19d3ca684849">
       <driver-ref>sqlserver.ms</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
       <jdbc-url>jdbc:sqlserver://localhost:1433;database=FinMate</jdbc-url>
-      <jdbc-additional-properties>
-        <property name="com.intellij.clouds.kubernetes.db.host.port" />
-        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
-        <property name="com.intellij.clouds.kubernetes.db.container.port" />
-      </jdbc-additional-properties>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="FinMate@localhost" uuid="870491a6-e44b-490c-a259-e450c4fa8d30">
-      <driver-ref>sqlserver.ms</driver-ref>
-      <synchronize>true</synchronize>
-      <imported>true</imported>
-      <jdbc-driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</jdbc-driver>
-      <jdbc-url>jdbc:sqlserver://localhost:1433;databaseName=FinMate;encrypt=true;trustServerCertificate=true</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />

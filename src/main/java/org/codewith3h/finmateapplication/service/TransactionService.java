@@ -169,6 +169,18 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('USER')")
+    public List<TransactionResponse> get5UserTransactionsWithoutPaging(Integer userId) {
+        log.info("Fetching 5 transactions for user {} without pagination", userId);
+
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
+        return transactions
+                .stream()
+                .map(transactionMapper::toResponseDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('USER')")
     public Page<TransactionResponse> searchTransaction(TransactionSearchRequest transactionSearchRequest) {
         log.info("dto: {}", transactionSearchRequest);
         log.info("Searching transactions with criteria for user: {}", transactionSearchRequest.getUserId());
@@ -358,9 +370,9 @@ public class TransactionService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<TransactionResponse> getAllTransactions(){
+    public List<TransactionResponse> getAllTransactions() {
         log.info("Fetching all transactions");
-        return transactionRepository.findAll().stream().map(transactionMapper :: toResponseDto).collect(Collectors.toList());
+        return transactionRepository.findAll().stream().map(transactionMapper::toResponseDto).collect(Collectors.toList());
     }
 
 

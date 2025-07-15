@@ -40,7 +40,7 @@ public class TransactionController {
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<TransactionStatisticResponse>> getStatistic(
             @RequestParam Integer userId
-    ){
+    ) {
         log.info("Getting transaction statistic for user {}", userId);
         TransactionStatisticResponse transactionStatisticResponse = transactionService.getStatisticForUser(userId);
 
@@ -67,14 +67,14 @@ public class TransactionController {
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/{transactionId}")
     public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(
-            @PathVariable @Positive Integer  transactionId,
+            @PathVariable @Positive Integer transactionId,
             @RequestParam @Positive Integer userId,
             @Valid @RequestBody TransactionUpdateRequest requestDto
     ) {
         log.info("is recurring: {}", requestDto.isRecurring());
 
         log.info("Updating transaction {} for user: {}", transactionId, userId);
-        TransactionResponse transactionResponse = transactionService.updateTransaction(transactionId,  userId, requestDto);
+        TransactionResponse transactionResponse = transactionService.updateTransaction(transactionId, userId, requestDto);
         ApiResponse<TransactionResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Transaction updated successfully");
         apiResponse.setResult(transactionResponse);
@@ -116,8 +116,19 @@ public class TransactionController {
             @RequestParam(defaultValue = "ASC") String sortDirection) {
 
         Page<TransactionResponse> responses = transactionService.getUserTransactions(userId, page, size, sortBy, sortDirection);
-        ApiResponse<Page<TransactionResponse>> apiResponse = new  ApiResponse<>();
+        ApiResponse<Page<TransactionResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Transactions fetched successfully");
+        apiResponse.setResult(responses);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/forReport")
+    public ResponseEntity<ApiResponse<List<TransactionResponse>>> get5UserTransactionsWithoutPaging(@RequestParam Integer userId) {
+
+        List<TransactionResponse> responses = transactionService.get5UserTransactionsWithoutPaging(userId);
+        ApiResponse<List<TransactionResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Transactions fetched successfully for financial report");
         apiResponse.setResult(responses);
         return ResponseEntity.ok(apiResponse);
     }
@@ -138,7 +149,7 @@ public class TransactionController {
     @RequestMapping(value = "/confirm-reminder", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<ApiResponse<TransactionResponse>> confirmReminder(
             @RequestParam String token
-    ){
+    ) {
         TransactionResponse transactionResponse = transactionService.confirmTransactionReminder(token);
 
         ApiResponse<TransactionResponse> response = new ApiResponse<>();
@@ -150,7 +161,7 @@ public class TransactionController {
     @GetMapping("/getAllTransaction/{userId}")
     public ResponseEntity<ApiResponse<List<TransactionResponse>>> getUserTransactions(
             @PathVariable Integer userId
-    ){
+    ) {
         log.info("Fetching all transaction for user {}", userId);
         List<TransactionResponse> transactions = transactionService.getAllTransactions();
         ApiResponse<List<TransactionResponse>> apiResponse = new ApiResponse<>();
