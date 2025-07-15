@@ -2,8 +2,7 @@ package org.codewith3h.finmateapplication.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.*;
 
 import java.time.Instant;
@@ -14,6 +13,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Notifications")
 @DynamicInsert
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
