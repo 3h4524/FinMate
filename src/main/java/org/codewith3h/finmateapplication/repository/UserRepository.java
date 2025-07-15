@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     void updateLastLoginAt(Integer userId);
 
     List<User> findAllByIsPremium(boolean check);
+
+    User findFirstByRole(String role);
 }

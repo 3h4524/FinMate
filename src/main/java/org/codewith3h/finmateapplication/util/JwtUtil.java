@@ -6,10 +6,12 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
+import org.codewith3h.finmateapplication.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import java.util.Set;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JwtUtil {
 
     @Value("${jwt.secret}")
@@ -31,6 +34,8 @@ public class JwtUtil {
 
     private byte[] secretKey;
     private final Set<String> invalidatedTokens = new HashSet<>();
+
+    private final UserRepository userRepository;
 
 
     public String generateToken(User user) throws JOSEException {
@@ -46,6 +51,25 @@ public class JwtUtil {
 
         SignedJWT signedJWT = new SignedJWT(header, claimSet);
 
+        JWSSigner signer = new MACSigner(secret.getBytes());
+
+        signedJWT.sign(signer);
+
+        return signedJWT.serialize();
+    }
+
+    public String generateTokenForExternalSystem() throws JOSEException {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+
+        User admin = userRepository.findFirstByRole("ADMIN");
+
+        JWTClaimsSet claimSet = new JWTClaimsSet.Builder()
+                .claim("scope", admin.getRole())
+                .issueTime(new Date())
+                .expirationTime(new Date(System.currentTimeMillis() + expiration))
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(header, claimSet);
         JWSSigner signer = new MACSigner(secret.getBytes());
 
         signedJWT.sign(signer);

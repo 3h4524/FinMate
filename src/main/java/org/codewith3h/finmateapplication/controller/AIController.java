@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
@@ -9,6 +10,7 @@ import org.codewith3h.finmateapplication.entity.Category;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.entity.UserCategory;
+import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.service.*;
 import org.codewith3h.finmateapplication.util.JwtUtil;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +56,17 @@ public class AIController {
 
     @PostMapping("/predict-budget")
     public ResponseEntity<ApiResponse<BudgetPredictionResponse>> predictBudget(
-            @RequestBody BudgetPredictionRequest budgetPredictionRequest){
+            @RequestBody BudgetPredictionRequest budgetPredictionRequest,
+            HttpServletRequest request){
         log.info("Predicting budget for user {}", budgetPredictionRequest.getUserId());
-        String token = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
+        String tokenHeader = request.getHeader("Authorization");
+        if(!tokenHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization token");
+        }
+
+        String jwtToken = tokenHeader.substring(7);
         BudgetPredictionResponse budgetPredictionResponse =
-                aiService.predictBudgets(budgetPredictionRequest.getUserId(), token);
+                aiService.predictBudgets(budgetPredictionRequest.getUserId(), jwtToken);
 
         ApiResponse<BudgetPredictionResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Budgets predicted successfully.");
@@ -67,10 +75,15 @@ public class AIController {
     }
 
     @GetMapping("/retrain-model")
-    public ResponseEntity<ApiResponse<RetrainResponse>>  retrainModel(){
+    public ResponseEntity<ApiResponse<RetrainResponse>>  retrainModel(HttpServletRequest request){
         log.info("Retraining model!");
-        String token = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
-        RetrainResponse response = aiService.retrainModel(token);
+        String tokenHeader = request.getHeader("Authorization");
+        if(!tokenHeader.startsWith("Bearer ")){
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+
+        String jwtToken = tokenHeader.substring(7);
+        RetrainResponse response = aiService.retrainModel(jwtToken);
         ApiResponse<RetrainResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Retraining model fetched successfully.");
         apiResponse.setResult(response);

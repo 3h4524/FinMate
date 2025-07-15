@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
+import org.codewith3h.finmateapplication.dto.response.BudgetEntry;
 import org.codewith3h.finmateapplication.entity.EmailVerification;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.entity.TransactionReminder;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -197,6 +199,49 @@ public class EmailService {
         helper.setText(content, isHTML);
         mailSender.send(message);
         logger.info("Email sent successfully to: {}", toEmail);
+    }
+
+    @Async
+    @Transactional
+    public void sendBudgetRecommendation(Integer userId, List<BudgetEntry> budgetEntries) throws MessagingException {
+        // Prepare email content as HTML with a table
+        StringBuilder emailContent = new StringBuilder();
+        emailContent.append("<html><body>");
+        emailContent.append("<h2>Budget Recommendation Summary</h2>");
+        emailContent.append("<p>Dear User,</p>");
+        emailContent.append("<p>Below is your budget recommendation for this period:</p>");
+        emailContent.append("<table border='1' style='border-collapse: collapse; width: 100%;'>");
+        emailContent.append("<tr style='background-color: #f2f2f2;'>");
+        emailContent.append("<th style='padding: 10px;'>Category</th>");
+        emailContent.append("<th style='padding: 10px;'>Budget (USD)</th>");
+        emailContent.append("<th style='padding: 10px;'>Savings (USD)</th>");
+        emailContent.append("</tr>");
+
+        // Add each budget entry to the table
+        for (BudgetEntry entry : budgetEntries) {
+            emailContent.append("<tr>");
+            emailContent.append("<td style='padding: 10px;'>").append(entry.getCategoryName()).append("</td>");
+            emailContent.append("<td style='padding: 10px; text-align: right;'>").append(String.format("%.2f", entry.getBudget())).append("</td>");
+            emailContent.append("<td style='padding: 10px; text-align: right;'>").append(String.format("%.2f", entry.getSavings())).append("</td>");
+            emailContent.append("</tr>");
+        }
+
+        emailContent.append("</table>");
+        emailContent.append("<p>Thank you for using our budgeting service!</p>");
+        emailContent.append("<p>Best regards,<br>Your Budgeting Team</p>");
+        emailContent.append("</body></html>");
+
+        // Fetch user email (assuming a method to get user email by ID)
+        String userEmail = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION)).getEmail(); // Adjust based on your actual service
+
+        // Send email
+        sendCustomEmail(
+                userEmail,
+                "Your Budget Recommendation",
+                emailContent.toString(),
+                true // isHTML
+        );
     }
 
 
