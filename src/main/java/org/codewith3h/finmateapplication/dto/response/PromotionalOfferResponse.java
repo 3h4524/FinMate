@@ -12,8 +12,10 @@ import java.util.Set;
 @Builder
 @ToString
 public class PromotionalOfferResponse {
+    private Integer id;
     private String discountEvent;
     private BigDecimal discountPercentage;
+    private LocalDate startDate;
     private LocalDate expiryDate;
     private Set<Integer> packageIds;
 }
