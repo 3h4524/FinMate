@@ -12,6 +12,8 @@ import org.codewith3h.finmateapplication.service.GoalService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -50,6 +52,17 @@ public class GoalController {
         ApiResponse<GoalResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Goal found.");
         apiResponse.setResult(goal);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/getAll/{userId}")
+    public ResponseEntity<ApiResponse<List<GoalResponse>>> getAllGoals(
+            @PathVariable Integer userId
+    ){
+        List<GoalResponse> goals = goalService.getGoalsForUser(userId);
+        ApiResponse<List<GoalResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("All goals found.");
+        apiResponse.setResult(goals);
         return ResponseEntity.ok(apiResponse);
     }
 }

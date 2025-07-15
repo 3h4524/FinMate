@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -68,8 +69,8 @@ public class UserCategoryService {
         return count;
     }
 
-    public List<UserCategory> getAllUserCategories(){
+    public List<CategoryResponse> getAllUserCategories(){
         log.info("Fetching all user categories");
-        return userCategoryRepository.findAll();
+        return userCategoryRepository.findAll().stream().map(userCategoryMapper :: toCategoryResponse).collect(Collectors.toList());
     }
 }

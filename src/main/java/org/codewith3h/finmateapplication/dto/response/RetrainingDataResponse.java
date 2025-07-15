@@ -16,8 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class RetrainingDataResponse {
-    private List<Transaction> transactions;
-    private List<Goal> goals;
-    private List<Category> defaultCategories;
-    private List<UserCategory> userCategories;
+    private List<TransactionResponse> transactions;
+    private List<GoalResponse> goals;
+    private List<CategoryResponse> defaultCategories;
+    private List<CategoryResponse> userCategories;
 }

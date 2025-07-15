@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.codewith3h.finmateapplication.dto.response.AuthenticationResponse;
+import org.codewith3h.finmateapplication.dto.response.BudgetEntry;
 import org.codewith3h.finmateapplication.entity.EmailVerification;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.exception.AppException;
@@ -20,7 +21,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
 
@@ -216,6 +220,124 @@ public class EmailService {
         mailSender.send(message);
         logger.info("Change email OTP sent to: {}", toEmail);
     }
+
+
+    @Async
+    @Transactional
+    public void sendBudgetRecommendation(Integer userId, List<BudgetEntry> budgetEntries) throws MessagingException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        String userName = user.getName();
+
+        // Tạo đối tượng format tiền theo chuẩn Việt Nam
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+
+        // Calculate total savings
+        double totalSavings = budgetEntries.stream()
+                .mapToDouble(BudgetEntry::getSavings)
+                .sum();
+
+        // Prepare email content as HTML with enhanced styling
+        StringBuilder emailContent = new StringBuilder();
+        emailContent.append("<!DOCTYPE html>");
+        emailContent.append("<html lang='vi'>");
+        emailContent.append("<head>");
+        emailContent.append("<meta charset='UTF-8'>");
+        emailContent.append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+        emailContent.append("<style>");
+        emailContent.append("body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }");
+        emailContent.append(".container { max-width: 800px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }");
+        emailContent.append("h2 { color: #2c3e50; text-align: center; margin-bottom: 30px; font-size: 28px; font-weight: 600; }");
+        emailContent.append("p { color: #555; line-height: 1.6; margin-bottom: 15px; }");
+        emailContent.append(".greeting { font-size: 16px; margin-bottom: 20px; }");
+        emailContent.append("table { width: 100%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }");
+        emailContent.append("th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: left; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }");
+        emailContent.append("td { padding: 15px; border-bottom: 1px solid #e9ecef; }");
+        emailContent.append("tr:nth-child(even) { background-color: #f8f9fa; }");
+        emailContent.append("tr:hover { background-color: #e3f2fd; transition: background-color 0.3s ease; }");
+        emailContent.append(".amount { text-align: right; font-weight: 600; color: #2c3e50; }");
+        emailContent.append(".savings { text-align: right; font-weight: 600; color: #27ae60; }");
+        emailContent.append(".total-row { background-color: #e8f5e8 !important; font-weight: bold; border-top: 2px solid #27ae60; }");
+        emailContent.append(".total-row td { padding: 18px 15px; font-size: 16px; }");
+        emailContent.append(".total-savings { color: #27ae60; font-size: 18px; font-weight: bold; }");
+        emailContent.append(".summary-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }");
+        emailContent.append(".summary-box h3 { margin: 0 0 10px 0; font-size: 18px; }");
+        emailContent.append(".summary-amount { font-size: 24px; font-weight: bold; }");
+        emailContent.append(".footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #7f8c8d; }");
+        emailContent.append(".signature { margin-top: 20px; font-weight: 600; color: #2c3e50; }");
+        emailContent.append("</style>");
+        emailContent.append("</head>");
+        emailContent.append("<body>");
+        emailContent.append("<div class='container'>");
+
+        emailContent.append("<h2>📊 Budget Recommendation Summary</h2>");
+        emailContent.append("<p class='greeting'>Dear ").append(userName).append(",</p>");
+        emailContent.append("<p>We have prepared your personalized budget recommendation for this period. Below is a detailed breakdown of your budget allocation and potential savings:</p>");
+
+        // Summary box for total savings
+        emailContent.append("<div class='summary-box'>");
+        emailContent.append("<h3>💰 Total Potential Savings</h3>");
+        emailContent.append("<div class='summary-amount'>").append(currencyFormatter.format(totalSavings)).append("</div>");
+        emailContent.append("</div>");
+
+        emailContent.append("<table>");
+        emailContent.append("<thead>");
+        emailContent.append("<tr>");
+        emailContent.append("<th>📋 Category</th>");
+        emailContent.append("<th>💳 Budget (VND)</th>");
+        emailContent.append("<th>💰 Savings (VND)</th>");
+        emailContent.append("</tr>");
+        emailContent.append("</thead>");
+        emailContent.append("<tbody>");
+
+        // Add each budget entry to the table
+        for (BudgetEntry entry : budgetEntries) {
+            emailContent.append("<tr>");
+            emailContent.append("<td>").append(entry.getCategoryName()).append("</td>");
+            emailContent.append("<td class='amount'>")
+                    .append(currencyFormatter.format(entry.getBudget())).append("</td>");
+            emailContent.append("<td class='savings'>")
+                    .append(currencyFormatter.format(entry.getSavings())).append("</td>");
+            emailContent.append("</tr>");
+        }
+
+        // Add total row
+        emailContent.append("<tr class='total-row'>");
+        emailContent.append("<td><strong>📊 TOTAL SAVINGS</strong></td>");
+        emailContent.append("<td class='amount'>-</td>");
+        emailContent.append("<td class='total-savings'>")
+                .append(currencyFormatter.format(totalSavings)).append("</td>");
+        emailContent.append("</tr>");
+
+        emailContent.append("</tbody>");
+        emailContent.append("</table>");
+
+        emailContent.append("<div class='footer'>");
+        emailContent.append("<p>💡 <strong>Tips:</strong> Following this budget recommendation can help you save <strong>")
+                .append(currencyFormatter.format(totalSavings))
+                .append("</strong> this period!</p>");
+        emailContent.append("<p>Thank you for using our budgeting service. We're here to help you achieve your financial goals!</p>");
+        emailContent.append("<div class='signature'>");
+        emailContent.append("Best regards,<br>");
+        emailContent.append("🏦 Your Personal Budgeting Team");
+        emailContent.append("</div>");
+        emailContent.append("</div>");
+
+        emailContent.append("</div>");
+        emailContent.append("</body></html>");
+
+        // Fetch user email
+        String userEmail = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_NOT_FOUND_EXCEPTION)).getEmail();
+
+        // Send email
+        sendCustomEmail(
+                userEmail,
+                "📊 Your Personal Budget Recommendation",
+                emailContent.toString(),
+                true // isHTML
+        );
+    }
+
 
     private String generateOTP() {
         Random random = new Random();

@@ -1,26 +1,29 @@
 package org.codewith3h.finmateapplication.controller;
 
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.codewith3h.finmateapplication.dto.response.ApiResponse;
-import org.codewith3h.finmateapplication.dto.response.RetrainingDataResponse;
+import org.apache.coyote.Response;
+import org.codewith3h.finmateapplication.dto.request.BudgetPredictionRequest;
+import org.codewith3h.finmateapplication.dto.response.*;
 import org.codewith3h.finmateapplication.entity.Category;
 import org.codewith3h.finmateapplication.entity.Goal;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.entity.UserCategory;
-import org.codewith3h.finmateapplication.service.CategoryService;
-import org.codewith3h.finmateapplication.service.GoalService;
-import org.codewith3h.finmateapplication.service.TransactionService;
-import org.codewith3h.finmateapplication.service.UserCategoryService;
+import org.codewith3h.finmateapplication.exception.AppException;
+import org.codewith3h.finmateapplication.service.*;
+import org.codewith3h.finmateapplication.util.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/data/retraining-data")
+@RequestMapping("/AI")
 @RequiredArgsConstructor
 @Slf4j
 public class AIController {
@@ -28,15 +31,16 @@ public class AIController {
     private final GoalService goalService;
     private final CategoryService categoryService;
     private final UserCategoryService userCategoryService;
+    private final AIService aiService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/data/retraining-data")
     public ResponseEntity<ApiResponse<RetrainingDataResponse>> getRetrainingData(){
         log.info("Fetching data for retraining AI");
 
-        List<Transaction> transactions =  transactionService.getAllTransactions();
-        List<Goal> goals = goalService.getAllGoals();
-        List<Category> defaultCategories =  categoryService.getAllCategories();
-        List<UserCategory> userCategories = userCategoryService.getAllUserCategories();
+        List<TransactionResponse> transactions =  transactionService.getAllTransactions();
+        List<GoalResponse> goals = goalService.getAllGoals();
+        List<CategoryResponse> defaultCategories =  categoryService.getAllCategories();
+        List<CategoryResponse> userCategories = userCategoryService.getAllUserCategories();
 
         RetrainingDataResponse retrainingDataResponse = RetrainingDataResponse.builder()
                 .transactions(transactions)
@@ -51,4 +55,39 @@ public class AIController {
         return ResponseEntity.ok(apiResponse);
     };
 
+    @PostMapping("/predict-budget")
+    public ResponseEntity<ApiResponse<BudgetPredictionResponse>> predictBudget(
+            @RequestBody BudgetPredictionRequest budgetPredictionRequest,
+            HttpServletRequest request) throws MessagingException {
+        log.info("Predicting budget for user {}", budgetPredictionRequest.getUserId());
+        String tokenHeader = request.getHeader("Authorization");
+        if(!tokenHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization token");
+        }
+
+        String jwtToken = tokenHeader.substring(7);
+        BudgetPredictionResponse budgetPredictionResponse =
+                aiService.predictBudgets(budgetPredictionRequest.getUserId(), jwtToken);
+
+        ApiResponse<BudgetPredictionResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Budgets predicted successfully.");
+        apiResponse.setResult(budgetPredictionResponse);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/retrain-model")
+    public ResponseEntity<ApiResponse<RetrainResponse>>  retrainModel(HttpServletRequest request){
+        log.info("Retraining model!");
+        String tokenHeader = request.getHeader("Authorization");
+        if(!tokenHeader.startsWith("Bearer ")){
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+
+        String jwtToken = tokenHeader.substring(7);
+        RetrainResponse response = aiService.retrainModel(jwtToken);
+        ApiResponse<RetrainResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Retraining model fetched successfully.");
+        apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
 }

@@ -1,8 +1,14 @@
 package org.codewith3h.finmateapplication.service;
 
+import jakarta.mail.MessagingException;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.codewith3h.finmateapplication.dto.request.BudgetPredictionRequest;
 import org.codewith3h.finmateapplication.dto.response.BudgetPredictionResponse;
 import org.codewith3h.finmateapplication.dto.response.RetrainResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,10 +21,14 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
+@Data
+@Slf4j
 public class AIService {
 
     private final RestTemplate restTemplate;
     private final String pythonApiBaseUrl;
+    @Autowired
+    private EmailService emailService;
 
     public AIService(RestTemplate restTemplate,
                      @Value("${python.api.base-url:http://localhost:8000}") String pythonApiBaseUrl) {
@@ -32,7 +42,7 @@ public class AIService {
      * @param jwtToken JWT token của admin
      * @return BudgetPredictionResponse chứa danh sách ngân sách và tiết kiệm
      */
-    public BudgetPredictionResponse predictBudgets(Integer userId, String jwtToken) {
+    public BudgetPredictionResponse predictBudgets(Integer userId, String jwtToken) throws MessagingException {
         String url = pythonApiBaseUrl + "/predict-budgets";
 
         // Tạo request body
@@ -53,6 +63,13 @@ public class AIService {
 
         if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
             throw new RuntimeException("Failed to predict budgets: " + response.getStatusCode());
+        }
+
+        if(response.getBody() != null && response.getBody().getBudgets() != null){
+            emailService.sendBudgetRecommendation(userId, response.getBody().getBudgets());
+            log.info("Budget recommendation sent to user: {}", userId);
+        } else {
+            log.warn("No budget predictions available for user: {}", userId);
         }
 
         return response.getBody();

@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -356,9 +357,10 @@ public class TransactionService {
                 .build();
     }
 
-    public List<Transaction> getAllTransactions(){
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<TransactionResponse> getAllTransactions(){
         log.info("Fetching all transactions");
-        return transactionRepository.findAll();
+        return transactionRepository.findAll().stream().map(transactionMapper :: toResponseDto).collect(Collectors.toList());
     }
 
 
