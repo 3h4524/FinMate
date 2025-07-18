@@ -12,6 +12,4 @@ public interface UserCategoryRepository extends JpaRepository<UserCategory, Inte
     List<UserCategory> findByUserId(Integer userId);
 
     Integer countByUserId(Integer userId);
-
-    Optional<UserCategory> findByName(String name);
 }

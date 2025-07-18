@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface BudgetRepository extends JpaRepository<Budget, Integer> {
@@ -23,4 +24,6 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
             @Param("userCategoryId") Integer userCategoryId
     );
     long countByUserId(Integer userId);
+
+    List<Budget> findBudgetsByUser_Id(Integer userId);
 }

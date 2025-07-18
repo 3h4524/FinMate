@@ -37,6 +37,7 @@ public class BudgetController {
     public ResponseEntity<ApiResponse<BudgetResponse>> updateBudget(
             @PathVariable("id") Integer budgetId,
             @Valid @RequestBody UpdateBudgetRequest request) {
+        System.err.println(request.toString());
         BudgetResponse response = budgetService.updateBudget(budgetId, request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);

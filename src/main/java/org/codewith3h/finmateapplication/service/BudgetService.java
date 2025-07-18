@@ -25,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -81,7 +82,10 @@ public class BudgetService {
 
     public BudgetResponse updateBudget(Integer budgetId, UpdateBudgetRequest request) {
         log.info("Updating budget with budgetId: {} for userId: {}", budgetId,
-                (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        List<Budget> budgetList = budgetRepository.findBudgetsByUser_Id(request.getUserId());
+
 
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> {
@@ -102,7 +106,21 @@ public class BudgetService {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
+
+        Object category = request.getCategoryId() != null
+                ? categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION))
+                : userCategoryRepository.findById(request.getUserCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
+
+        if (category instanceof Category) {
+            budget.setCategory((Category) category);
+        } else {
+            budget.setUserCategory((UserCategory) category);
+        }
+
         budgetMapper.updateBudget(budget, request, entityResolver);
+
         log.info("Saving updated budget for budgetId: {}", budgetId);
         budget = budgetRepository.save(budget);
         log.info("Budget updated successfully for budgetId: {}", budgetId);

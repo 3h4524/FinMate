@@ -2,10 +2,12 @@ package org.codewith3h.finmateapplication.mapper;
 
 import org.codewith3h.finmateapplication.EntityResolver;
 import org.codewith3h.finmateapplication.dto.request.CreateBudgetRequest;
+import org.codewith3h.finmateapplication.dto.request.RecurringTransactionRequest;
 import org.codewith3h.finmateapplication.dto.request.UpdateBudgetRequest;
 import org.codewith3h.finmateapplication.dto.response.BudgetAnalysisResponse;
 import org.codewith3h.finmateapplication.dto.response.BudgetResponse;
 import org.codewith3h.finmateapplication.entity.Budget;
+import org.codewith3h.finmateapplication.entity.RecurringTransaction;
 import org.codewith3h.finmateapplication.entity.Transaction;
 import org.codewith3h.finmateapplication.repository.TransactionRepository;
 import org.mapstruct.*;
@@ -59,6 +61,8 @@ public interface BudgetMapper {
 
 
     @Mapping(target = "endDate", expression = "java(calculateEndDate(request.getStartDate(), request.getPeriodType()))")
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "userCategory", ignore = true)
     void updateBudget(@MappingTarget Budget budget, UpdateBudgetRequest request, @Context EntityResolver entityResolver);
 
     @Mapping(target = "budgetId", source = "id")

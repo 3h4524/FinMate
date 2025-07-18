@@ -3,11 +3,13 @@ package org.codewith3h.finmateapplication.dto.request;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@ToString
 public class UpdateBudgetRequest {
 
     @NotNull(message = "USER_ID_IS_REQUIRED")
