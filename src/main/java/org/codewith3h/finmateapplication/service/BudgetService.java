@@ -84,14 +84,16 @@ public class BudgetService {
         log.info("Updating budget with budgetId: {} for userId: {}", budgetId,
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
-        List<Budget> budgetList = budgetRepository.findBudgetsByUser_Id(request.getUserId());
-
 
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> {
                     log.error("Budget not found for budgetId: {}", budgetId);
                     return new AppException(ErrorCode.BUDGET_NOT_FOUND);
                 });
+
+        if (checkConflictBudget(request, budget)) {
+            throw new AppException(ErrorCode.BUDGET_EXISTS);
+        }
 
         if (request.getStartDate() != null) {
             LocalDate today = LocalDate.now();
@@ -137,11 +139,6 @@ public class BudgetService {
                     return new AppException(ErrorCode.BUDGET_NOT_FOUND);
                 });
 
-        if (!budget.getUser().getId().equals(currentUserId) && !hasRole("ROLE_ADMIN")) {
-            log.error("Unauthorized attempt to delete budgetId: {} by userId: {}", budgetId, currentUserId);
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-
         budgetRepository.delete(budget);
         log.info("Budget deleted successfully for budgetId: {}", budgetId);
     }
@@ -178,8 +175,43 @@ public class BudgetService {
         });
     }
 
-    private boolean hasRole(String role) {
-        return SecurityContextHolder.getContext().getAuthentication().getAuthorities()
-                .stream().anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+    private boolean checkConflictBudget(UpdateBudgetRequest request, Budget budget) {
+        List<Budget> budgetList = budgetRepository.findBudgetsByUser_Id(request.getUserId());
+
+        String categoryName;
+        Object category = request.getCategoryId() != null
+                ? categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION))
+                : userCategoryRepository.findById(request.getUserCategoryId())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
+
+        if (category instanceof Category) {
+            categoryName = ((Category) category).getName();
+        } else {
+            categoryName = ((UserCategory) category).getName();
+        }
+
+        System.err.println("categoryName" + categoryName);
+        for (Budget bg : budgetList) {
+            String categoryNameInLoop = bg.getCategory() != null
+                    ? bg.getCategory().getName()
+                    : bg.getUserCategory().getName();
+
+            System.err.println("Category: " + categoryNameInLoop);
+
+            LocalDate deadline = switch (bg.getPeriodType()) {
+                case "WEEKLY" -> bg.getStartDate().plusDays(7);
+                case "MONTHLY" -> bg.getStartDate().plusDays(30);
+                default -> throw new IllegalArgumentException("Invalid period type: " + request.getPeriodType());
+            };
+
+            System.err.println("deadline: " + deadline);
+
+            if (categoryNameInLoop.equals(categoryName) && !request.getStartDate().isAfter(deadline)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
