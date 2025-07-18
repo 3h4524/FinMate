@@ -76,8 +76,8 @@ public class PaymentService {
         String description = "Purchasing " + truncatedPackageName;
 
         log.info("Description: " + description);
-        String returnUrl = "http://127.0.0.1:5500/pages/user_premium/";
-        String cancelUrl = "http://127.0.0.1:5500/pages/user_premium/";
+        String returnUrl = "https://www.finmate.fun/pages/user_premium/";
+        String cancelUrl = "https://www.finmate.fun/pages/user_premium/";
 
         if (coupon != null) {
             returnUrl += "?couponId=" + coupon.getId();

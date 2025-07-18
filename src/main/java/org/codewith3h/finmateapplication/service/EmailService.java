@@ -123,7 +123,7 @@ public class EmailService {
             logger.info("Attempting to send password reset email to: {}", toEmail);
 
             String subject = "Password Reset Request - FinMate";
-            String resetLink = "http://127.0.0.1:5500/pages/reset-password/?token=" + token;
+            String resetLink = "https://www.finmate.fun/pages/reset-password/?token=" + token;
 
             String content = String.format(
                     "Hello!\n\n" +

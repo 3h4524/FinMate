@@ -258,6 +258,8 @@ public class TransactionService {
 
             reminder.setTransaction(transaction);
 
+            System.out.println("Tét ne");
+
             transactionReminderRepository.save(reminder);
 
             String categoryName = transaction.getCategory() != null

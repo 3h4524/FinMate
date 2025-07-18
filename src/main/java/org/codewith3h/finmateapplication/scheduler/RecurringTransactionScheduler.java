@@ -79,7 +79,7 @@ public class RecurringTransactionScheduler {
 
             recurringTransactionRepository.save(recurringTransaction);
 
-            log.info("Created transaction for recurring transaction Id: {}, next date set to: {}"
+            log.info("Created transaction for recurring transaction Id: {}, next date    set to: {}"
                         , recurringTransaction.getId(), recurringTransaction.getNextDate());
         }
     }
@@ -112,11 +112,17 @@ public class RecurringTransactionScheduler {
                 continue;
 
             Map<TransactionKey, Set<LocalDate>> grouped = groupTransactionsByTypeAndDate(transactions);
+
             Optional<Map.Entry<TransactionKey, Set<LocalDate>>> mostFrequent = findMostFrequentTransaction(grouped);
+
+            transactionService.createRecurringTransactionForReminder(user, new TransactionKey(6, null, BigDecimal.valueOf(10000)));
+
+            System.err.println(mostFrequent.isPresent());
 
             mostFrequent.ifPresent(entry -> {
                 int repeatDays = entry.getValue().size();
                 if(repeatDays >= 3){
+                    System.err.println(entry.getKey());
                     log.info("User {} most frequent transactionKey: {}, repeated in {} day(s)", user.getId(), entry.getKey(), repeatDays);
                     transactionService.createRecurringTransactionForReminder(user, entry.getKey());
                 }
@@ -127,7 +133,7 @@ public class RecurringTransactionScheduler {
 
     private Map<TransactionKey, Set<LocalDate>> groupTransactionsByTypeAndDate(List<Transaction> transactions) {
         return transactions.stream()
-                .filter(transaction -> transaction.getRecurringTransactions() != null)
+                .filter(transaction -> transaction.getRecurringTransactions() == null)
                 .collect(Collectors.groupingBy(
                         transaction -> new TransactionKey(
                                 transaction.getCategory() != null ? transaction.getCategory().getId() : null,
