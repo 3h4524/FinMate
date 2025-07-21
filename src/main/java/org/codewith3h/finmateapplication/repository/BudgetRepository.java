@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface BudgetRepository extends JpaRepository<Budget, Integer> {
     Page<Budget> findByUser_IdAndPeriodTypeIgnoreCase(Integer userId, String periodType, Pageable pageable);
     Page<Budget> findByUser_Id(Integer userId, Pageable pageable);
+    
     @Query("SELECT b FROM Budget b WHERE b.user.id = :userId AND b.periodType = :periodType AND b.startDate = :startDate " +
             "AND (b.category.id = :categoryId OR b.userCategory.id = :userCategoryId)")
     Optional<Budget> findByUserIdAndPeriodTypeAndStartDateAndCategoryOrUserCategory(
@@ -23,6 +24,18 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
             @Param("categoryId") Integer categoryId,
             @Param("userCategoryId") Integer userCategoryId
     );
+    
+    @Query("SELECT b FROM Budget b WHERE b.user.id = :userId AND b.periodType = :periodType " +
+            "AND (b.category.id = :categoryId OR b.userCategory.id = :userCategoryId) " +
+            "AND b.endDate >= :currentDate")
+    List<Budget> findActiveBudgetsByUserIdAndPeriodTypeAndCategory(
+            @Param("userId") Integer userId,
+            @Param("periodType") String periodType,
+            @Param("categoryId") Integer categoryId,
+            @Param("userCategoryId") Integer userCategoryId,
+            @Param("currentDate") LocalDate currentDate
+    );
+    
     long countByUserId(Integer userId);
 
     List<Budget> findBudgetsByUser_Id(Integer userId);
