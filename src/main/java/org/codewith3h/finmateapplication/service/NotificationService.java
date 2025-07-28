@@ -55,7 +55,8 @@ public class NotificationService {
         log.info("Notification mark as read successful!");
     }
 
-    public List<NotificationResponse> getAllUnreadNotificationsForUser(Integer userId) {
+    public List<NotificationResponse> getAllUnreadNotificationsForUser() {
+        int userId = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         log.info("Getting all notifications for user {}", userId);
         List<Notification> notifications = notificationRepository.findAllByUserIdAndIsRead(userId, false);
 
