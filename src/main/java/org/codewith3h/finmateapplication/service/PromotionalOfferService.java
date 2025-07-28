@@ -14,6 +14,7 @@ import org.codewith3h.finmateapplication.mapper.PromotionalOfferMapper;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.codewith3h.finmateapplication.repository.PromotionalOfferPremiumPackageRepository;
 import org.codewith3h.finmateapplication.repository.PromotionalOfferRepository;
+import org.codewith3h.finmateapplication.util.AdminLogUtil;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class PromotionalOfferService {
     PromotionalOfferPremiumPackageRepository promotionalOfferPremiumPackageRepository;
     PromotionalOfferMapper promotionalOfferMapper;
     PremiumPackageRepository premiumPackageRepository;
+    AdminLogUtil adminLogUtil;
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -42,6 +44,8 @@ public class PromotionalOfferService {
         if (packageNameUnderPromotionSet.isEmpty()) {
             log.info("Creating promotional offer.");
             PromotionalOffer promotionalOffer = promotionalOfferMapper.toPromotionalOffer(request, premiumPackageRepository);
+
+            adminLogUtil.logPromotionalOfferAction("CREATE", null, promotionalOffer.getDiscountEvent());
 
             promotionalOfferRepository.save(promotionalOffer);
             log.info("Successfully created promotional offer.");

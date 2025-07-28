@@ -18,8 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.codewith3h.finmateapplication.util.AdminLogUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +36,14 @@ public class PremiumPackageService {
     private final PremiumPackageMapper premiumPackageMapper;
     private final FeatureRepository featureRepository;
     private final SubscriptionService subscriptionService;
+    private final AdminLogUtil adminLogUtil;
 
+    @Transactional
     public PremiumPackageResponse createPremiumPackage(PremiumPackageCreationDto request) {
 
         log.info("Creating premium package.");
         PremiumPackage premiumPackage = premiumPackageMapper.toEntity(request, featureRepository);
-
+        adminLogUtil.logPremiumPackageAction("CREATE", null, premiumPackage.getName());
         premiumPackageRepository.save(premiumPackage);
         log.info("Premium package created successfully!");
         return premiumPackageMapper.toResponseDto(premiumPackage);
@@ -74,12 +78,14 @@ public class PremiumPackageService {
         return responsePages;
     }
 
+    @Transactional
     public PremiumPackageResponse updatePremiumPackage(Integer id, PremiumPackageCreationDto request) {
         log.info("Updating premium package: {}", request);
 
         PremiumPackage premiumPackage = premiumPackageRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PREMIUM_PACKAGE_NOT_FOUND));
 
+        adminLogUtil.logPremiumPackageAction("UPDATE", id, premiumPackage.getName());
         premiumPackageMapper.updateEntityFromDto(request, premiumPackage, featureRepository);
 
         premiumPackageRepository.save(premiumPackage);
@@ -87,10 +93,13 @@ public class PremiumPackageService {
         return premiumPackageMapper.toResponseDto(premiumPackage);
     }
 
+    @Transactional
     public void deletePremiumPackage(Integer id) {
         log.info("Deleting premium package.");
         PremiumPackage premiumPackage = premiumPackageRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PREMIUM_PACKAGE_NOT_FOUND));
+
+        adminLogUtil.logPremiumPackageAction("DELETE", id, premiumPackage.getName());
 
         premiumPackageRepository.delete(premiumPackage);
         log.info("Premium package deleted successfully.");

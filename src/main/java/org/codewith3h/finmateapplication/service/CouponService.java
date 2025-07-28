@@ -23,9 +23,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.codewith3h.finmateapplication.util.AdminLogUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,6 +44,7 @@ public class CouponService {
     CouponMapper couponMapper;
     UserRepository userRepository;
     PremiumPackageRepository premiumPackageRepository;
+    AdminLogUtil adminLogUtil;
 
     public CouponResponse getCoupon(Integer couponId) {
         log.info("Fetching data for coupon {}", couponId);
@@ -66,28 +69,38 @@ public class CouponService {
         return couponPage.map(couponMapper::toResponseDto);
     }
 
+    @Transactional
     public CouponResponse createCoupon(CouponRequest couponRequest) {
         log.info("Creating coupon");
         Coupon coupon = couponMapper.toEntity(couponRequest, premiumPackageRepository);
+
+        adminLogUtil.logCouponAction("CREATE", null, coupon.getCode());
 
         Coupon couponCreated = couponRepository.save(coupon);
         return couponMapper.toResponseDto(couponCreated);
     }
 
+    @Transactional
     public CouponResponse updateCoupon(Integer couponId, CouponRequest couponRequest) {
         log.info("Updating coupon {}", couponId);
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_FOUND));
+
+        adminLogUtil.logCouponAction("UPDATE", couponId, coupon.getCode());
 
         couponMapper.updateEntityFromDto(couponRequest, coupon, premiumPackageRepository);
         Coupon couponUpdated = couponRepository.save(coupon);
         return couponMapper.toResponseDto(couponUpdated);
     }
 
+    @Transactional
     public void deleteCoupon(Integer couponId) {
         log.info("Deleting coupon {}", couponId);
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new AppException(ErrorCode.COUPON_NOT_FOUND));
+
+        adminLogUtil.logCouponAction("DELETE", couponId, coupon.getCode());
+
         couponRepository.delete(coupon);
         log.info("Coupon deleted successfully.");
     }
