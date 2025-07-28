@@ -31,12 +31,13 @@ public class GoalTrackingController {
     // get all progress with status != cancel
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<Page<GoalProgressResponse>>> getGoalProgresses(
-            @RequestHeader(name = "userId") Integer userId,
             @RequestParam(name = "status", required = false, defaultValue = "CANCELLED") String status,
             @RequestParam(name = "page", defaultValue = "0", required = false) @Min(0) int page,
             @RequestParam(name = "size", defaultValue = "100", required = false) @Min(1) int size) {
 
-        Page<GoalProgressResponse> goalProgressResponseList = goalProgressService.getAllGoalProgressesUniqueByDate(userId, status, page, size);
+        System.err.println("page " + page + " size " + size);
+
+        Page<GoalProgressResponse> goalProgressResponseList = goalProgressService.getAllGoalProgressesUniqueByDate(status, page, size);
         ApiResponse<Page<GoalProgressResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(goalProgressResponseList);
         apiResponse.setCode(1000);

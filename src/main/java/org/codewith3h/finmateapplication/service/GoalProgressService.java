@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -98,7 +99,8 @@ public class GoalProgressService {
     }
 
 
-    public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(Integer userId, String status, int page, int size) {
+    public Page<GoalProgressResponse> getAllGoalProgressesUniqueByDate(String status, int page, int size) {
+        int userId = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
         updateTodayGoalProgressList(userId);
         Pageable pageable = PageRequest.of(page, size);
 
