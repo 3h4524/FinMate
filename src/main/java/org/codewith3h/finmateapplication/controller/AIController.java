@@ -2,22 +2,15 @@ package org.codewith3h.finmateapplication.controller;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.codewith3h.finmateapplication.dto.request.BudgetPredictionRequest;
 import org.codewith3h.finmateapplication.dto.response.*;
-import org.codewith3h.finmateapplication.entity.Category;
-import org.codewith3h.finmateapplication.entity.Goal;
-import org.codewith3h.finmateapplication.entity.Transaction;
-import org.codewith3h.finmateapplication.entity.UserCategory;
-import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.service.*;
-import org.codewith3h.finmateapplication.util.JwtUtil;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/AI")
 @RequiredArgsConstructor
+@Validated
 @Slf4j
 public class AIController {
     private final TransactionService transactionService;
@@ -88,6 +82,31 @@ public class AIController {
         ApiResponse<RetrainResponse> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Retraining model fetched successfully.");
         apiResponse.setResult(response);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/training-models")
+    public ResponseEntity<ApiResponse<Page<RetrainResponse>>>  getTrainingModels(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "1") @Min(1) int size,
+            @RequestParam(defaultValue = "trainingTimestamp") String sortBy,
+            @RequestParam(defaultValue = "trainingTimestamp") String sortDirection){
+        log.info("Fetching training histories");
+        Page<RetrainResponse> retrainResponsePage = aiService.getModelTrainings(page, size, sortBy, sortDirection);
+        ApiResponse<Page<RetrainResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Retraining models fetched successfully.");
+        apiResponse.setResult(retrainResponsePage);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/stats-model")
+    public ResponseEntity<ApiResponse<AiStatsResponse>> getAiStats(){
+        log.info("Fetching statistic model");
+        AiStatsResponse aiStatsResponse = aiService.getStatsModel();
+        log.info("Statistic: {}", aiStatsResponse.getTotalCategories());
+        ApiResponse<AiStatsResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("Stats model fetched successfully.");
+        apiResponse.setResult(aiStatsResponse);
         return ResponseEntity.ok(apiResponse);
     }
 }

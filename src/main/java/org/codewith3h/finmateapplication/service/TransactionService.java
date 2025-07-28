@@ -377,5 +377,4 @@ public class TransactionService {
         return transactionRepository.findAll().stream().map(transactionMapper::toResponseDto).collect(Collectors.toList());
     }
 
-
 }
