@@ -6,6 +6,7 @@ import org.codewith3h.finmateapplication.dto.response.UserManagementResponse;
 import org.codewith3h.finmateapplication.entity.User;
 import org.codewith3h.finmateapplication.mapper.UserManagementMapper;
 import org.codewith3h.finmateapplication.repository.UserManagementRepository;
+import org.codewith3h.finmateapplication.util.AdminLogUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +25,7 @@ public class UserManagementService {
 
     private final UserManagementRepository userRepository;
     private final UserManagementMapper userManagementMapper;
+    private final AdminLogUtil adminLogUtil;
 
     public Page<UserManagementResponse> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
@@ -40,9 +42,9 @@ public class UserManagementService {
     public UserManagementResponse updateUser(Integer id, UpdateUserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        adminLogUtil.logUserAction("UPDATE", id, user.getEmail());
 
         userManagementMapper.updateEntityFromRequest(userRequest, user);
-
         return userManagementMapper.toResponse(userRepository.save(user));
     }
 
@@ -50,6 +52,9 @@ public class UserManagementService {
     public void deleteUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        adminLogUtil.logUserAction("BAN", id, user.getEmail());
+
         user.setIsDelete(true);
         userRepository.save(user);
     }
@@ -58,6 +63,9 @@ public class UserManagementService {
     public void restoreUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        adminLogUtil.logUserAction("RESTORE", id, user.getEmail());
+
         user.setIsDelete(false);
         userRepository.save(user);
     }
@@ -65,19 +73,19 @@ public class UserManagementService {
     public Page<UserManagementResponse> searchUsers(String keyword, Pageable pageable) {
         Specification<User> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            
+
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String likePattern = "%" + keyword.toLowerCase() + "%";
                 predicates.add(cb.or(
-                    cb.like(cb.lower(root.get("name")), likePattern),
-                    cb.like(cb.lower(root.get("email")), likePattern)
+                        cb.like(cb.lower(root.get("name")), likePattern),
+                        cb.like(cb.lower(root.get("email")), likePattern)
                 ));
             }
-            
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
         return userRepository.findAll(spec, pageable)
                 .map(userManagementMapper::toResponse);
     }
-} 
+}

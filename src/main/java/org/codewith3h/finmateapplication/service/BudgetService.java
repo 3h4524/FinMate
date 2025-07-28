@@ -58,6 +58,14 @@ public class BudgetService {
             log.error("Both categoryId and userCategoryId are null for budget creation by userId: {}", currentUserId);
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
+        List<Budget> activeBudgets = budgetRepository.findActiveBudgetsByUserIdAndPeriodTypeAndCategory(
+                currentUserId, request.getPeriodType(), request.getCategoryId(), request.getUserCategoryId(), today);
+        
+        if (!activeBudgets.isEmpty()) {
+            log.warn("Active budget already exists for userId: {}, periodType: {}, categoryId: {}, userCategoryId: {}",
+                    currentUserId, request.getPeriodType(), request.getCategoryId(), request.getUserCategoryId());
+            throw new AppException(ErrorCode.BUDGET_EXISTS);
+        }
 
         Optional<Budget> existingBudget = budgetRepository.findByUserIdAndPeriodTypeAndStartDateAndCategoryOrUserCategory(
                 currentUserId, request.getPeriodType(), request.getStartDate(),
@@ -67,6 +75,7 @@ public class BudgetService {
                     currentUserId, request.getPeriodType(), request.getStartDate(), request.getCategoryId(), request.getUserCategoryId());
             throw new AppException(ErrorCode.BUDGET_EXISTS);
         }
+        
         if (!featureService.userHasFeature(currentUserId, FeatureCode.UNLIMITED_BUDGET.getDisplayName())) {
             long currentBudgetCount = budgetRepository.countByUserId(currentUserId);
             if (currentBudgetCount >= 3) {
@@ -84,16 +93,11 @@ public class BudgetService {
         log.info("Updating budget with budgetId: {} for userId: {}", budgetId,
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
-
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> {
                     log.error("Budget not found for budgetId: {}", budgetId);
                     return new AppException(ErrorCode.BUDGET_NOT_FOUND);
                 });
-
-        if (checkConflictBudget(request, budget)) {
-            throw new AppException(ErrorCode.BUDGET_EXISTS);
-        }
 
         if (request.getStartDate() != null) {
             LocalDate today = LocalDate.now();
@@ -108,6 +112,10 @@ public class BudgetService {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
+        // Kiểm tra xung đột với budget khác (trừ budget hiện tại)
+        if (checkConflictBudget(request, budget)) {
+            throw new AppException(ErrorCode.BUDGET_EXISTS);
+        }
 
         Object category = request.getCategoryId() != null
                 ? categoryRepository.findById(request.getCategoryId())
@@ -175,43 +183,31 @@ public class BudgetService {
         });
     }
 
-    private boolean checkConflictBudget(UpdateBudgetRequest request, Budget budget) {
-        List<Budget> budgetList = budgetRepository.findBudgetsByUser_Id(request.getUserId());
-
-        String categoryName;
-        Object category = request.getCategoryId() != null
-                ? categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION))
-                : userCategoryRepository.findById(request.getUserCategoryId())
-                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
-
-        if (category instanceof Category) {
-            categoryName = ((Category) category).getName();
-        } else {
-            categoryName = ((UserCategory) category).getName();
-        }
-
-        System.err.println("categoryName" + categoryName);
-        for (Budget bg : budgetList) {
-            String categoryNameInLoop = bg.getCategory() != null
-                    ? bg.getCategory().getName()
-                    : bg.getUserCategory().getName();
-
-            System.err.println("Category: " + categoryNameInLoop);
-
-            LocalDate deadline = switch (bg.getPeriodType()) {
-                case "WEEKLY" -> bg.getStartDate().plusDays(7);
-                case "MONTHLY" -> bg.getStartDate().plusDays(30);
-                default -> throw new IllegalArgumentException("Invalid period type: " + request.getPeriodType());
-            };
-
-            System.err.println("deadline: " + deadline);
-
-            if (categoryNameInLoop.equals(categoryName) && !request.getStartDate().isAfter(deadline)) {
-                return true;
+    private boolean checkConflictBudget(UpdateBudgetRequest request, Budget currentBudget) {
+        LocalDate today = LocalDate.now();
+        List<Budget> activeBudgets = budgetRepository.findActiveBudgetsByUserIdAndPeriodTypeAndCategory(
+                request.getUserId(), request.getPeriodType(), request.getCategoryId(), request.getUserCategoryId(), today);
+        for (Budget activeBudget : activeBudgets) {
+            if (activeBudget.getId().equals(currentBudget.getId())) {
+                continue;
+            }
+            if (request.getStartDate() != null) {
+                LocalDate requestEndDate = calculateEndDate(request.getStartDate(), request.getPeriodType());
+                LocalDate activeEndDate = activeBudget.getEndDate();
+                if (!request.getStartDate().isAfter(activeEndDate) && !requestEndDate.isBefore(activeBudget.getStartDate())) {
+                    log.warn("Budget conflict detected: new budget period overlaps with existing active budget");
+                    return true;
+                }
             }
         }
-
         return false;
+    }
+
+    private LocalDate calculateEndDate(LocalDate startDate, String periodType) {
+        return switch (periodType.toUpperCase()) {
+            case "WEEKLY" -> startDate.plusDays(6);
+            case "MONTHLY" -> startDate.withDayOfMonth(startDate.lengthOfMonth());
+            default -> throw new IllegalArgumentException("Invalid period type: " + periodType);
+        };
     }
 }

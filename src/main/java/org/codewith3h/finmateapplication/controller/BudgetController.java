@@ -30,6 +30,8 @@ public class BudgetController {
         BudgetResponse response = budgetService.createBudget(request);
         ApiResponse<BudgetResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(response);
+        apiResponse.setCode(1000);
+        apiResponse.setMessage("Budget created successfully");
         return ResponseEntity.ok(apiResponse);
     }
 

@@ -18,9 +18,9 @@ import java.util.List;
 public class NotificationController {
     NotificationService notificationService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getAllUnreadNotificationsForUser(@PathVariable Integer userId){
-        List<NotificationResponse> listNotifications = notificationService.getAllUnreadNotificationsForUser(userId);
+    @GetMapping()
+    public ResponseEntity<ApiResponse<List<NotificationResponse>>> getAllUnreadNotificationsForUser(){
+        List<NotificationResponse> listNotifications = notificationService.getAllUnreadNotificationsForUser();
         ApiResponse<List<NotificationResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Fetch all notifications for user successfully");
         apiResponse.setResult(listNotifications);

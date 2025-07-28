@@ -38,7 +38,7 @@ public interface BudgetMapper {
         }
         return switch (periodType.toUpperCase()) {
             case "WEEKLY" -> startDate.plusDays(6);
-            case "MONTHLY" -> startDate.plusMonths(1).minusDays(1);
+            case "MONTHLY" -> startDate.withDayOfMonth(startDate.lengthOfMonth());
             default -> throw new IllegalArgumentException("Invalid period type: " + periodType);
         };
     }

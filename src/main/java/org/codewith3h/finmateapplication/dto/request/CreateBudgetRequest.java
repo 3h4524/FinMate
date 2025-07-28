@@ -1,6 +1,8 @@
 package org.codewith3h.finmateapplication.dto.request;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -10,23 +12,25 @@ import java.time.LocalDate;
 @Data
 public class CreateBudgetRequest {
 
-    @NotNull(message = "USER_ID_IS_REQUIRED")
+    @NotNull
     private Integer userId;
 
     private Integer categoryId;
 
     private Integer userCategoryId;
 
-    @NotNull(message = "AMOUNT_IS_REQUIRED")
-    @DecimalMin(value = "0.01", inclusive = false, message = "AMOUNT_MUST_BE_POSITIVE")
+    @NotNull
+    @DecimalMin(value = "0.01", inclusive = false)
     private BigDecimal amount;
 
-    @NotNull(message = "PERIOD_TYPE_IS_REQUIRED")
+    @NotNull
     private String periodType;
 
-    @NotNull(message = "START_DATE_IS_REQUIRED")
+    @NotNull
     private LocalDate startDate;
 
-    @NotNull(message = "NOTIFICATION_THRESHOLD_IS_REQUIRED")
+    @NotNull
+    @Min(value = 1)
+    @Max(value = 100)
     private Integer notificationThreshold;
 }

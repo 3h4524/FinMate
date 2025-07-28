@@ -33,7 +33,7 @@ public class AdminLogService {
     AdminLogRepository adminLogRepository;
     AdminLogMapper adminLogMapper;
 
-    public AdminLogResponse createAdminLog(AdminLogCreateRequest request) {
+    public void createAdminLog(AdminLogCreateRequest request) {
 
         log.info("Creating new admin log for adminId: {}, action: {}, entityType: {}",
                 request.getAdminId(), request.getAction(), request.getEntityType());
@@ -41,7 +41,6 @@ public class AdminLogService {
         AdminLog adminLog = adminLogRepository.save(adminLogMapper.toAdminLog(request));
 
         log.info("Admin log created successfully with id: {}", adminLog.getId());
-        return adminLogMapper.toAdminLogResponse(adminLog);
     }
 
     public Page<AdminLogResponse> getAdminLogsByFilter(

@@ -21,7 +21,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.codewith3h.finmateapplication.util.AdminLogUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,6 +38,7 @@ public class FeatureService {
     private final FeatureRepository featureRepository;
     private final FeatureMapper featureMapper;
     private final SubscriptionRepository subscriptionRepository;
+    private final AdminLogUtil adminLogUtil;
 
     public List<FeatureResponse> getFeaturesByIsActive() {
 
@@ -67,19 +70,25 @@ public class FeatureService {
                 .anyMatch(feature -> feature.getIsActive() && feature.getCode().equals(featureCode));
     }
 
+    @Transactional
     public FeatureResponse createFeature(FeatureRequestDto dto){
         log.info("Creating new feature");
         Feature feature = featureMapper.toEntity(dto);
+        
+
         log.info("Feature created successfully.");
         Feature savedFeature = featureRepository.save(feature);
-
+        adminLogUtil.logFeatureAction("CREATE", savedFeature.getId(), feature.getName());
         return featureMapper.toResponseDto(savedFeature);
     }
 
+    @Transactional
     public FeatureResponse updateFeature(Integer featureId,FeatureRequestDto dto){
         log.info("Updating feature");
         Feature feature = featureRepository.findById(featureId)
                 .orElseThrow(() -> new AppException(ErrorCode.FEATURE_NOT_FOUND));
+
+        adminLogUtil.logFeatureAction("UPDATE", featureId, feature.getName());
 
         featureMapper.updateEntityFromDto(dto, feature);
 
@@ -88,10 +97,13 @@ public class FeatureService {
         return featureMapper.toResponseDto(updatedFeature);
     }
 
+    @Transactional
     public void deleteFeature(Integer featureId){
         log.info("Deleting feature");
         Feature feature = featureRepository.findById(featureId)
                 .orElseThrow(() -> new AppException(ErrorCode.FEATURE_NOT_FOUND));
+
+        adminLogUtil.logFeatureAction("DELETE", featureId, feature.getName());
 
         featureRepository.delete(feature);
         log.info("Feature deleted successfully");
