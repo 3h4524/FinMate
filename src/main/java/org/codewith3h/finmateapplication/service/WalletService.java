@@ -60,7 +60,7 @@ public class WalletService {
         String transactionType = newBalance.compareTo(currentBalance) < 0 ? "EXPENSE" : "INCOME";
         BigDecimal transactionAmount = newBalance.subtract(currentBalance).abs();
 
-        Category category = categoryRepository.findByNameAndType("Điều chỉnh số dư", transactionType)
+        Category category = categoryRepository.findByNameAndType("Adjust balance", transactionType)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND_EXCEPTION));
 
         Transaction transaction = Transaction.builder()
