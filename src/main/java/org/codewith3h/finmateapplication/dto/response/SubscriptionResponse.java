@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +14,10 @@ import java.time.LocalDateTime;
 @Builder
 public class SubscriptionResponse {
     private String userName;
+    private int packageId;
     private String packageName;
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     private String status;
     private BigDecimal amount;
+    private LocalDate endDate;
 }

@@ -24,7 +24,7 @@ public class CategoryService {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Transactional(readOnly = true)
     public List<CategoryResponse> getCategories() {
-        List<Category> categories = categoryRepository.findAllByNameNot("Điều chỉnh số dư");
+        List<Category> categories = categoryRepository.findAllByNameNot("Adjust balance");
         return categories.stream().map(categoryMapper :: toCategoryResponse).toList();
     }
 

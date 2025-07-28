@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
@@ -50,6 +52,17 @@ public class SubscriptionController {
         ApiResponse<Page<SubscriptionResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setMessage("Recent subscriptions fetched successfully");
         apiResponse.setResult(subscriptionResponses);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/purchasedList")
+    public ResponseEntity<ApiResponse<List<SubscriptionResponse>>> getSubscriptionsPurchasedIsNotExpired() {
+        log.info("Getting premium package purchased");
+        List<SubscriptionResponse> packageResponses = subscriptionService.getSubscriptionsPurchasedIsNotExpired();
+
+        ApiResponse<List<SubscriptionResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setMessage("purchased list retrieved successfully");
+        apiResponse.setResult(packageResponses);
         return ResponseEntity.ok(apiResponse);
     }
 }

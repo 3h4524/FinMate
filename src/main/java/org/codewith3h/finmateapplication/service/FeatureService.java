@@ -23,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,7 +54,7 @@ public class FeatureService {
 
     public boolean userHasFeature(int userId, String featureCode) {
         List<Subscription> subscriptions = subscriptionRepository
-                .findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.name());
+                .findSubscriptionsByUser_IdAndStatusAndEndDateIsGreaterThanEqual(userId, Status.ACTIVE.name(), LocalDate.now());
 
         return subscriptions.stream()
                 .flatMap(sub -> {

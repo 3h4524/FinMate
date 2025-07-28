@@ -8,20 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Integer> {
-    List<Subscription> findByPremiumPackage(PremiumPackage premiumPackage);
-
     Page<Subscription> findSubscriptionsByStatus(String status, Pageable pageable);
 
     List<Subscription> findByStatus(String status);
-
-    List<Subscription> findSubscriptionsByUser_Id(Integer userId);
-
-    List<Subscription> findSubscriptionsByUser_IdAndStatus(Integer userId, String status);
-
 
     List<Subscription> findByPremiumPackageAndStatusIn(PremiumPackage premiumPackage, List<String> statuses);
 
@@ -31,4 +25,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Inte
 
     boolean existsByUserIdAndStatus(Integer id, String active);
 
+    List<Subscription> findSubscriptionsByUser_IdAndStatusAndEndDateIsGreaterThanEqual(Integer userId, String status, LocalDate endDateIsGreaterThan);
 }

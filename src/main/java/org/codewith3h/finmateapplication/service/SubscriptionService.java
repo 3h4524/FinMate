@@ -2,6 +2,7 @@ package org.codewith3h.finmateapplication.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.dto.response.RevenueAndSubscribers;
 import org.codewith3h.finmateapplication.dto.response.SubscriptionResponse;
 import org.codewith3h.finmateapplication.entity.Feature;
@@ -14,9 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,13 +69,20 @@ public class SubscriptionService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus(Status.ACTIVE.name(),pageable);
+        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByStatus(Status.ACTIVE.name(), pageable);
 
         return subscriptions.map(subscriptionMapper::toResponseDto);
     }
 
-    public List<Subscription> getSubscriptionsPurchasedForUserId(int userId) {
-        return subscriptionRepository.findSubscriptionsByUser_IdAndStatus(userId, Status.ACTIVE.name());
-    }
+    public List<SubscriptionResponse> getSubscriptionsPurchasedIsNotExpired() {
+        int userId = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
 
+        log.info("Fetching subscriptions purchased for user " + userId);
+
+        List<Subscription> subscriptions = subscriptionRepository.findSubscriptionsByUser_IdAndStatusAndEndDateIsGreaterThanEqual(userId, Status.ACTIVE.name(), LocalDate.now());
+
+        return subscriptions.stream()
+                .map(subscriptionMapper::toResponseDto)
+                .toList();
+    }
 }

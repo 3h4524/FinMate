@@ -11,10 +11,7 @@ import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.repository.PremiumPackageRepository;
 import org.mapstruct.*;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -38,9 +35,9 @@ public interface SubscriptionMapper {
 
     @AfterMapping
     default void calculateEndDate(@MappingTarget Subscription subscription, @Context PremiumPackageRepository premiumPackageRepository) {
-        Instant purchaseDate = subscription.getStartDate() != null
+        LocalDate purchaseDate = subscription.getStartDate() != null
                 ? subscription.getStartDate()
-                : Instant.now();
+                : LocalDate.now();
 
         PremiumPackage premiumPackage = subscription.getPremiumPackage();
 
@@ -56,20 +53,14 @@ public interface SubscriptionMapper {
 
         long totalDays = (long) durationDays * premiumPackage.getDurationValue();
 
-        LocalDateTime startDateTime = purchaseDate.atZone(ZoneId.of("UTC")).toLocalDateTime();
+        LocalDate endDate = purchaseDate.plusDays(totalDays);
 
-        LocalDateTime endDateTime = startDateTime.plusDays(totalDays)
-                .withHour(23)
-                .withMinute(59)
-                .withSecond(59)
-                .withNano(999_999_999);
-
-        Instant endDate = endDateTime.toInstant(ZoneOffset.UTC);
         subscription.setEndDate(endDate);
     }
 
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "user.name", target = "userName")
+    @Mapping(source = "premiumPackage.id", target = "packageId")
     @Mapping(source = "premiumPackage.name", target = "packageName")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "amount", target = "amount")

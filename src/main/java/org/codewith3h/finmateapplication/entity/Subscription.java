@@ -8,8 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -35,10 +34,10 @@ public class Subscription {
 
     @ColumnDefault("getdate()")
     @Column(name = "start_date")
-    private Instant startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private Instant endDate;
+    private LocalDate endDate;
 
     @Size(max = 20)
     @Column(name = "amount")
@@ -51,6 +50,6 @@ public class Subscription {
 
     @ColumnDefault("getdate()")
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
 }

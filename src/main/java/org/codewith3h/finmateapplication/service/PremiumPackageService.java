@@ -8,6 +8,7 @@ import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
 import org.codewith3h.finmateapplication.dto.response.RevenueAndSubscribers;
 import org.codewith3h.finmateapplication.entity.PremiumPackage;
 import org.codewith3h.finmateapplication.entity.Subscription;
+import org.codewith3h.finmateapplication.enums.Status;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
 import org.codewith3h.finmateapplication.mapper.PremiumPackageMapper;
@@ -97,26 +98,7 @@ public class PremiumPackageService {
     }
 
 
-    public List<PremiumPackageResponse> getPremiumPackagesPurchased() {
-        int userId = Integer.parseInt(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
 
-        log.info("Fetching premium packages purchased for user " + userId);
-
-
-        List<Subscription> subscriptions = subscriptionService.getSubscriptionsPurchasedForUserId(userId);
-
-        List<PremiumPackage> premiumPackagePurchasedList = new ArrayList<>();
-
-        subscriptions.forEach(subscription -> {
-            if (subscription.getPremiumPackage() != null) {
-                premiumPackagePurchasedList.add(subscription.getPremiumPackage());
-            }
-        });
-
-        return premiumPackagePurchasedList.stream()
-                .map(premiumPackageMapper::toResponseDto)
-                .toList();
-    }
 
     public List<PremiumPackageFetchResponse> getAllPremiumPackages() {
         log.info("Fetching all premium packages.");

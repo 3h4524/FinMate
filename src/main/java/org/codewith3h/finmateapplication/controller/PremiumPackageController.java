@@ -9,6 +9,7 @@ import org.codewith3h.finmateapplication.dto.request.PremiumPackageCreationDto;
 import org.codewith3h.finmateapplication.dto.response.ApiResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageFetchResponse;
 import org.codewith3h.finmateapplication.dto.response.PremiumPackageResponse;
+import org.codewith3h.finmateapplication.dto.response.SubscriptionResponse;
 import org.codewith3h.finmateapplication.service.PremiumPackageService;
 import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
@@ -62,17 +63,6 @@ public class PremiumPackageController {
         apiResponse.setMessage("premium package list retrieved successfully");
         apiResponse.setResult(packageResponses);
 
-        return ResponseEntity.ok(apiResponse);
-    }
-
-    @GetMapping("/purchasedList")
-    public ResponseEntity<ApiResponse<List<PremiumPackageResponse>>> getPremiumPackagePurchased() {
-        log.info("Getting premium package purchased");
-        List<PremiumPackageResponse> packageResponses = premiumPackageService.getPremiumPackagesPurchased();
-
-        ApiResponse<List<PremiumPackageResponse>> apiResponse = new ApiResponse<>();
-        apiResponse.setMessage("premium package purchased list retrieved successfully");
-        apiResponse.setResult(packageResponses);
         return ResponseEntity.ok(apiResponse);
     }
 
