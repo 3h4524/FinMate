@@ -80,6 +80,7 @@ public class AuthenticationService {
                     .build();
     }
 
+    @Transactional
     public AuthenticationResponse processGoogleLogin(String email, String name, boolean emailVerified) throws JOSEException {
         log.info("Processing Google login for email: {}", email);
         // Check if user exists
@@ -87,13 +88,11 @@ public class AuthenticationService {
         User user;
 
         if (existingUser.isPresent()) {
-            log.info("User found, updating information");
+            log.info("User found, keeping existing information");
             user = existingUser.get();
-            // Update user information if needed
-            if (!user.getName().equals(name)) {
-                user.setName(name);
-                user = userRepository.save(user);
-            }
+            // Không update tên nếu user đã tồn tại
+            // Chỉ update lastLoginAt nếu cần
+            userRepository.updateLastLoginAt(user.getId());
         } else {
             log.info("Creating new user from Google login");
             // Create new user with all required fields
