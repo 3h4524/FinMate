@@ -211,26 +211,4 @@ public class BudgetService {
         };
     }
 
-    private boolean checkConflictBudget(UpdateBudgetRequest request, Budget budget){
-        List<Budget> budgetList = budgetRepository.findBudgetsByUser_Id(request.getUserId());
-        String categoryName = budget.getCategory() != null
-                ? budget.getCategory().getName() :
-                budget.getUserCategory().getName();
-        for(Budget bg : budgetList){
-            String categoryNameInLoop = bg.getCategory() != null
-                    ? bg.getCategory().getName()
-                    : bg.getUserCategory().getName();
-            LocalDate deadline = switch (bg.getPeriodType()) {
-                case "Weekly" -> bg.getStartDate().plusDays(7);
-                case "MONTHLY" -> bg.getStartDate().plusDays(30);
-                default -> throw new IllegalArgumentException("Invalid period type: " + request.getPeriodType());
-            };
-
-            if(categoryNameInLoop.equals(categoryName) && !request.getStartDate().isAfter(deadline)){
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

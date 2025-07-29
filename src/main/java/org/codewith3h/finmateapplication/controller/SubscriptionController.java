@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/subscriptions")
+    @RequestMapping("/api/subscriptions")
 @RequiredArgsConstructor
 @Slf4j
 @Validated

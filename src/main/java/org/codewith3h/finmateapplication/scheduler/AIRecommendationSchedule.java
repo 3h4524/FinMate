@@ -30,6 +30,7 @@ public class AIRecommendationSchedule {
     private final EmailService emailService;
 
     @Transactional
+//    @Scheduled(cron = "*/10 * * * * *")
     @Scheduled(cron = "0 0 8 1 * *")
     public void scheduleBudgetRecommendation() throws JOSEException, MessagingException {
         List<User> premiumUser = userRepository.findAllByIsPremium(true);

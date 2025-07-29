@@ -1,5 +1,6 @@
 package org.codewith3h.finmateapplication.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -31,12 +32,8 @@ public class TransactionCreationRequest {
     private LocalDate transactionDate;
     @Size(max = 255, message = "Payment method cannot exceed 255 characters")
     private String paymentMethod;
-    @Size(max = 255, message = "Location cannot exceed 255 characters")
-    private String location;
-    @Size(max = 255, message = "Image URL cannot exceed 255 characters")
-    private String imageUrl;
-    @AssertTrue(message = "Exactly one of categoryId or userCategoryId must be provided")
-    public boolean isCategoryValid() {
-        return (categoryId == null) != (userCategoryId == null);
-    }
+    @JsonProperty("isAgree")
+    private boolean isAgree;
+    @JsonProperty("percentage")
+    private BigDecimal percentage;
 }

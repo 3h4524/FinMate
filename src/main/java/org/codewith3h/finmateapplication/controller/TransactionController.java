@@ -56,6 +56,7 @@ public class TransactionController {
             @Valid @RequestBody TransactionCreationRequest requestDto) {
 
         log.info("Creating transaction for user: {}", requestDto.getUserId());
+        log.info("Dto: {}", requestDto);
 
         TransactionResponse transactionResponse = transactionService.createTransaction(requestDto);
         ApiResponse<TransactionResponse> apiResponse = new ApiResponse<>();

@@ -131,6 +131,7 @@ public class AIService {
             throw new RuntimeException("Failed to retrain model: " + response.getStatusCode());
         }
         RetrainResponse retrainResponse = response.getBody();
+        log.info("Model retrained: {}", retrainResponse);
         ModelTrainingHistory modelTrainingHistory = modelTrainingMapper.toEntity(retrainResponse);
         modelTrainingRepository.save(modelTrainingHistory);
         return retrainResponse;

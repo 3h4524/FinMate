@@ -87,10 +87,11 @@ public class AIController {
 
     @GetMapping("/training-models")
     public ResponseEntity<ApiResponse<Page<RetrainResponse>>>  getTrainingModels(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "1") @Min(1) int size,
+            @RequestParam(defaultValue = "0", name = "page") @Min(0) int page,
+            @RequestParam(defaultValue = "5", name = "size") @Min(1) int size,
             @RequestParam(defaultValue = "trainingTimestamp") String sortBy,
-            @RequestParam(defaultValue = "trainingTimestamp") String sortDirection){
+            @RequestParam(defaultValue = "DESC") String sortDirection){
+        log.info("page: {}", page);
         log.info("Fetching training histories");
         Page<RetrainResponse> retrainResponsePage = aiService.getModelTrainings(page, size, sortBy, sortDirection);
         ApiResponse<Page<RetrainResponse>> apiResponse = new ApiResponse<>();

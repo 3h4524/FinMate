@@ -11,6 +11,7 @@ import org.codewith3h.finmateapplication.dto.response.TransactionStatisticRespon
 import org.codewith3h.finmateapplication.entity.*;
 import org.codewith3h.finmateapplication.exception.AppException;
 import org.codewith3h.finmateapplication.exception.ErrorCode;
+import org.codewith3h.finmateapplication.mapper.GoalMapper;
 import org.codewith3h.finmateapplication.mapper.TransactionMapper;
 import org.codewith3h.finmateapplication.repository.*;
 import org.codewith3h.finmateapplication.scheduler.RecurringTransactionScheduler;
@@ -47,6 +48,7 @@ public class TransactionService {
     private final TransactionReminderRepository transactionReminderRepository;
     private final EmailService emailService;
     private final WalletService walletService;
+    private final GoalContributionService goalContributionService;
 
     //create transaction
     @Transactional
@@ -56,6 +58,24 @@ public class TransactionService {
                 transactionCreationRequest.getUserId(),
                 transactionCreationRequest.getCategoryId(),
                 transactionCreationRequest.getUserCategoryId());
+        log.info("haha: {}", transactionCreationRequest);
+        boolean agreed = transactionCreationRequest.isAgree();
+        BigDecimal amount = transactionCreationRequest.getAmount();
+
+        if(agreed) {
+            BigDecimal percentage = BigDecimal.ONE.subtract(transactionCreationRequest.getPercentage().divide(BigDecimal.valueOf(100)));
+            BigDecimal agreedAmount = transactionCreationRequest.getAmount().multiply(percentage);
+            BigDecimal remain =  goalContributionService.contributeByAgreement(transactionCreationRequest.getUserId(), agreedAmount);
+            BigDecimal remainAmount;
+            if(remain.compareTo(agreedAmount) < 0 && remain.compareTo(BigDecimal.ZERO) > 0) {
+                 remainAmount = amount.subtract(agreedAmount).add(remain);
+            } else if (remain.compareTo(agreedAmount) < 0 && remain.compareTo(BigDecimal.ZERO) < 0) {
+                 remainAmount = amount.subtract(agreedAmount);
+            } else {
+                 remainAmount = amount;
+            }
+            transactionCreationRequest.setAmount(remainAmount);
+        }
 
         User user = userRepository.findById(transactionCreationRequest.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -234,7 +254,15 @@ public class TransactionService {
 
     public void createRecurringTransactionForReminder(User user, RecurringTransactionScheduler.TransactionKey key) {
         try {
-            log.info("Sending reminder email for user {}", user.getName());
+            // Kiểm tra input
+            if (user == null || key == null) {
+                log.error("User or TransactionKey is null");
+                return;
+            }
+
+            log.info("Sending reminder email for user {}, userId: {}, categoryId: {}, userCategoryId: {}",
+                    user.getName(), user.getId(), key.categoryId(), key.userCategoryId());
+
             String token = UUID.randomUUID().toString();
             TransactionReminder reminder = TransactionReminder.builder()
                     .token(token)
@@ -254,12 +282,15 @@ public class TransactionService {
                     .getContent()
                     .stream()
                     .findFirst()
-                    .orElseThrow(() -> new AppException(ErrorCode.TRANSACTION_NOT_FOUND_EXCEPTION));
+                    .orElse(null);
+
+            if (transaction == null) {
+                log.warn("No transaction found for userId: {}, categoryId: {}, userCategoryId: {}",
+                        user.getId(), key.categoryId(), key.userCategoryId());
+                return;
+            }
 
             reminder.setTransaction(transaction);
-
-            System.out.println("Tét ne");
-
             transactionReminderRepository.save(reminder);
 
             String categoryName = transaction.getCategory() != null
@@ -271,10 +302,8 @@ public class TransactionService {
                     : transaction.getUserCategory().getType();
 
             String subject = "Recurring Transaction Reminder - FinMate";
-
             String confirmRecurringUrl = "http://127.0.0.1:8080/api/recurringTransactions/confirm-reminder?token=" + token;
 
-            // HTML content for email with two buttons
             String content = String.format(
                     "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>"
                             + "<h2>Recurring Transaction Reminder</h2>"
@@ -282,7 +311,7 @@ public class TransactionService {
                             + "<p>We noticed you have a recurring transaction in last week:</p>"
                             + "<ul>"
                             + "<li><strong>Category:</strong> %s</li>"
-                            + "<li><strong>Amount:</strong> %s</li>"
+                            + "<li><strong>Amount:</strong> %.2f</li>"
                             + "<li><strong>Type:</strong> %s</li>"
                             + "</ul>"
                             + "<p>Would you like to create recurring transaction?</p>"
@@ -304,6 +333,8 @@ public class TransactionService {
 
         } catch (MessagingException e) {
             log.error("Failed to send reminder email to {}: {}", user.getEmail(), e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to create recurring transaction reminder for user {}: {}", user.getName(), e.getMessage());
         }
     }
 
@@ -346,7 +377,7 @@ public class TransactionService {
     }
 
     public TransactionStatisticResponse getStatisticForUser(Integer userId) {
-        log.info("Fetching statistic for user {}", userId);
+        log.info("Fetching statistic for users");
 
         List<Transaction> allTransaction = transactionRepository.findByUserId(userId);
 

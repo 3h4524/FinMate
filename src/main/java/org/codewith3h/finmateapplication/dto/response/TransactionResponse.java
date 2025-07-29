@@ -22,7 +22,7 @@ public class TransactionResponse {
     String icon;
     BigDecimal amount;
     String note;
-    String type;
+        String type;
     LocalDate transactionDate;
     String paymentMethod;
     String location;

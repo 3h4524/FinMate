@@ -43,7 +43,7 @@ public class RecurringTransactionService{
 
             RecurringTransaction recurringTransaction = recurringTransactionMapper.toEntity(dto, entityResolver);
 
-            int countTotalRecurringTransaction = recurringTransactionRepository.countByUserId(dto.getUserId());
+            int countTotalRecurringTransaction = recurringTransactionRepository.countByUserIdAndIsActive(dto.getUserId(), true);
             boolean hasUnlimited = featureService.userHasFeature(dto.getUserId(), FeatureCode.UNLIMITED_RECURRING_TRANSACTION.name());
 
             if(countTotalRecurringTransaction >= LimitCount.RECURRING_TRANSACTION.getCount() && !hasUnlimited){
@@ -69,6 +69,7 @@ public class RecurringTransactionService{
             }
 
             Transaction originalTransaction = reminder.getTransaction();
+            log.info("Amount: {}", originalTransaction.getAmount());
 
             RecurringTransactionRequest request = RecurringTransactionRequest.builder()
                                     .userId(reminder.getUser().getId())

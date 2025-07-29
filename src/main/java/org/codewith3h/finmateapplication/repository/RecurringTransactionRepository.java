@@ -36,4 +36,6 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
             @Param("limit") int limit);
 
     int countByUserId(Integer userId);
+
+    int countByUserIdAndIsActive(Integer userId, Boolean isActive);
 }
