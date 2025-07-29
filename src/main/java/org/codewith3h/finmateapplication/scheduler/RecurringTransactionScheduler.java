@@ -43,8 +43,8 @@ public class RecurringTransactionScheduler {
 
     //Hàm tạo transaction dựa trên recurring transaction
     @Transactional
-//    @Scheduled(cron = "*/10 * * * * ?")
-    @Scheduled(cron = "0 0 6 * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
+//    @Scheduled(cron = "0 0 6 * * ?")
     public void scheduleRecurringTransaction() {
         LocalDate today = LocalDate.now();
         log.info("Processing recurring transactions for date: {}", today);
@@ -87,8 +87,8 @@ public class RecurringTransactionScheduler {
 
 
     // Hàm scan những transaction nào lặp lại trong vòng 1 tuần
-//    @Scheduled(cron = "*/30 * * * * ?")
-    @Scheduled(cron = "0 0 6 * * 7")
+    @Scheduled(cron = "*/30 * * * * ?")
+//    @Scheduled(cron = "0 0 6 * * 7")
     @Transactional
     public void scanForRecurringTransactions(){
         log.info("Schedule is running!");

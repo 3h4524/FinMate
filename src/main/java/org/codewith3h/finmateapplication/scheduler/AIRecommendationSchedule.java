@@ -38,6 +38,7 @@ public class AIRecommendationSchedule {
 
         for(User user : premiumUser) {
             if(featureService.userHasFeature(user.getId(), FeatureCode.SMART_REMINDER.name())){
+                log.info("User {} has smart reminder, token: {}", user.getId(), token);
                 BudgetPredictionResponse budgetPredictionResponse = aiService.predictBudgets(user.getId(), token);
             }
         }
