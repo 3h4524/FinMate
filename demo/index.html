@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinMate Demo</title>
+    <meta name="description" content="FinMate demo landing page for a personal finance platform with budgets, goals, recurring transactions, premium plans, and AI insights.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <nav class="topbar">
+                <div class="brand">
+                    <span class="brand-mark">F</span>
+                    <div>
+                        <strong>FinMate</strong>
+                        <span>Personal finance system</span>
+                    </div>
+                </div>
+                <div class="topbar-links">
+                    <a href="#workspace">Product</a>
+                    <a href="#premium">Premium</a>
+                    <a href="#roadmap">Roadmap</a>
+                </div>
+            </nav>
+
+            <div class="hero-grid">
+                <section class="hero-copy">
+                    <p class="eyebrow">Spring Boot finance platform</p>
+                    <h1>Control spending, goals, reminders, and premium finance tools in one place.</h1>
+                    <p class="hero-text">
+                        This demo reinterprets the FinMate backend into a public product surface. It showcases the wallet,
+                        budgeting, goal tracking, recurring transactions, notifications, premium packages, and AI-powered planning modules found in the original codebase.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="#workspace">Open demo workspace</a>
+                        <a class="button button-secondary" href="#premium">See premium plans</a>
+                    </div>
+
+                    <div class="hero-stats">
+                        <article>
+                            <strong>6</strong>
+                            <span>core finance flows</span>
+                        </article>
+                        <article>
+                            <strong>22+</strong>
+                            <span>REST controllers mapped</span>
+                        </article>
+                        <article>
+                            <strong>AI</strong>
+                            <span>budget prediction module</span>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="hero-visual" aria-label="FinMate dashboard preview">
+                    <div class="glow glow-a"></div>
+                    <div class="glow glow-b"></div>
+                    <div class="device-frame">
+                        <div class="device-top">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <div class="dashboard-header">
+                            <div>
+                                <p>Wallet balance</p>
+                                <strong>$12,480</strong>
+                            </div>
+                            <span class="badge success">Premium active</span>
+                        </div>
+
+                        <div class="mini-grid">
+                            <article>
+                                <span>Needs</span>
+                                <strong>$1,960</strong>
+                            </article>
+                            <article>
+                                <span>Wants</span>
+                                <strong>$920</strong>
+                            </article>
+                            <article>
+                                <span>Saved</span>
+                                <strong>$3,400</strong>
+                            </article>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-labels">
+                                <span>Monthly flow</span>
+                                <span>72% on target</span>
+                            </div>
+                            <div class="chart-bars" aria-hidden="true">
+                                <i style="--bar: 42%"></i>
+                                <i style="--bar: 58%"></i>
+                                <i style="--bar: 46%"></i>
+                                <i style="--bar: 67%"></i>
+                                <i style="--bar: 74%"></i>
+                                <i style="--bar: 60%"></i>
+                                <i style="--bar: 82%"></i>
+                            </div>
+                        </div>
+
+                        <div class="activity-card">
+                            <div>
+                                <p>Recurring reminder</p>
+                                <strong>Rent due tomorrow</strong>
+                            </div>
+                            <span>08:00</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </header>
+
+        <main>
+            <section class="feature-strip">
+                <article>
+                    <h2>Wallet and category tracking</h2>
+                    <p>Track spending by custom categories and keep balances aligned with user wallets.</p>
+                </article>
+                <article>
+                    <h2>Budgets and goal progress</h2>
+                    <p>Set limits, monitor progress, and move contributions toward personal milestones.</p>
+                </article>
+                <article>
+                    <h2>Notifications and reminders</h2>
+                    <p>Recurring transactions, alerts, and verification flows keep users active and informed.</p>
+                </article>
+            </section>
+
+            <section class="workspace" id="workspace">
+                <div class="section-copy">
+                    <p class="eyebrow">Interactive product surface</p>
+                    <h2>Explore the modules behind the backend.</h2>
+                    <p>
+                        Each state below represents a core capability visible in the Java API structure: transaction analytics,
+                        financial goals, premium subscriptions, and AI recommendations.
+                    </p>
+                </div>
+
+                <div class="workspace-shell">
+                    <div class="workspace-tabs" role="tablist" aria-label="FinMate modules">
+                        <button class="tab-button is-active" type="button" data-panel="overview">Overview</button>
+                        <button class="tab-button" type="button" data-panel="transactions">Transactions</button>
+                        <button class="tab-button" type="button" data-panel="goals">Goals</button>
+                        <button class="tab-button" type="button" data-panel="premium">Premium</button>
+                    </div>
+
+                    <div class="workspace-panel" id="workspace-panel">
+                        <div class="panel-copy">
+                            <span class="panel-kicker" id="panel-kicker"></span>
+                            <h3 id="panel-title"></h3>
+                            <p id="panel-description"></p>
+                        </div>
+
+                        <div class="panel-canvas">
+                            <div class="metric-row" id="metric-row"></div>
+                            <div class="detail-grid">
+                                <div class="detail-card">
+                                    <div class="detail-card-head">
+                                        <h4 id="list-title"></h4>
+                                        <span id="list-tag"></span>
+                                    </div>
+                                    <div class="detail-list" id="detail-list"></div>
+                                </div>
+                                <div class="detail-card accent-card">
+                                    <div class="detail-card-head">
+                                        <h4 id="highlight-title"></h4>
+                                        <span>Live preview</span>
+                                    </div>
+                                    <div class="highlight-body" id="highlight-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="system-grid">
+                <article class="system-card">
+                    <p class="eyebrow">Security and auth</p>
+                    <h3>JWT authentication, email verification, and Google OAuth.</h3>
+                    <p>FinMate's auth layer includes registration, login, OTP verification, password reset, token validation, logout, and profile email verification flows.</p>
+                </article>
+                <article class="system-card">
+                    <p class="eyebrow">Automation</p>
+                    <h3>Recurring schedules and reminder confirmations.</h3>
+                    <p>Schedulers and reminder endpoints support recurring financial activity, overdue checks, premium expiry, and AI retraining workflows.</p>
+                </article>
+                <article class="system-card">
+                    <p class="eyebrow">Admin and monetization</p>
+                    <h3>Premium packages, promotions, subscriptions, and admin logs.</h3>
+                    <p>The backend includes monetization endpoints, premium gating, coupons, subscription metrics, and audit trails for operational visibility.</p>
+                </article>
+            </section>
+
+            <section class="premium" id="premium">
+                <div class="section-copy narrow">
+                    <p class="eyebrow">Premium package concept</p>
+                    <h2>Free control for everyday spending, premium depth for power users.</h2>
+                </div>
+
+                <div class="pricing-grid">
+                    <article class="pricing-card">
+                        <p class="plan-name">Starter</p>
+                        <strong>$0</strong>
+                        <span>Basic wallet, category, and transaction flows</span>
+                        <ul>
+                            <li>Daily transaction tracking</li>
+                            <li>Budget visibility</li>
+                            <li>Core reminders</li>
+                        </ul>
+                    </article>
+                    <article class="pricing-card featured">
+                        <p class="plan-name">Premium</p>
+                        <strong>$7.90</strong>
+                        <span>Advanced planning with AI and multi-goal management</span>
+                        <ul>
+                            <li>AI budget prediction</li>
+                            <li>Expanded goal creation</li>
+                            <li>Priority notification flows</li>
+                        </ul>
+                    </article>
+                    <article class="pricing-card">
+                        <p class="plan-name">Teams</p>
+                        <strong>Custom</strong>
+                        <span>For coached programs, finance labs, or startup pilots</span>
+                        <ul>
+                            <li>Premium analytics setup</li>
+                            <li>Admin oversight</li>
+                            <li>Custom onboarding</li>
+                        </ul>
+                    </article>
+                </div>
+            </section>
+
+            <section class="roadmap" id="roadmap">
+                <div class="section-copy narrow">
+                    <p class="eyebrow">Demo takeaway</p>
+                    <h2>A production-style landing page for a backend-first student finance project.</h2>
+                </div>
+                <div class="roadmap-steps">
+                    <article>
+                        <span>01</span>
+                        <h3>Backend audited</h3>
+                        <p>Controllers, schedulers, entities, and premium modules were reviewed to reconstruct the real product scope.</p>
+                    </article>
+                    <article>
+                        <span>02</span>
+                        <h3>Frontend demo rebuilt</h3>
+                        <p>A static public experience was created so the project can be showcased without a local SQL Server or mail setup.</p>
+                    </article>
+                    <article>
+                        <span>03</span>
+                        <h3>Portfolio-ready output</h3>
+                        <p>The result is deployable on Netlify and suitable for embedded preview inside the main portfolio.</p>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+</html>
